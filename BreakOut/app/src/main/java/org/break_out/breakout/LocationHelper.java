@@ -37,7 +37,7 @@ public class LocationHelper {
      * @return instance of the LocationHelper
      */
     public static LocationHelper getInstance() {
-        if (instance == null) {
+        if(instance == null) {
             instance = new LocationHelper();
             _callbackList = new ArrayList<Callback>();
             _lastTimestamp = 0;
@@ -52,8 +52,8 @@ public class LocationHelper {
      * @param c Context of the calling activity
      */
     public void requestObtainingLocation(Context c) {
-        if (!_isLocating) {
-            if (_locationManager == null) {
+        if(!_isLocating) {
+            if(_locationManager == null) {
                 _locationManager = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
             }
             _isLocating = true;
@@ -62,21 +62,21 @@ public class LocationHelper {
             _networkAvailable = _locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
             _gpsAvailable = _locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-            if (_locationListener == null) {
+            if(_locationListener == null) {
                 _locationListener = new BreakOutLocationListener();
             }
 
             //get fastest obtained location
             try {
-                if (_networkAvailable) {
+                if(_networkAvailable) {
                     _locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, MIN_DISTANCE, _locationListener);
                 }
-                if (_gpsAvailable) {
+                if(_gpsAvailable) {
                     _locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, MIN_DISTANCE, _locationListener);
                 }
 
 
-            } catch (SecurityException e) {
+            } catch(SecurityException e) {
                 e.printStackTrace();
             }
         }
@@ -89,18 +89,17 @@ public class LocationHelper {
         try {
             _locationManager.removeUpdates(_locationListener);
             _isLocating = false;
-        } catch (SecurityException e) {
+        } catch(SecurityException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     *
      * @return the last known location, or NullPointerException if nothing is found
      * @throws NullPointerException if no location is known yet
      */
     public Location getLastKnownLocation() throws NullPointerException {
-        if (_lastKnownLocation != null) {
+        if(_lastKnownLocation != null) {
             return _lastKnownLocation;
         } else {
             throw new NullPointerException(NULLPOINTEREXCEPTION_LOCATION);
@@ -133,7 +132,7 @@ public class LocationHelper {
      * @param status
      */
     private void updateProviderAvailability(String provider, boolean status) {
-        switch (provider) {
+        switch(provider) {
             case LocationManager.GPS_PROVIDER: {
                 _gpsAvailable = status;
                 break;
@@ -151,7 +150,7 @@ public class LocationHelper {
      * @param l obtained Location
      */
     private void sendLocationCallback(Location l) {
-        for (Callback c : _callbackList) {
+        for(Callback c : _callbackList) {
             c.onLocationObtained(l);
         }
     }
@@ -163,7 +162,7 @@ public class LocationHelper {
      * @param isActive
      */
     private void sendServiceStatusCallback(String provider, boolean isActive) {
-        for (Callback c : _callbackList) {
+        for(Callback c : _callbackList) {
             c.onServiceStatusChanged(provider, isActive);
         }
     }
@@ -192,7 +191,7 @@ public class LocationHelper {
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            if (status == LocationProvider.AVAILABLE) {
+            if(status == LocationProvider.AVAILABLE) {
                 sendServiceStatusCallback(provider, true);
                 updateProviderAvailability(provider, true);
             } else {
