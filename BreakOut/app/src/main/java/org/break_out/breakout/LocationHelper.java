@@ -10,7 +10,7 @@ import android.os.Bundle;
 import java.util.ArrayList;
 
 /**
- * Created by Maximilian on 13.12.2015.
+ * Created by Maximilian Duehr on 13.12.2015.
  */
 public class LocationHelper {
 
