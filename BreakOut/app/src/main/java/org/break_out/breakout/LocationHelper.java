@@ -38,6 +38,8 @@ public class LocationHelper {
     public static LocationHelper getInstance() {
         if (instance == null) {
             instance = new LocationHelper();
+            _callbackList = new ArrayList<Callback>();
+            _lastTimestamp = 0;
         }
 
         return instance;
