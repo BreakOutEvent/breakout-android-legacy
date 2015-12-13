@@ -47,6 +47,7 @@ public class LocationHelper {
 
     /**
      * request to start obtaining the location (fastest result will be picked)
+     *
      * @param c Context of the calling activity
      */
     public void requestObtainingLocation(Context c) {
@@ -77,27 +78,24 @@ public class LocationHelper {
             } catch (SecurityException e) {
                 e.printStackTrace();
             }
-
-
         }
     }
 
     /**
      * stop locationg request
      */
-    public void stopObtainingLocation()
-    {
-        try{
+    public void stopObtainingLocation() {
+        try {
             _locationManager.removeUpdates(_locationListener);
             _isLocating = false;
-        }catch (SecurityException e)
-        {
+        } catch (SecurityException e) {
             e.printStackTrace();
         }
     }
 
     /**
      * add class callback
+     *
      * @param c
      */
     public void addCallback(Callback c) {
@@ -106,6 +104,7 @@ public class LocationHelper {
 
     /**
      * remove class callback
+     *
      * @param c class that does not require updates from this class anymore
      * @return
      */
@@ -115,6 +114,7 @@ public class LocationHelper {
 
     /**
      * update the booleans representing provier availability
+     *
      * @param provider
      * @param status
      */
@@ -178,8 +178,6 @@ public class LocationHelper {
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            ;
-
             if (status == LocationProvider.AVAILABLE) {
                 sendServiceStatusCallback(provider, true);
                 updateProviderAvailability(provider, true);
