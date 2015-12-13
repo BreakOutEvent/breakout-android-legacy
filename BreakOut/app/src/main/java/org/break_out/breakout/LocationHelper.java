@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class LocationHelper {
 
     private final static String TAG = "LocationHelper";
+    private final static String NULLPOINTEREXCEPTION_LOCATION = "No location found";
     private static final long TWO_MINUTES = 1000 * 60 * 2;
     private static final float MIN_DISTANCE = 10;
     private static LocationHelper instance;
@@ -90,6 +91,19 @@ public class LocationHelper {
             _isLocating = false;
         } catch (SecurityException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     *
+     * @return the last known location, or NullPointerException if nothing is found
+     * @throws NullPointerException if no location is known yet
+     */
+    public Location getLastKnownLocation() throws NullPointerException {
+        if (_lastKnownLocation != null) {
+            return _lastKnownLocation;
+        } else {
+            throw new NullPointerException(NULLPOINTEREXCEPTION_LOCATION);
         }
     }
 
