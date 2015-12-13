@@ -13,6 +13,9 @@ public class LocationHelper {
 
     private static ArrayList<Callback> _callbackList;
 
+    private static Location _lastKnownLocation;
+    private static long _lastTimestamp;
+
 
     private LocationHelper()
     {}
@@ -31,6 +34,10 @@ public class LocationHelper {
         return instance;
     }
 
+    /**
+     * Inform all Callbacks about the newly obtained Location object
+     * @param l obtained Location
+     */
     private void sendLocationCallback(Location l)
     {
         for(Callback c : _callbackList)
