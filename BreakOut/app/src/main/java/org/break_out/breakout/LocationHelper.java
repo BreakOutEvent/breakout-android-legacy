@@ -18,7 +18,7 @@ public class LocationHelper {
     private final static String NULLPOINTEREXCEPTION_LOCATION = "No location found";
     private static final long TWO_MINUTES = 1000 * 60 * 2;
     private static final float MIN_DISTANCE = 10;
-    private static LocationHelper instance;
+    private static LocationHelper _instance;
     private static ArrayList<Callback> _callbackList;
     private static Location _lastKnownLocation;
     private static long _lastTimestamp;
@@ -37,13 +37,13 @@ public class LocationHelper {
      * @return instance of the LocationHelper
      */
     public static LocationHelper getInstance() {
-        if(instance == null) {
-            instance = new LocationHelper();
+        if(_instance == null) {
+            _instance = new LocationHelper();
             _callbackList = new ArrayList<Callback>();
             _lastTimestamp = 0;
         }
 
-        return instance;
+        return _instance;
     }
 
     /**
@@ -51,7 +51,7 @@ public class LocationHelper {
      *
      * @param c Context of the calling activity
      */
-    public void requestObtainingLocation(Context c) {
+    public boolean requestObtainingLocation(Context c) {
         if(!_isLocating) {
             if(_locationManager == null) {
                 _locationManager = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
@@ -80,30 +80,27 @@ public class LocationHelper {
                 e.printStackTrace();
             }
         }
+        return true;
     }
 
     /**
      * stop locationg request
      */
-    public void stopObtainingLocation() {
+    public LocationHelper stopObtainingLocation() {
         try {
             _locationManager.removeUpdates(_locationListener);
             _isLocating = false;
         } catch(SecurityException e) {
             e.printStackTrace();
         }
+        return this;
     }
 
     /**
-     * @return the last known location, or NullPointerException if nothing is found
-     * @throws NullPointerException if no location is known yet
+     * @return the last known location, or null if nothing is found
      */
-    public Location getLastKnownLocation() throws NullPointerException {
-        if(_lastKnownLocation != null) {
-            return _lastKnownLocation;
-        } else {
-            throw new NullPointerException(NULLPOINTEREXCEPTION_LOCATION);
-        }
+    public Location getLastKnownLocation() {
+        return _lastKnownLocation;
     }
 
     /**
@@ -111,8 +108,9 @@ public class LocationHelper {
      *
      * @param c
      */
-    public void addCallback(Callback c) {
+    public LocationHelper addCallback(Callback c) {
         _callbackList.add(c);
+        return this;
     }
 
     /**
@@ -121,8 +119,9 @@ public class LocationHelper {
      * @param c class that does not require updates from this class anymore
      * @return
      */
-    public boolean removeCallback(Callback c) {
-        return _callbackList.remove(c);
+    public LocationHelper removeCallback(Callback c) {
+        _callbackList.remove(c);
+        return this;
     }
 
     /**
@@ -165,6 +164,7 @@ public class LocationHelper {
         for(Callback c : _callbackList) {
             c.onServiceStatusChanged(provider, isActive);
         }
+        updateProviderAvailability(provider, isActive);
     }
 
 
@@ -187,6 +187,7 @@ public class LocationHelper {
             _lastKnownLocation = location;
             _lastTimestamp = System.currentTimeMillis();
             sendLocationCallback(_lastKnownLocation);
+            stopObtainingLocation();
         }
 
         @Override
