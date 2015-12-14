@@ -14,14 +14,16 @@ import java.util.ArrayList;
  */
 public class LocationHelper {
 
-    private final static String TAG = "LocationHelper";
-    private final static String NULLPOINTEREXCEPTION_LOCATION = "No location found";
+    private final static String NULLPOINTEREXCEPTION_NO_LAST_LOCATION = "No last location found.";
+
     private static final long TWO_MINUTES = 1000 * 60 * 2;
     private static final float MIN_DISTANCE = 10;
-    private static LocationHelper instance;
+
     private static ArrayList<Callback> _callbackList;
+
     private static Location _lastKnownLocation;
     private static long _lastTimestamp;
+
     private LocationManager _locationManager;
     private LocationListener _locationListener;
 
@@ -29,25 +31,28 @@ public class LocationHelper {
     private boolean _networkAvailable;
     private boolean _gpsAvailable;
 
+    private static LocationHelper _instance;
+
 
     private LocationHelper() {
+
     }
 
     /**
-     * @return instance of the LocationHelper
+     * @return Instance of the LocationHelper
      */
     public static LocationHelper getInstance() {
-        if(instance == null) {
-            instance = new LocationHelper();
+        if(_instance == null) {
+            _instance = new LocationHelper();
             _callbackList = new ArrayList<Callback>();
             _lastTimestamp = 0;
         }
 
-        return instance;
+        return _instance;
     }
 
     /**
-     * request to start obtaining the location (fastest result will be picked)
+     * Request to start obtaining the location (fastest result will be picked)
      *
      * @param c Context of the calling activity
      */
@@ -58,7 +63,7 @@ public class LocationHelper {
             }
             _isLocating = true;
 
-            //update status booleans
+            // Update status booleans
             _networkAvailable = _locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
             _gpsAvailable = _locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
@@ -66,7 +71,7 @@ public class LocationHelper {
                 _locationListener = new BreakOutLocationListener();
             }
 
-            //get fastest obtained location
+            // Get fastest obtained location
             try {
                 if(_networkAvailable) {
                     _locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, MIN_DISTANCE, _locationListener);
@@ -83,7 +88,7 @@ public class LocationHelper {
     }
 
     /**
-     * stop locationg request
+     * Stop locationg request
      */
     public void stopObtainingLocation() {
         try {
@@ -95,19 +100,19 @@ public class LocationHelper {
     }
 
     /**
-     * @return the last known location, or NullPointerException if nothing is found
+     * @return The last known location, or NullPointerException if nothing is found
      * @throws NullPointerException if no location is known yet
      */
     public Location getLastKnownLocation() throws NullPointerException {
         if(_lastKnownLocation != null) {
             return _lastKnownLocation;
         } else {
-            throw new NullPointerException(NULLPOINTEREXCEPTION_LOCATION);
+            throw new NullPointerException(NULLPOINTEREXCEPTION_NO_LAST_LOCATION);
         }
     }
 
     /**
-     * add class callback
+     * Add class callback
      *
      * @param c
      */
@@ -116,7 +121,7 @@ public class LocationHelper {
     }
 
     /**
-     * remove class callback
+     * Remove class callback
      *
      * @param c class that does not require updates from this class anymore
      * @return
@@ -126,7 +131,7 @@ public class LocationHelper {
     }
 
     /**
-     * update the booleans representing provier availability
+     * Update the booleans representing provider availability
      *
      * @param provider
      * @param status
@@ -172,13 +177,14 @@ public class LocationHelper {
      * Callback interface to receive answer from the LocationHelper
      */
     public interface Callback {
+        
         void onLocationObtained(Location l);
 
         void onServiceStatusChanged(String provider, boolean isActive);
     }
 
     /**
-     * own Locationlistener class to handle location updates
+     * Own Locationlistener class to handle location updates
      */
     private class BreakOutLocationListener implements LocationListener {
 
@@ -210,7 +216,6 @@ public class LocationHelper {
         public void onProviderDisabled(String provider) {
             updateProviderAvailability(provider, false);
             sendServiceStatusCallback(provider, false);
-
         }
     }
 }
