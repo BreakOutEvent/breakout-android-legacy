@@ -8,6 +8,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <service android:name=".sync.services.PostingService" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -15,6 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".sync.BOSyncController$ResponseReceiver" >
+            <intent-filter>
+                <action android:name="org.break_out.posting.ACTION_RESPONSE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
