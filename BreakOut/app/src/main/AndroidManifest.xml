@@ -19,9 +19,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".sync.BOSyncController$ResponseReceiver" >
+        <receiver android:name=".sync.BOSyncReceiver" >
             <intent-filter>
-                <action android:name="org.break_out.posting.ACTION_RESPONSE" />
+                <action android:name="org.break_out.posting.SYNC_RECEIVER" />
             </intent-filter>
         </receiver>
 

@@ -7,12 +7,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.break_out.breakout.sync.BOSyncController;
+import org.break_out.breakout.sync.BOSyncControllerPosting;
 import org.break_out.breakout.sync.model.Posting;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BOSyncControllerPosting.UploadListener {
 
-    private BOSyncController _syncController;
+    private BOSyncControllerPosting _syncController;
     private TextView _tv;
 
     private String[] _messages = {"Hello world.", "This is a test.", "What's up?", "Test.", "Short text.", "How are you?", "Let's meet.", "We've reached Denmark!", "Where are you?", "Great app!"};
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        _syncController = new BOSyncController(this);
+        _syncController = BOSyncControllerPosting.getInstance(this);
 
         _tv = (TextView) findViewById(R.id.textview);
 
@@ -38,13 +38,7 @@ public class MainActivity extends AppCompatActivity {
                 Posting p = new Posting();
                 p.setText(_messages[(int) (Math.random() * _messages.length)]);
 
-                _syncController.uploadPosting(p, new BOSyncController.PostingCallback() {
-                    @Override
-                    public void postingRequestDone() {
-                        Log.i("breakout", "[Activity] Callback fired!");
-                        updateView();
-                    }
-                });
+                _syncController.uploadPosting(p, MainActivity.this);
             }
         });
     }
@@ -57,5 +51,22 @@ public class MainActivity extends AppCompatActivity {
         }
 
         _tv.setText(text);
+    }
+
+    @Override
+    public void uploadStateChanged() {
+        updateView();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        _syncController.unregisterListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        _syncController.registerUploadListener(this);
     }
 }

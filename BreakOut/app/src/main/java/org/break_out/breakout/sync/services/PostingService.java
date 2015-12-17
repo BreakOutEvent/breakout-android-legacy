@@ -7,7 +7,8 @@ import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
 
-import org.break_out.breakout.sync.BOSyncController;
+import org.break_out.breakout.sync.BOSyncControllerPosting;
+import org.break_out.breakout.sync.BOSyncReceiver;
 import org.break_out.breakout.sync.model.PostingsDatabaseHelper;
 import org.break_out.breakout.sync.model.Posting;
 
@@ -36,14 +37,12 @@ public class PostingService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        int requestId = intent.getIntExtra(BOSyncController.KEY_REQUEST_ID, -1);
+        Posting posting = (Posting) intent.getSerializableExtra(KEY_POSTING);
 
-        if(requestId == -1) {
-            Log.e("breakout", "You must pass a request ID to the Service (BOSyncController.KEY_REQUEST_ID)!");
-            return;
+        if(posting == null) {
+            Log.e("breakout", "[PostingService] Could not get Posting from Intent");
         }
 
-        Posting posting = (Posting) intent.getSerializableExtra(KEY_POSTING);
         posting.setSent(false);
 
         Log.i("breakout", "[Service] Start sending \"" + posting.getText() + "\"");
@@ -51,7 +50,7 @@ public class PostingService extends IntentService {
         SystemClock.sleep(10000);
         posting.setSent(true);
 
-        Log.i("breakout", "[Service] Sent \"" + posting.getText() + "\"");
+        Log.i("breakout", "[Service] Done sending \"" + posting.getText() + "\"");
 
         try {
             _dao.update(posting);
@@ -59,14 +58,12 @@ public class PostingService extends IntentService {
             e.printStackTrace();
         }
 
-        sendResult(requestId);
+        sendResult();
     }
 
-    private void sendResult(int requestId) {
+    private void sendResult() {
         Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction(BOSyncController.ACTION_RESP);
-        //broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        broadcastIntent.putExtra(BOSyncController.KEY_REQUEST_ID, requestId);
+        broadcastIntent.setAction(BOSyncReceiver.ACTION);
         sendBroadcast(broadcastIntent);
 
         Log.i("breakout", "[Service] Sent broadcast");
