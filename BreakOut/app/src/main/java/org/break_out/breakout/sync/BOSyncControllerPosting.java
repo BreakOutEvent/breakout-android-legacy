@@ -1,14 +1,16 @@
 package org.break_out.breakout.sync;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.table.TableUtils;
 
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.sync.model.PostingsDatabaseHelper;
-import org.break_out.breakout.sync.services.PostingService;
+import org.break_out.breakout.sync.service.UploaderService;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -70,6 +72,11 @@ public class BOSyncControllerPosting {
         }
     }
 
+    public void tryUploadAll() {
+        Intent intent = new Intent(_context, UploaderService.class);
+        _context.startService(intent);
+    }
+
     private void addPostingToLocalDB(Posting posting) {
         try {
             _dao.create(posting);
@@ -93,9 +100,7 @@ public class BOSyncControllerPosting {
         posting.setSent(false);
         addPostingToLocalDB(posting);
 
-        Intent intent = new Intent(_context, PostingService.class);
-        intent.putExtra(PostingService.KEY_POSTING, posting);
-        _context.startService(intent);
+        tryUploadAll();
 
         Log.i("breakout", "[BOSyncControllerPosting] Called Service");
     }
@@ -112,6 +117,16 @@ public class BOSyncControllerPosting {
         }
 
         return new ArrayList<Posting>();
+    }
+
+    public void deleteAllPostings() {
+        try {
+            for(Posting p : _dao.queryForAll()) {
+                _dao.delete(p);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

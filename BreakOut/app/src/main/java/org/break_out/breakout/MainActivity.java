@@ -33,12 +33,24 @@ public class MainActivity extends AppCompatActivity implements BOSyncControllerP
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("breakout", "[Activity] Calling controller's uploadPosting method...");
-
                 Posting p = new Posting();
                 p.setText(_messages[(int) (Math.random() * _messages.length)]);
 
-                _syncController.uploadPosting(p, MainActivity.this);
+                _syncController.uploadPosting(p, new BOSyncControllerPosting.UploadListener() {
+                    @Override
+                    public void uploadStateChanged() {
+                        updateView();
+                    }
+                });
+            }
+        });
+
+        Button clearButton = (Button) findViewById(R.id.clear_button);
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                _syncController.deleteAllPostings();
+                updateView();
             }
         });
     }
