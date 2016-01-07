@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BreakOut</string>
+
+    <string name="button_checkPermission_location">Check for location permission</string>
 </resources>

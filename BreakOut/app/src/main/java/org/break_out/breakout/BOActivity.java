@@ -2,6 +2,7 @@ package org.break_out.breakout;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,13 +12,12 @@ import java.util.HashMap;
 /**
  * Created by Maximilian Duehr on 21.12.2015.
  */
-public class BOActivity extends AppCompatActivity {
+public abstract class BOActivity extends AppCompatActivity {
 
     private static final String PERMISSION_INTERNET = Manifest.permission.INTERNET;
     private static final String PERMISSION_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
 
-    static final int REQUESTCODE_INTERNET = 0;
-    static final int REQUESTCODE_LOCATION = 1;
+    static final int REQUESTCODE_LOCATION = 0;
 
     private HashMap<Integer, PermissionCallback> _hashMap_callbacks;
     private final static String TAG = "BOActivity";
@@ -35,7 +35,8 @@ public class BOActivity extends AppCompatActivity {
         Log.d(TAG, "onRequestPermissionResult");
         PermissionCallback permissionCallback = getCallbacks().get(requestCode);
         if(permissionCallback != null) {
-            permissionCallback.onResult(grantResults[0] != 0);
+            Log.d(TAG, "result size: " + grantResults.length);
+            permissionCallback.onResult(grantResults[0] == PackageManager.PERMISSION_GRANTED);
         }
     }
 
@@ -50,13 +51,16 @@ public class BOActivity extends AppCompatActivity {
         Log.d(TAG, "checkForPermission");
         getCallbacks().put(requestCode, callback);
         if(hasDenieablePermissions()) {
-            requestPermissions(new String[]{getPermissionFromRequestcode(requestCode)}, requestCode);
+            Log.d(TAG, "deniable permissions!");
+            if(shouldShowRequestPermissionRationale(getPermissionFromRequestcode(requestCode)))
+            {
+                requestPermissions(new String[]{getPermissionFromRequestcode(requestCode)}, requestCode);
+            }
         } else {
             //if function is called on an old device the permissions cannot be not granted, simulate a 'true' answer
             onRequestPermissionsResult(requestCode, new String[]{getPermissionFromRequestcode(requestCode)}, new int[]{1});
         }
     }
-
     /**
      * @return hashMap of callbacks
      */
@@ -89,10 +93,8 @@ public class BOActivity extends AppCompatActivity {
      * @param requestCode one of the declared final REQUESTCODE constants
      * @return the android permission as a String
      */
-    private String getPermissionFromRequestcode(int requestCode) {
+    public String getPermissionFromRequestcode(int requestCode) {
         switch(requestCode) {
-            case REQUESTCODE_INTERNET:
-                return Manifest.permission.INTERNET;
             case REQUESTCODE_LOCATION:
                 return Manifest.permission.ACCESS_FINE_LOCATION;
         }

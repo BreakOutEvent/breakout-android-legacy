@@ -9,8 +9,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="org.break_out.breakout.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/main_button_requestPermissionLocation"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="@string/button_checkPermission_location"/>
 </RelativeLayout>
