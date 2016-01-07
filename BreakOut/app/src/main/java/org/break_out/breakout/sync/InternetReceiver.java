@@ -29,7 +29,7 @@ public class InternetReceiver extends BroadcastReceiver {
         }
 
         if(connected) {
-            BOSyncControllerPosting.getInstance(context).tryUploadAll();
+            BOSyncController.getInstance(context).tryUploadAll();
         }
     }
 }

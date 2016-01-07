@@ -1,21 +1,21 @@
 package org.break_out.breakout;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.break_out.breakout.sync.BOSyncControllerPosting;
+import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.model.Posting;
 
-public class MainActivity extends AppCompatActivity implements BOSyncControllerPosting.UploadListener {
+public class MainActivity extends AppCompatActivity implements BOSyncController.UploadListener {
 
-    private BOSyncControllerPosting _syncController;
+    private BOSyncController _syncController;
     private TextView _tv;
 
-    private String[] _messages = {"Hello world.", "This is a test.", "What's up?", "Test.", "Short text.", "How are you?", "Let's meet.", "We've reached Denmark!", "Where are you?", "Great app!"};
+    private String[] _messages = {"Hello world.", "This is a test.", "What's up?", "Test.", "Short text.", "How are you?", "Let's meet.", "Where are you?", "Great app!"};
 
 
     @Override
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements BOSyncControllerP
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        _syncController = BOSyncControllerPosting.getInstance(this);
+        _syncController = BOSyncController.getInstance(this);
 
         _tv = (TextView) findViewById(R.id.textview);
 
@@ -34,14 +34,14 @@ public class MainActivity extends AppCompatActivity implements BOSyncControllerP
             @Override
             public void onClick(View v) {
                 Posting p = new Posting();
-                p.setText(_messages[(int) (Math.random() * _messages.length)]);
-
-                _syncController.uploadPosting(p, new BOSyncControllerPosting.UploadListener() {
+                p.setText(_messages[(int) (Math.random()*_messages.length)]);
+                _syncController.upload(p, new BOSyncController.UploadListener() {
                     @Override
                     public void uploadStateChanged() {
                         updateView();
                     }
                 });
+                updateView();
             }
         });
 
@@ -49,17 +49,20 @@ public class MainActivity extends AppCompatActivity implements BOSyncControllerP
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                _syncController.deleteAllPostings();
-                updateView();
+
             }
         });
+
+        // TEST AREA
+        Log.v("breakout", "Done.");
+        // End TEST AREA
     }
 
     private void updateView() {
         String text = "";
 
-        for(Posting p : _syncController.getAllPostings()) {
-            text += "(" + p.getLocalId() + ") " + p.getText() + (p.isSent() ? " (sent)" : " (not sent)") + "\n";
+        for(Posting p : _syncController.getAll(Posting.class)) {
+            text += p.toString() + "\n";
         }
 
         _tv.setText(text);

@@ -1,21 +1,19 @@
 package org.break_out.breakout.sync.service;
 
-import android.accounts.Account;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
+import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.BOSyncReceiver;
 import org.break_out.breakout.sync.model.Posting;
-import org.break_out.breakout.sync.model.PostingsDatabaseHelper;
+import org.break_out.breakout.sync.model.SyncEntity;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,24 +22,12 @@ import java.util.List;
  */
 public class UploaderService extends Service {
 
-    private Dao<Posting, Void> _dao = null;
     private boolean _isRunning = false;
-
-
-    public UploaderService() {
-        super();
-
-        PostingsDatabaseHelper db = new PostingsDatabaseHelper(this);
-        try {
-            _dao = db.getDao();
-        } catch(SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    private List<SyncEntity> _entitiesToUpload = null;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("breakout", "[UploaderService] START COMMAND");
+        Log.i("breakout", "[UploaderService] --- START COMMAND ---");
 
         startUploading();
         return START_STICKY;
@@ -63,14 +49,21 @@ public class UploaderService extends Service {
         }).start();
     }
 
-    private Posting getNextPendingUpload() {
-        try {
-            List<Posting> postings = _dao.query(_dao.queryBuilder().limit(1L).where().eq(Posting.COLUMN_SENT, false).prepare());
-            if(postings.size() == 1) {
-                return postings.get(0);
+    private SyncEntity getNextPendingUpload() {
+        if(_entitiesToUpload == null) {
+            _entitiesToUpload = new ArrayList<SyncEntity>();
+
+            List<Class<? extends SyncEntity>> entityClasses = BOSyncController.getInstance(this).getEntityClasses();
+            for(Class<? extends SyncEntity> entityClass : entityClasses) {
+                _entitiesToUpload.addAll(SyncEntity.find(entityClass, SyncEntity.IS_UPLOADING_NAME + " = ?", "1"));
             }
-        } catch(SQLException e) {
-            e.printStackTrace();
+        }
+
+        if(_entitiesToUpload.size() > 0) {
+            SyncEntity entity = _entitiesToUpload.get(0);
+            _entitiesToUpload.remove(entity);
+
+            return entity;
         }
 
         return null;
@@ -90,38 +83,35 @@ public class UploaderService extends Service {
         public void run() {
 
             while(_isRunning) {
-                Posting posting = getNextPendingUpload();
+                SyncEntity entity = getNextPendingUpload();
 
-                if(posting == null) {
+                if(entity == null) {
                     _isRunning = false;
                 } else {
-                    Log.i("breakout", "[UploaderService$UploaderThread] Starting upload of \"" + posting.getText() + "\"");
+                    Log.i("breakout", "[UploaderService] Starting upload of \"" + entity.toString() + "\"");
 
-                    // Upload post
-                    try {
-                        Thread.sleep(4000);
-                    } catch(InterruptedException e) {
-                        e.printStackTrace();
+                    // Upload entity
+                    boolean success = entity.uploadToServer();
+
+                    if(success) {
+                        Log.i("breakout", "[UploaderService] > Upload successful");
+
+                        // Update local DB
+                        entity.setState(SyncEntity.SyncState.NORMAL);
+                        entity.save();
+
+                        // Send broadcast
+                        sendResult();
+                    } else {
+                        Log.i("breakout", "[UploaderService] > Upload failed");
                     }
-
-                    // Update local DB
-                    posting.setSent(true);
-                    try {
-                        _dao.update(posting);
-                    } catch(SQLException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Send broadcast
-                    sendResult();
-
-                    Log.i("breakout", "[UploaderService$UploaderThread] > Finished upload of \"" + posting.getText() + "\"");
                 }
             }
 
             _isRunning = false;
+            _entitiesToUpload = null;
             stopSelf();
-            Log.i("breakout", "[UploaderService$UploaderThread] STOPPED SERVICE");
+            Log.i("breakout", "[UploaderService] --- STOPPED SERVICE ---");
         }
     }
 
