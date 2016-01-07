@@ -7,7 +7,6 @@ package org.break_out.breakout.sync.model;
 public class Posting extends SyncEntity {
 
     private String _text;
-    private boolean _sent = false;
 
     // SugarORM needs an empty constructor
     public Posting() {
