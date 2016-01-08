@@ -91,16 +91,36 @@ public class BOSyncController {
         Log.i("breakout", "[BOSyncController] Called Service");
     }
 
-    public void update(SyncEntity entity) {
-        // TODO
+    public void update(SyncEntity entity, UploadListener listener) {
+        registerUploadListener(listener);
+
+        // Set sync state
+        entity.setState(SyncEntity.SyncState.UPDATING);
+        entity.save();
+
+        Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
+
+        tryUploadAll();
+
+        Log.i("breakout", "[BOSyncController] Called Service");
     }
 
     public <T extends SyncEntity> List<T> getAll(Class<T> type) {
         return SyncEntity.listAll(type);
     }
 
-    public void delete() {
-        // TODO
+    public void delete(SyncEntity entity, UploadListener listener) {
+        registerUploadListener(listener);
+
+        // Set sync state
+        entity.setState(SyncEntity.SyncState.DELETING);
+        entity.save();
+
+        Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
+
+        tryUploadAll();
+
+        Log.i("breakout", "[BOSyncController] Called Service");
     }
 
 }

@@ -18,12 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This Service will iterate over all entities returned by {@link BOSyncController#getEntityClasses()}
+ * and upload the pending uploads, updates and deletions.
+ *
  * Created by Tino on 18.12.2015.
  */
 public class UploaderService extends Service {
 
     private boolean _isRunning = false;
-    private List<SyncEntity> _entitiesToUpload = null;
+    private List<SyncEntity> _processedEntities = new ArrayList<SyncEntity>();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -49,21 +52,30 @@ public class UploaderService extends Service {
         }).start();
     }
 
+    /**
+     * Returns the next entity to be uploaded, updated or deleted on the server.
+     * Will return null if there is no further entity waiting for an upload in this
+     * particular run of the service (for every run there will only be one try for
+     * every upload).
+     *
+     * @return The next entity to be uploaded, updated or deleted on server or null
+     */
     private SyncEntity getNextPendingUpload() {
-        if(_entitiesToUpload == null) {
-            _entitiesToUpload = new ArrayList<SyncEntity>();
 
-            List<Class<? extends SyncEntity>> entityClasses = BOSyncController.getInstance(this).getEntityClasses();
-            for(Class<? extends SyncEntity> entityClass : entityClasses) {
-                _entitiesToUpload.addAll(SyncEntity.find(entityClass, SyncEntity.IS_UPLOADING_NAME + " = ?", "1"));
+        List<SyncEntity> entitiesToUpload = new ArrayList<SyncEntity>();
+        String whereClause = SyncEntity.IS_UPLOADING_NAME + " = ? OR " + SyncEntity.IS_UPDATING_NAME + " = ? OR " + SyncEntity.IS_DELETING + " = ?";
+        String[] attrs = {"1", "1", "1"};
+
+        List<Class<? extends SyncEntity>> entityClasses = BOSyncController.getInstance(this).getEntityClasses();
+        for(Class<? extends SyncEntity> entityClass : entityClasses) {
+            List<? extends SyncEntity> candidates = SyncEntity.find(entityClass, whereClause , attrs);
+
+            for(SyncEntity entity : candidates) {
+                if(!_processedEntities.contains(entity)) {
+                    _processedEntities.add(entity);
+                    return entity;
+                }
             }
-        }
-
-        if(_entitiesToUpload.size() > 0) {
-            SyncEntity entity = _entitiesToUpload.get(0);
-            _entitiesToUpload.remove(entity);
-
-            return entity;
         }
 
         return null;
@@ -90,27 +102,42 @@ public class UploaderService extends Service {
                 } else {
                     Log.i("breakout", "[UploaderService] Starting upload of \"" + entity.toString() + "\"");
 
-                    // Upload entity
-                    boolean success = entity.uploadToServer();
+                    // Upload, update or delete entity
+                    boolean success = false;
+                    switch(entity.getState()) {
+                        case UPLOADING:
+                            success = entity.uploadToServer();
+                            break;
+                        case UPDATING:
+                            success = entity.updateOnServer();
+                            break;
+                        case DELETING:
+                            success = entity.deleteOnServer();
+                            break;
+                    }
 
                     if(success) {
-                        Log.i("breakout", "[UploaderService] > Upload successful");
+                        Log.i("breakout", "[UploaderService] > " + entity.getState().toString() + " operation on server successful");
 
-                        // Update local DB
-                        entity.setState(SyncEntity.SyncState.NORMAL);
-                        entity.save();
+                        if(entity.getState() != SyncEntity.SyncState.DELETING) {
+                            // Update local DB with NORMAL state
+                            entity.setState(SyncEntity.SyncState.NORMAL);
+                            entity.save();
+                        } else {
+                            // Delete entity locally
+                            entity.delete();
+                        }
 
-                        // Send broadcast
+                        // Send broadcast indicating the change of the data
                         sendResult();
                     } else {
-                        Log.i("breakout", "[UploaderService] > Upload failed");
+                        Log.i("breakout", "[UploaderService] > " + entity.getState().toString() + " operation on server failed");
                     }
                 }
             }
 
-            _isRunning = false;
-            _entitiesToUpload = null;
             stopSelf();
+
             Log.i("breakout", "[UploaderService] --- STOPPED SERVICE ---");
         }
     }

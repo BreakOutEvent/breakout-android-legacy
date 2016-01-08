@@ -35,8 +35,8 @@ public class Posting extends SyncEntity {
 
     @Override
     public boolean deleteOnServer() {
-        // TODO
-        return false;
+        // Currently randomly returns success or failure
+        return (Math.random() > 0.5);
     }
 
     @Override
@@ -46,4 +46,5 @@ public class Posting extends SyncEntity {
                 "state='" + getState() + '\'' +
                 "}";
     }
+
 }

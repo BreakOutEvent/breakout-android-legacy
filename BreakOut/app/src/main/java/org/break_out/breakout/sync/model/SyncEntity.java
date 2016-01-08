@@ -11,6 +11,12 @@ public abstract class SyncEntity extends SugarRecord {
     @Ignore
     public static final String IS_UPLOADING_NAME = "_is_uploading";
 
+    @Ignore
+    public static final String IS_UPDATING_NAME = "_is_updating";
+
+    @Ignore
+    public static final String IS_DELETING = "_is_deleting";
+
     private boolean _isUploading;
     private boolean _isUpdating;
     private boolean _isDeleting;
@@ -82,5 +88,28 @@ public abstract class SyncEntity extends SugarRecord {
     public abstract boolean updateOnServer();
 
     public abstract boolean deleteOnServer();
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) {
+            return false;
+        }
+
+        if(!(obj instanceof SyncEntity)) {
+            return false;
+        }
+
+        final SyncEntity other = (SyncEntity) obj;
+        if(getId() != other.getId()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 
 }
