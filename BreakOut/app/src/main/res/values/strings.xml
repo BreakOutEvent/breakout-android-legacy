@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">BreakOut</string>
+    <string name="hint_email">email</string>
+    <string name="hint_password">password</string>
+
+    <string name="button_login">Einloggen</string>
+    <string name="button_register">Kostenlos Registrieren</string>
+
+    <string name="textview_about">Was ist Breakout?</string>
 </resources>
