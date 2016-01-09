@@ -18,7 +18,6 @@ import java.net.URL;
 public class StartActivity extends AppCompatActivity {
     private Context _context;
     private TextView _textView_about;
-    private LinearLayout _linearLayout_container;
     private RelativeLayout _relativeLayout_container;
 
     private Button _button_login;
@@ -31,7 +30,6 @@ public class StartActivity extends AppCompatActivity {
         _context = this;
 
         _textView_about = (TextView) findViewById(R.id.start_textView_about);
-        _linearLayout_container = (LinearLayout) findViewById(R.id.start_linearLayout_mainWrapper);
         _relativeLayout_container = (RelativeLayout) findViewById(R.id.start_relativeLayout_mainWrapper);
 
     }
