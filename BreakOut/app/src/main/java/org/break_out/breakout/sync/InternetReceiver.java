@@ -24,7 +24,7 @@ public class InternetReceiver extends BroadcastReceiver {
 
         if(ni != null && ni.getState() == NetworkInfo.State.CONNECTED) {
             connected = true;
-        } else if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,Boolean.FALSE)) {
+        } else if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, Boolean.FALSE)) {
             connected = false;
         }
 

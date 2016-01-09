@@ -13,7 +13,7 @@ public class BOSyncReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        BOSyncController.getInstance(context).notifyAllUploadListeners();
+        BOSyncController.getInstance(context).notifyDataChangedListeners();
     }
 
 }

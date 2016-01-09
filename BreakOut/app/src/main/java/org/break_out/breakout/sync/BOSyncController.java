@@ -8,7 +8,6 @@ import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.sync.model.SyncEntity;
 import org.break_out.breakout.sync.service.UploaderService;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +21,10 @@ public class BOSyncController {
     private List<Class<? extends SyncEntity>> _entities = new ArrayList<>();
     private Context _context = null;
 
-    private List<UploadListener> _listeners = new ArrayList<UploadListener>();
+    private List<DataChangedListener> _listeners = new ArrayList<DataChangedListener>();
 
-    public interface UploadListener {
-        public void uploadStateChanged();
+    public interface DataChangedListener {
+        public void dataChanged();
     }
 
     private BOSyncController(Context context) {
@@ -54,21 +53,21 @@ public class BOSyncController {
         return _entities;
     }
 
-    public void registerUploadListener(UploadListener listener) {
+    public void registerUploadListener(DataChangedListener listener) {
         if(listener != null && !_listeners.contains(listener)) {
             _listeners.add(listener);
         }
     }
 
-    public void unregisterListener(UploadListener listener) {
+    public void unregisterListener(DataChangedListener listener) {
         if(listener != null && _listeners.contains(listener)) {
             _listeners.remove(listener);
         }
     }
 
-    public void notifyAllUploadListeners() {
-        for(UploadListener listener : _listeners) {
-            listener.uploadStateChanged();
+    public void notifyDataChangedListeners() {
+        for(DataChangedListener listener : _listeners) {
+            listener.dataChanged();
         }
     }
 
@@ -77,31 +76,25 @@ public class BOSyncController {
         _context.startService(intent);
     }
 
-    public void upload(SyncEntity entity, UploadListener listener) {
-        registerUploadListener(listener);
-
+    public void upload(SyncEntity entity) {
         // Set sync state
         entity.setState(SyncEntity.SyncState.UPLOADING);
         entity.save();
+        notifyDataChangedListeners();
 
         Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
-
         tryUploadAll();
-
         Log.i("breakout", "[BOSyncController] Called Service");
     }
 
-    public void update(SyncEntity entity, UploadListener listener) {
-        registerUploadListener(listener);
-
+    public void update(SyncEntity entity) {
         // Set sync state
         entity.setState(SyncEntity.SyncState.UPDATING);
         entity.save();
+        notifyDataChangedListeners();
 
         Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
-
         tryUploadAll();
-
         Log.i("breakout", "[BOSyncController] Called Service");
     }
 
@@ -109,17 +102,14 @@ public class BOSyncController {
         return SyncEntity.listAll(type);
     }
 
-    public void delete(SyncEntity entity, UploadListener listener) {
-        registerUploadListener(listener);
-
+    public void delete(SyncEntity entity) {
         // Set sync state
         entity.setState(SyncEntity.SyncState.DELETING);
         entity.save();
+        notifyDataChangedListeners();
 
         Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
-
         tryUploadAll();
-
         Log.i("breakout", "[BOSyncController] Called Service");
     }
 
