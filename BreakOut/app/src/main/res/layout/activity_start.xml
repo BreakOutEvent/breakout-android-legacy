@@ -63,7 +63,7 @@
                 android:textColor="@color/white"
                 android:textColorHint="@color/white_transparent"
                 android:theme="@style/AppTheme.EditText"
-                android:drawableLeft="@android:drawable/sym_action_email"
+                android:drawableLeft="@drawable/ic_mail_outline_white_24dp"
                 android:inputType="textEmailAddress"/>
 
             <EditText
@@ -75,7 +75,7 @@
                 android:textColorHint="@color/white_transparent"
                 android:layout_below="@+id/start_editText_email"
                 android:theme="@style/AppTheme.EditText"
-                android:drawableLeft="@android:drawable/ic_lock_idle_lock"
+                android:drawableLeft="@drawable/ic_lock_outline_white_24dp"
                 android:inputType="textPassword"/>
         </RelativeLayout>
 
