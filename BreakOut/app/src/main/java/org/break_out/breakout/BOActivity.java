@@ -49,7 +49,9 @@ public abstract class BOActivity extends AppCompatActivity {
     /**
      * Will be called when the permission has been asked from the user.
      * This method overrides the corresponding Android callback method to invoke
-     * the callback registered to this request.
+     * the callback registered to this request.<br />
+     * If a permission is always denied, you might want to check if it is specified
+     * in the manifest!
      *
      * @param requestCode The request code
      * @param permissions The permissions that had been asked
@@ -157,9 +159,9 @@ public abstract class BOActivity extends AppCompatActivity {
      * @return The permission String (empty String when an error occurred)
      */
     private String getPermissionString(Permission permission) {
+        // Note: One permission per permission group is enough!
         switch(permission) {
             case LOCATION:
-                // Request only fine location here (coarse location will not be granted by the system!)
                 return Manifest.permission.ACCESS_FINE_LOCATION;
             default:
                 return "";
