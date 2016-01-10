@@ -1,103 +1,168 @@
 package org.break_out.breakout;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Maximilian Duehr on 21.12.2015.
  */
 public abstract class BOActivity extends AppCompatActivity {
 
-    private static final String PERMISSION_INTERNET = Manifest.permission.INTERNET;
-    private static final String PERMISSION_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String TAG = "BOActivity";
 
-    static final int REQUESTCODE_LOCATION = 0;
-
-    private HashMap<Integer, PermissionCallback> _hashMap_callbacks;
-    private final static String TAG = "BOActivity";
+    private Map<Integer, PermissionCallback> _callbacks = new HashMap<Integer, PermissionCallback>();
+    private int _nextRequestCode = 0;
 
     /**
-     * use the android workflow to trigger the callback method
+     * Enum for the permission that can be requested within
+     * this Activity. Note that all permissions listet in this
+     * enum have to be in the manifest as well!
+     */
+    public enum Permission {
+        LOCATION
+    }
+
+    /**
+     * Interface for receiving permission results.
+     */
+    public interface PermissionCallback {
+        /**
+         * The requested permission has been granted.
+         */
+        public void permissionGranted();
+
+        /**
+         * The requested permission has been denied.
+         */
+        public void permissionDenied();
+    }
+
+    /**
+     * Will be called when the permission has been asked from the user.
+     * This method overrides the corresponding Android callback method to invoke
+     * the callback registered to this request.
      *
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
+     * @param requestCode The request code
+     * @param permissions The permissions that had been asked
+     * @param grantResults An array indicating which permissions had been granted
      */
     @Override
     public final void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Log.d(TAG, "onRequestPermissionResult");
-        PermissionCallback permissionCallback = getCallbacks().get(requestCode);
-        if(permissionCallback != null) {
-            Log.d(TAG, "result size: " + grantResults.length);
-            permissionCallback.onResult(grantResults[0] == PackageManager.PERMISSION_GRANTED);
+
+        // Send a "permission denied" callback as a default reaction to wrong request results (wrong sizes of the arrays)
+        if(grantResults.length != 1 || permissions.length != grantResults.length) {
+            fireCallback(requestCode, false);
+            return;
         }
+
+        boolean granted = (grantResults[0] == PackageManager.PERMISSION_GRANTED);
+        fireCallback(requestCode, granted);
     }
 
     /**
-     * check if the searched permission is granted
+     * Invoke the callback corresponding to the given request code.
      *
-     * @param requestCode requestcode for the permission
-     * @param callback    callback object that handles the result
+     * @param requestCode The request code of the callback
+     * @param granted If the permission had been granted or not
      */
-    @TargetApi(23)
-    public void checkForPermission(int requestCode, PermissionCallback callback) {
-        Log.d(TAG, "checkForPermission");
-        getCallbacks().put(requestCode, callback);
-        if(hasDenieablePermissions()) {
-            Log.d(TAG, "deniable permissions!");
-            if(shouldShowRequestPermissionRationale(getPermissionFromRequestcode(requestCode)))
-            {
-                requestPermissions(new String[]{getPermissionFromRequestcode(requestCode)}, requestCode);
+    private void fireCallback(Integer requestCode, boolean granted) {
+        PermissionCallback callback = _callbacks.get(requestCode);
+
+        if(callback != null) {
+            if(granted) {
+                callback.permissionGranted();
+            } else {
+                callback.permissionDenied();
+            }
+        }
+
+        // Callbacks will only be used once -> remove them after use
+        _callbacks.remove(callback);
+    }
+
+    /**
+     * Call this method to request a permission.
+     * The registered callback will get notified as soon
+     * as the result of the request is received.<br />
+     * Note that this method will always return <code>false</code>
+     * if the user selected "never ask me again" and denied the
+     * permission.
+     *
+     * @param permission The permission to be requested
+     * @param callback A callback object receiving the result of the request
+     */
+    public void getPermission(Permission permission, PermissionCallback callback) {
+        int requestCode = generateRequestCode();
+
+        // Register callback
+        _callbacks.put(requestCode, callback);
+
+        // For SDK version >= 23 request permission, otherwise instantly grant the permission
+        if(hasDeniablePermissions()) {
+            Log.d(TAG, "Deniable permissions -> ask for permission");
+
+            String permissionString = getPermissionString(permission);
+
+            // Check if permission has already been granted before
+            if(ContextCompat.checkSelfPermission(this, permissionString) == PackageManager.PERMISSION_GRANTED) {
+                fireCallback(requestCode, true);
+            } else {
+                requestPermissions(new String[] {permissionString}, requestCode);
             }
         } else {
-            //if function is called on an old device the permissions cannot be not granted, simulate a 'true' answer
-            onRequestPermissionsResult(requestCode, new String[]{getPermissionFromRequestcode(requestCode)}, new int[]{1});
+            Log.d(TAG, "No deniable permissions -> grant permission instantly");
+
+            fireCallback(requestCode, true);
         }
-    }
-    /**
-     * @return hashMap of callbacks
-     */
-    private HashMap<Integer, PermissionCallback> getCallbacks() {
-        if(_hashMap_callbacks == null) {
-            _hashMap_callbacks = new HashMap<>();
-        }
-        return _hashMap_callbacks;
     }
 
     /**
-     * check for API level and see if permissions can be denied
+     * Check the API level and see if permissions can be denied
+     * (which is possible for SDK version greater than 22).
      *
-     * @return true when SDK version is >=23
+     * @return True when SDK version is >= 23, false otherwise
      */
-    public boolean hasDenieablePermissions() {
+    private boolean hasDeniablePermissions() {
         return Build.VERSION.SDK_INT >= 23;
     }
 
     /**
-     * interface for receiving permission results
+     * Generates a request code which will be unique for
+     * this Activity instance. This request code can be
+     * used for one specific permission request.
+     *
+     * @return A unique request code
      */
-    public interface PermissionCallback {
-        void onResult(boolean granted);
+    private int generateRequestCode() {
+        int code = _nextRequestCode;
+        _nextRequestCode++;
+
+        return code;
     }
 
     /**
-     * convert final REQUESTCODE to permission
+     * Returns the corresponding string to a permission.
      *
-     * @param requestCode one of the declared final REQUESTCODE constants
-     * @return the android permission as a String
+     * @param permission The permission to get the String for
+     * @return The permission String (empty String when an error occurred)
      */
-    public String getPermissionFromRequestcode(int requestCode) {
-        switch(requestCode) {
-            case REQUESTCODE_LOCATION:
+    private String getPermissionString(Permission permission) {
+        switch(permission) {
+            case LOCATION:
+                // Request only fine location here (coarse location will not be granted by the system!)
                 return Manifest.permission.ACCESS_FINE_LOCATION;
+            default:
+                return "";
         }
-        return null;
     }
 }
