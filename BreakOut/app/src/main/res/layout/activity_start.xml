@@ -98,7 +98,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/start_button_logIn"
-                android:text="@string/button_register"
+                android:text="@string/button_start_register"
                 android:layout_marginTop="25dp"
                 android:background="@drawable/btn_rounded_white_50dp"/>
 

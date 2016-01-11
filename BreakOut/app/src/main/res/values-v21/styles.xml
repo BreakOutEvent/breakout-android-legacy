@@ -18,5 +18,6 @@
     <style name="AppTheme.EditText" parent="@android:style/Widget.EditText">
         <item name="android:colorControlNormal">@color/white</item>
         <item name="android:colorControlActivated">@color/colorPrimary</item>
+        <item name="android:textColorHint">@color/white</item>
     </style>
 </resources>

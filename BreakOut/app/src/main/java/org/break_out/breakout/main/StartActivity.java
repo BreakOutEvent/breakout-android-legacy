@@ -49,6 +49,13 @@ public class StartActivity extends AppCompatActivity {
                 logIn();
             }
         });
+
+        _button_register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                register();
+            }
+        });
     }
 
     /**

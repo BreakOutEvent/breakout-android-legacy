@@ -5,6 +5,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_login_600dp"
+    android:paddingTop="64dp"
     tools:context="org.break_out.breakout.main.RegisterActivity">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/register_viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/register_relativeLayout_indicatorWrapper"/>
+
+    <RelativeLayout
+        android:id="@+id/register_relativeLayout_indicatorWrapper"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:background="@color/black_transparent"
+        android:layout_alignParentBottom="true">
+
+    </RelativeLayout>
 
 </RelativeLayout>

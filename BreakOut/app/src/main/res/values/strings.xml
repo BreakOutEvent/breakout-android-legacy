@@ -2,9 +2,14 @@
     <string name="app_name">BreakOut</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
+    <string name="hint_firstname">Vorname</string>
+    <string name="hint_lastname">Nachname</string>
+    <string name="hint_repeatPassword">Passwort wiederholen</string>
 
     <string name="button_login">Einloggen</string>
-    <string name="button_register">Kostenlos Registrieren</string>
+    <string name="button_start_register">Kostenlos Registrieren</string>
+    <string name="button_continue">Weiter</string>
+    <string name="button_register">Registrieren</string>
 
     <string name="textview_about">Was ist Breakout?</string>
     <string name="popup_usernamePassword">Bitte gib deine Mail und ein Password ein </string>
