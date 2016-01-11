@@ -1,7 +1,9 @@
 package org.break_out.breakout;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -166,5 +168,37 @@ public abstract class BOActivity extends AppCompatActivity {
             default:
                 return "";
         }
+    }
+
+    /**
+     * This method will return true if the app is running
+     * on a tablet. The check is based on qualified resource
+     * files. Every device with a smallest screen width of
+     * 600dp or devices classified as xlarge will be seen as tablets.
+     *
+     * @return True if this device is a tablet, false otherwise
+     */
+    public boolean isTablet() {
+        return getResources().getBoolean(R.bool.isTablet);
+    }
+
+    /**
+     * This method will return true if this Activity is
+     * currently running in portrait mode.
+     *
+     * @return True if this Activity is in portrait mode, false otherwise
+     */
+    public boolean isPortrait() {
+        return !isLandscape();
+    }
+
+    /**
+     * This method will return true if this Activity is
+     * currently running in landscape mode.
+     *
+     * @return True if this Activity is in landscape mode, false otherwise
+     */
+    public boolean isLandscape() {
+        return (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
     }
 }
