@@ -72,7 +72,7 @@
             android:drawableLeft="@drawable/ic_mail_outline_white_24dp"/>
 
         <EditText
-            android:id="@+id/register_f1_editText_password"
+            android:id="@+id/register_editText_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/register_editText_email"
@@ -85,10 +85,10 @@
             android:drawableLeft="@drawable/ic_lock_outline_white_24dp"/>
 
         <EditText
-            android:id="@+id/register_f1_editText_passwordRepeat"
+            android:id="@+id/register_editText_passwordRepeat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/register_f1_editText_password"
+            android:layout_below="@id/register_editText_password"
             android:textColor="@color/white"
             android:layout_marginTop="@dimen/linearLayout_vertical_margin_elements"
             android:theme="@style/AppTheme.EditText"
@@ -98,10 +98,10 @@
             android:drawableLeft="@drawable/ic_account_box_white_24dp"/>
 
         <EditText
-            android:id="@+id/register_f1_editText_shirtSize"
+            android:id="@+id/register_editText_shirtSize"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/register_f1_editText_passwordRepeat"
+            android:layout_below="@id/register_editText_passwordRepeat"
             android:textColor="@color/white"
             android:layout_marginTop="@dimen/linearLayout_vertical_margin_elements"
             android:theme="@style/AppTheme.EditText"
@@ -112,10 +112,10 @@
             android:drawableRight="@drawable/ic_help_outline_black_24dp"/>
 
         <EditText
-            android:id="@+id/register_f1_editText_city"
+            android:id="@+id/register_editText_city"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/register_f1_editText_shirtSize"
+            android:layout_below="@id/register_editText_shirtSize"
             android:textColor="@color/white"
             android:layout_marginTop="@dimen/linearLayout_vertical_margin_elements"
             android:theme="@style/AppTheme.EditText"
@@ -125,10 +125,10 @@
             android:drawableLeft="@drawable/ic_account_box_white_24dp"/>
 
         <EditText
-            android:id="@+id/register_f1_editText_phoneNumber"
+            android:id="@+id/register_editText_phoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/register_f1_editText_city"
+            android:layout_below="@id/register_editText_city"
             android:textColor="@color/white"
             android:layout_marginTop="@dimen/linearLayout_vertical_margin_elements"
             android:theme="@style/AppTheme.EditText"
@@ -137,10 +137,10 @@
             android:singleLine="true"
             android:drawableLeft="@drawable/ic_account_box_white_24dp"/>
         <EditText
-            android:id="@+id/register_f1_editText_emergencyNumber"
+            android:id="@+id/register_editText_emergencyNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/register_f1_editText_phoneNumber"
+            android:layout_below="@id/register_editText_phoneNumber"
             android:textColor="@color/white"
             android:layout_marginTop="@dimen/linearLayout_vertical_margin_elements"
             android:theme="@style/AppTheme.EditText"
@@ -154,7 +154,7 @@
             android:id="@+id/register_button_register"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/register_f1_editText_emergencyNumber"
+            android:layout_below="@id/register_editText_emergencyNumber"
             android:layout_marginTop="@dimen/linearLayout_vertical_margin_elements"
             android:background="@drawable/btn_rounded_orange_50dp"
             android:textColor="@color/white"
