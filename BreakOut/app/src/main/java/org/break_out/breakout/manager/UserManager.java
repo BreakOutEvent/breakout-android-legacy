@@ -47,7 +47,7 @@ public class UserManager {
      *
      * @param user The currently logged in user
      */
-    public void setCurrentUser(User user) {
+    private void setCurrentUser(User user) {
         _currUser = user;
 
         user.saveToPrefs(_context);
@@ -66,7 +66,7 @@ public class UserManager {
      * @param listener The listener for the result of the upgrade
      */
     public void upgradeCurrentUser(User.Role role, UserUpgradeListener listener) {
-        // No such upgrade is possible, if the user already has this or a higher role
+        // No such upgrade is possible if the user already has this or a higher role
         if(_currUser.isAtLeast(role)) {
             listener.upgradeFailed();
             return;
@@ -74,8 +74,7 @@ public class UserManager {
 
         _listener = listener;
 
-        // TODO: Start register Activity, get results and call listener
-        // Don't forget to save the new user to the prefs!
+        // TODO: Start register Activity, get results, set current user (setCurrentUser(...)) and call the listener
     }
 
     /**
