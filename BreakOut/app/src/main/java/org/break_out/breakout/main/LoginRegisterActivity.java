@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import org.break_out.breakout.R;
 
-public class StartActivity extends AppCompatActivity {
+public class LoginRegisterActivity extends AppCompatActivity {
     private Context _context;
     private TextView _textView_about;
     private RelativeLayout _relativeLayout_container;
@@ -68,12 +68,23 @@ public class StartActivity extends AppCompatActivity {
         String input_password = _editText_password.getText().toString();
         if(input_email.isEmpty() || input_password.isEmpty()) {
             showHint();
+        } else {
+            //Start login
         }
     }
 
+    /**
+     * call code to register online
+     */
     private void register() {
-        Intent registerIntent = new Intent(this,RegisterActivity.class);
-        startActivity(registerIntent);
+        String input_email = _editText_email.getText().toString();
+        String input_password = _editText_password.getText().toString();
+
+        if(input_email.isEmpty() || input_password.isEmpty()) {
+            showHint();
+        } else {
+            //Start register
+        }
     }
 
     private void checkIfEnoughInput() {

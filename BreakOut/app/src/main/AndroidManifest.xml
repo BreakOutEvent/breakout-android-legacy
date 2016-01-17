@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".main.StartActivity"
+        <activity android:name=".main.LoginRegisterActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -16,10 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".main.RegisterActivity"
+        <activity android:name=".main.BecomeTeamMemberActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateVisible|adjustPan"
-            android:parentActivityName=".main.StartActivity">
+            android:parentActivityName=".main.LoginRegisterActivity">
         </activity>
     </application>
 

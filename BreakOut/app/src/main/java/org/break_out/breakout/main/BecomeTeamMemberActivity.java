@@ -3,6 +3,7 @@ package org.break_out.breakout.main;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
@@ -18,8 +19,8 @@ import org.break_out.breakout.R;
 
 import java.util.ArrayList;
 
-public class RegisterActivity extends FragmentActivity {
-    private static final String TAG = "RegisterActivity";
+public class BecomeTeamMemberActivity extends AppCompatActivity {
+    private static final String TAG = "BecomeTeamMemberActivity";
     private ScrollView _scrollView_credentials;
 
     private ImageView _imageView_chosenImage;
