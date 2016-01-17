@@ -1,6 +1,8 @@
 package org.break_out.breakout.manager;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 
 import org.break_out.breakout.model.User;
 
@@ -9,9 +11,14 @@ import org.break_out.breakout.model.User;
  */
 public class UserManager {
 
+    public static final int REQUEST_CODE_LOGIN = 0;
+    public static final int REQUEST_CODE_BECOME_MEMBER = 1;
+
+    public static final String KEY_USER = "key_user";
+
     private static UserManager _instance;
 
-    private Context _context;
+    private Activity _activity;
 
     private User _currUser = new User();
 
@@ -22,21 +29,21 @@ public class UserManager {
         public void upgradeFailed();
     }
 
-    private UserManager(Context context) {
-        _context = context;
+    private UserManager(Activity activity) {
+        _activity = activity;
 
-        _currUser = User.loadFromPrefs(_context);
+        _currUser = User.loadFromPrefs(_activity);
     }
 
     /**
      * Returns an instance of the UserManager.
      *
-     * @param context The context (e.g., an Activity)
+     * @param activity The context (e.g., an Activity)
      * @return An instance of the UserManager
      */
-    public static UserManager getInstance(Context context) {
+    public static UserManager getInstance(Activity activity) {
         if(_instance == null) {
-            _instance = new UserManager(context);
+            _instance = new UserManager(activity);
         }
 
         return _instance;
@@ -49,8 +56,17 @@ public class UserManager {
      */
     private void setCurrentUser(User user) {
         _currUser = user;
+        user.saveToPrefs(_activity);
+    }
 
-        user.saveToPrefs(_context);
+    private void sendLoginRegisterIntent() {
+        //Intent intent = new Intent(this, LoginRegisterActivity.class);
+        //_activity.startActivityForResult(intent, REQUEST_CODE_LOGIN);
+    }
+
+    private void sendBecomeTeamMemberIntent() {
+        //Intent intent = new Intent(this, BecomeTeamMemberActivity.class);
+        //_activity.startActivityForResult(intent, REQUEST_CODE_BECOME_MEMBER);
     }
 
     /**
@@ -66,15 +82,26 @@ public class UserManager {
      * @param listener The listener for the result of the upgrade
      */
     public void upgradeCurrentUser(User.Role role, UserUpgradeListener listener) {
+        _listener = listener;
+
         // No such upgrade is possible if the user already has this or a higher role
         if(_currUser.isAtLeast(role)) {
-            listener.upgradeFailed();
+            callListener(false);
             return;
         }
 
-        _listener = listener;
+        if(role == User.Role.USER) {
+            sendLoginRegisterIntent();
+        } else if(role == User.Role.TEAM_MEMBER) {
 
-        // TODO: Start register Activity, get results, set current user (setCurrentUser(...)) and call the listener
+            // Only users can become team members
+            if(getCurrentUsersRole() != User.Role.USER) {
+                callListener(false);
+                return;
+            }
+
+            sendBecomeTeamMemberIntent();
+        }
     }
 
     /**
@@ -86,7 +113,7 @@ public class UserManager {
      */
     public void logOutCurrentUser() {
         _currUser = new User();
-        _currUser.saveToPrefs(_context);
+        _currUser.saveToPrefs(_activity);
     }
 
     /**
@@ -109,6 +136,43 @@ public class UserManager {
      */
     public User.Role getCurrentUsersRole() {
         return _currUser.getRole();
+    }
+
+    /**
+     * This method will call the upgrade listener, if it is not null.
+     * Depending on the boolean passed as a parameter, the corresponding
+     * method of the listener will be called.
+     *
+     * @param loginSuccessful If the login was successful or not
+     */
+    private void callListener(boolean loginSuccessful) {
+        if(_listener == null) {
+            return;
+        }
+
+        if(loginSuccessful) {
+            _listener.upgradeSuccessful();
+        } else {
+            _listener.upgradeFailed();
+        }
+
+        _listener = null;
+    }
+
+    /**
+     * This method will be called by the {@link org.break_out.breakout.BOActivity}, when
+     * the login/register Activity is done.
+     *
+     * @param resultCode The data from the login/register Activity
+     */
+    public void loginActivityDone(int resultCode, Intent data) {
+        if(resultCode == Activity.RESULT_OK) {
+            User user = (User) data.getSerializableExtra(KEY_USER);
+            setCurrentUser(user);
+            callListener(true);
+        } else {
+            callListener(false);
+        }
     }
 
 }

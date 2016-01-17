@@ -2,12 +2,15 @@ package org.break_out.breakout;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import org.break_out.breakout.manager.UserManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -200,5 +203,14 @@ public abstract class BOActivity extends AppCompatActivity {
      */
     public boolean isLandscape() {
         return (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == UserManager.REQUEST_CODE_LOGIN) {
+            UserManager.getInstance(this).loginActivityDone(resultCode, data);
+        }
     }
 }

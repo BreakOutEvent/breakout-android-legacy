@@ -5,10 +5,12 @@ import android.content.SharedPreferences;
 
 import org.break_out.breakout.R;
 
+import java.io.Serializable;
+
 /**
  * Created by Tino on 16.01.2016.
  */
-public class User {
+public class User implements Serializable {
 
     public static final String PREF_KEY = "pref_key_user";
 
