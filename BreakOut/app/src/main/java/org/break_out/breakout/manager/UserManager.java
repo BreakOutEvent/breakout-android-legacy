@@ -1,10 +1,12 @@
 package org.break_out.breakout.manager;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 
+import org.break_out.breakout.ui.BecomeTeamMemberActivity;
+import org.break_out.breakout.ui.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.ui.BOActivity;
 
 /**
  * Created by Tino on 16.01.2016.
@@ -60,13 +62,13 @@ public class UserManager {
     }
 
     private void sendLoginRegisterIntent() {
-        //Intent intent = new Intent(this, LoginRegisterActivity.class);
-        //_activity.startActivityForResult(intent, REQUEST_CODE_LOGIN);
+        Intent intent = new Intent(_activity, LoginRegisterActivity.class);
+        _activity.startActivityForResult(intent, REQUEST_CODE_LOGIN);
     }
 
     private void sendBecomeTeamMemberIntent() {
-        //Intent intent = new Intent(this, BecomeTeamMemberActivity.class);
-        //_activity.startActivityForResult(intent, REQUEST_CODE_BECOME_MEMBER);
+        Intent intent = new Intent(_activity, BecomeTeamMemberActivity.class);
+        _activity.startActivityForResult(intent, REQUEST_CODE_BECOME_MEMBER);
     }
 
     /**
@@ -160,7 +162,7 @@ public class UserManager {
     }
 
     /**
-     * This method will be called by the {@link org.break_out.breakout.BOActivity}, when
+     * This method will be called by the {@link BOActivity}, when
      * the login/register Activity is done.
      *
      * @param resultCode The data from the login/register Activity

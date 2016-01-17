@@ -1,4 +1,4 @@
-package org.break_out.breakout;
+package org.break_out.breakout.ui;
 
 import android.Manifest;
 import android.app.Activity;
@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 
 import java.util.ArrayList;

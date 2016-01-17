@@ -1,8 +1,6 @@
-package org.break_out.breakout.main;
+package org.break_out.breakout.ui;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,9 +10,10 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.break_out.breakout.ui.BOActivity;
 import org.break_out.breakout.R;
 
-public class LoginRegisterActivity extends AppCompatActivity {
+public class LoginRegisterActivity extends BOActivity {
     private Context _context;
     private TextView _textView_about;
     private RelativeLayout _relativeLayout_container;

@@ -1,4 +1,4 @@
-package org.break_out.breakout.main;
+package org.break_out.breakout.ui;
 
 import android.content.Context;
 import android.os.Bundle;
