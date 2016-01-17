@@ -7,11 +7,14 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="android:editTextStyle">@style/AppTheme.EditText</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="AppTheme.EditText" parent="@android:style/Widget.EditText">
-        <item name="android:textColorHint">@color/white_transparent</item>
         <item name="android:textColor">@color/white</item>
+        <item name="android:colorControlNormal">@color/white_transparent</item>
+        <item name="android:colorControlActivated">@color/colorPrimary</item>
+        <item name="android:textColorHint">@color/white_transparent</item>
+        <item name="android:color">@color/white</item>
     </style>
 </resources>
