@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_login_600dp"
     android:paddingTop="64dp"
-    tools:context=".ui.BecomeTeamMemberActivity">
+    tools:context=".ui.activities.BecomeTeamMemberActivity">
 
     <ImageView
         android:id="@+id/register_imageView_addProfileImage"

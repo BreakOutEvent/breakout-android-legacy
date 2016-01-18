@@ -3,10 +3,10 @@ package org.break_out.breakout.manager;
 import android.app.Activity;
 import android.content.Intent;
 
-import org.break_out.breakout.ui.BecomeTeamMemberActivity;
-import org.break_out.breakout.ui.LoginRegisterActivity;
+import org.break_out.breakout.ui.activities.BecomeTeamMemberActivity;
+import org.break_out.breakout.ui.activities.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.ui.BOActivity;
+import org.break_out.breakout.ui.activities.BOActivity;
 
 /**
  * Created by Tino on 16.01.2016.
@@ -20,7 +20,7 @@ public class UserManager {
 
     private static UserManager _instance;
 
-    private Activity _activity;
+    private BOActivity _activity;
 
     private User _currUser = new User();
 
@@ -31,7 +31,7 @@ public class UserManager {
         public void upgradeFailed();
     }
 
-    private UserManager(Activity activity) {
+    private UserManager(BOActivity activity) {
         _activity = activity;
 
         _currUser = User.loadFromPrefs(_activity);
@@ -43,7 +43,7 @@ public class UserManager {
      * @param activity The context (e.g., an Activity)
      * @return An instance of the UserManager
      */
-    public static UserManager getInstance(Activity activity) {
+    public static UserManager getInstance(BOActivity activity) {
         if(_instance == null) {
             _instance = new UserManager(activity);
         }
@@ -171,6 +171,9 @@ public class UserManager {
         if(resultCode == Activity.RESULT_OK) {
             User user = (User) data.getSerializableExtra(KEY_USER);
             setCurrentUser(user);
+
+            // TODO: Log user in with OAuth
+
             callListener(true);
         } else {
             callListener(false);

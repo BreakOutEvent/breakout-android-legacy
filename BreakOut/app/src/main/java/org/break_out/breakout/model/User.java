@@ -3,8 +3,6 @@ package org.break_out.breakout.model;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.break_out.breakout.R;
-
 import java.io.Serializable;
 
 /**
@@ -14,10 +12,12 @@ public class User implements Serializable {
 
     public static final String PREF_KEY = "pref_key_user";
 
-    public static final String KEY_ROLE = "key_role";
-    public static final String KEY_EMAIL = "key_email";
-    public static final String KEY_PASSWORD = "key_password";
+    private static final String KEY_REMOTE_ID = "key_id";
+    private static final String KEY_ROLE = "key_role";
+    private static final String KEY_EMAIL = "key_email";
+    private static final String KEY_PASSWORD = "key_password";
 
+    private long _remoteId = -1;
     private String _email = "";
     private String _password = "";
 
@@ -45,10 +45,37 @@ public class User implements Serializable {
     }
 
     public User(String email, String password) {
-        _email = email;
-        _password = password;
+        _email = (email != null ? email : "");
+        _password = (password != null ? password : "");
 
         _role = Role.USER;
+    }
+
+    public User(long remoteId, String email, String password) {
+        _remoteId = (remoteId > -1 ? remoteId : -1);
+        _email = (email != null ? email : "");
+        _password = (password != null ? password : "");
+
+        _role = Role.USER;
+    }
+
+    /**
+     * Set the ID assigned by the server.
+     *
+     * @param remoteId The ID of this user on the server
+     */
+    public void setRemoteId(long remoteId) {
+        _remoteId = remoteId;
+    }
+
+    /**
+     * Returns the global ID of this user as assigned
+     * by the server.
+     *
+     * @return The remote ID or -1 if no ID has been assigned
+     */
+    public long getRemoteId() {
+        return _remoteId;
     }
 
     /**
@@ -57,6 +84,10 @@ public class User implements Serializable {
      * @param email The new email
      */
     public void setEmail(String email) {
+        if(email == null) {
+            return;
+        }
+
         _email = email;
     }
 
@@ -77,6 +108,10 @@ public class User implements Serializable {
      * @param password The new password
      */
     public void setPassword(String password) {
+        if(password == null) {
+            return;
+        }
+
         _password = password;
     }
 
@@ -97,6 +132,10 @@ public class User implements Serializable {
      * @param role The new role of the user
      */
     public void setRole(Role role) {
+        if(role == null) {
+            return;
+        }
+
         _role = role;
     }
 
@@ -140,6 +179,7 @@ public class User implements Serializable {
         SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
 
+        editor.putLong(KEY_REMOTE_ID, _remoteId);
         editor.putString(KEY_ROLE, _role.toString());
         editor.putString(KEY_EMAIL, _email);
         editor.putString(KEY_PASSWORD, _password);
@@ -158,6 +198,7 @@ public class User implements Serializable {
     public static User loadFromPrefs(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE);
 
+        long remoteId = sharedPref.getLong(KEY_REMOTE_ID, -1);
         Role role = Role.fromString(sharedPref.getString(KEY_ROLE, ""));
         String email = sharedPref.getString(KEY_EMAIL, "");
         String password = sharedPref.getString(KEY_PASSWORD, "");
@@ -169,6 +210,7 @@ public class User implements Serializable {
             return user;
         }
 
+        user.setRemoteId(remoteId);
         user.setEmail(email);
         user.setPassword(password);
 
@@ -178,5 +220,10 @@ public class User implements Serializable {
 
         // TODO: Set attributes that are only available for team members
         return user;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + _remoteId + ")" + " " + _email + " - " + _role;
     }
 }

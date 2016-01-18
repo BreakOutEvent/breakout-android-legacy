@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".ui.MainActivity"
+        <activity android:name=".ui.activities.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -22,14 +22,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.LoginRegisterActivity"
+        <activity android:name=".ui.activities.LoginRegisterActivity"
                   android:windowSoftInputMode="stateVisible|adjustPan"
-                  android:parentActivityName=".ui.LoginRegisterActivity">
+                  android:parentActivityName=".ui.activities.LoginRegisterActivity">
         </activity>
 
-        <activity android:name=".ui.BecomeTeamMemberActivity"
+        <activity android:name=".ui.activities.BecomeTeamMemberActivity"
             android:windowSoftInputMode="stateVisible|adjustPan"
-            android:parentActivityName=".ui.LoginRegisterActivity">
+            android:parentActivityName=".ui.activities.LoginRegisterActivity">
         </activity>
     </application>
 
