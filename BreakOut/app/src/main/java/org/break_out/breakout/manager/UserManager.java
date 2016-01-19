@@ -1,6 +1,6 @@
 package org.break_out.breakout.manager;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 
 import org.break_out.breakout.ui.activities.BecomeTeamMemberActivity;
@@ -20,7 +20,7 @@ public class UserManager {
 
     private static UserManager _instance;
 
-    private BOActivity _activity;
+    private Context _context;
 
     private User _currUser = new User();
 
@@ -31,21 +31,21 @@ public class UserManager {
         public void upgradeFailed();
     }
 
-    private UserManager(BOActivity activity) {
-        _activity = activity;
+    private UserManager(Context context) {
+        _context = context;
 
-        _currUser = User.loadFromPrefs(_activity);
+        _currUser = User.loadFromPrefs(context);
     }
 
     /**
      * Returns an instance of the UserManager.
      *
-     * @param activity The context (e.g., an Activity)
+     * @param context The context (e.g., an Activity)
      * @return An instance of the UserManager
      */
-    public static UserManager getInstance(BOActivity activity) {
+    public static UserManager getInstance(Context context) {
         if(_instance == null) {
-            _instance = new UserManager(activity);
+            _instance = new UserManager(context);
         }
 
         return _instance;
@@ -56,54 +56,23 @@ public class UserManager {
      *
      * @param user The currently logged in user
      */
-    private void setCurrentUser(User user) {
+    public void setCurrentUser(User user) {
         _currUser = user;
-        user.saveToPrefs(_activity);
-    }
-
-    private void sendLoginRegisterIntent() {
-        Intent intent = new Intent(_activity, LoginRegisterActivity.class);
-        _activity.startActivityForResult(intent, REQUEST_CODE_LOGIN);
-    }
-
-    private void sendBecomeTeamMemberIntent() {
-        Intent intent = new Intent(_activity, BecomeTeamMemberActivity.class);
-        _activity.startActivityForResult(intent, REQUEST_CODE_BECOME_MEMBER);
+        user.saveToPrefs(_context);
     }
 
     /**
-     * Upgrades the current user to the given role.<br />
-     * This method will launch an Activity which will handle the
-     * registration of the user. If everything went fine and the user
-     * could be upgraded, this method call the listener's {@link UserUpgradeListener#upgradeSuccessful()}
-     * method. If anything went wrong (e.g., the user cancelled the registration process) or the user
-     * already own this or a higher role, the listener's {@link UserUpgradeListener#upgradeFailed()} method
-     * will be called.
+     * Opens the {@link LoginRegisterActivity} and lets the user either
+     * login or create an account. The listener will be called, when the
+     * process is finished.
      *
-     * @param role The role the current user should be upgraded to (has to be higher than the current one)
-     * @param listener The listener for the result of the upgrade
+     * @param listener The listener for the login/register process
      */
-    public void upgradeCurrentUser(User.Role role, UserUpgradeListener listener) {
+    public void loginOrRegisterUser(UserUpgradeListener listener) {
         _listener = listener;
 
-        // No such upgrade is possible if the user already has this or a higher role
-        if(_currUser.isAtLeast(role)) {
-            callListener(false);
-            return;
-        }
-
-        if(role == User.Role.USER) {
-            sendLoginRegisterIntent();
-        } else if(role == User.Role.TEAM_MEMBER) {
-
-            // Only users can become team members
-            if(getCurrentUsersRole() != User.Role.USER) {
-                callListener(false);
-                return;
-            }
-
-            sendBecomeTeamMemberIntent();
-        }
+        Intent intent = new Intent(_context, LoginRegisterActivity.class);
+        _context.startActivity(intent);
     }
 
     /**
@@ -115,7 +84,7 @@ public class UserManager {
      */
     public void logOutCurrentUser() {
         _currUser = new User();
-        _currUser.saveToPrefs(_activity);
+        _currUser.saveToPrefs(_context);
     }
 
     /**
@@ -165,19 +134,10 @@ public class UserManager {
      * This method will be called by the {@link BOActivity}, when
      * the login/register Activity is done.
      *
-     * @param resultCode The data from the login/register Activity
+     * @param success If the login/register process was successful
      */
-    public void loginActivityDone(int resultCode, Intent data) {
-        if(resultCode == Activity.RESULT_OK) {
-            User user = (User) data.getSerializableExtra(KEY_USER);
-            setCurrentUser(user);
-
-            // TODO: Log user in with OAuth
-
-            callListener(true);
-        } else {
-            callListener(false);
-        }
+    public void loginRegisterDone(boolean success) {
+        callListener(success);
     }
 
 }

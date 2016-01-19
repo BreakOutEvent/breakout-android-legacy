@@ -205,13 +205,4 @@ public abstract class BOActivity extends AppCompatActivity {
     public boolean isLandscape() {
         return (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
     }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == UserManager.REQUEST_CODE_LOGIN) {
-            UserManager.getInstance(this).loginActivityDone(resultCode, data);
-        }
-    }
 }

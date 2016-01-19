@@ -1,7 +1,5 @@
 package org.break_out.breakout.ui.activities;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -34,6 +32,9 @@ public class LoginRegisterActivity extends BOActivity {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final String BASE_URL = "http://breakout-development.herokuapp.com";
 
+    private boolean _loginRegisterSuccessful = false;
+    private UserManager _userManager = null;
+
     private TextView _tvAbout;
 
     private RelativeLayout _rlContainer;
@@ -48,6 +49,8 @@ public class LoginRegisterActivity extends BOActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+
+        _userManager = UserManager.getInstance(this);
 
         _tvAbout = (TextView) findViewById(R.id.start_textView_about);
 
@@ -147,15 +150,15 @@ public class LoginRegisterActivity extends BOActivity {
      * This task expects two Strings as parameters when executing:
      * the user's email and the desired password.
      */
-    private class RegisterTask extends AsyncTask<String, Void, User> {
+    private class RegisterTask extends AsyncTask<String, Void, Boolean> {
 
         @Override
-        protected User doInBackground(String... params) {
+        protected Boolean doInBackground(String... params) {
 
             // Get email and password
             if(params.length != 2) {
                 Log.e(TAG, "The RegisterTask needs 2 arguments (email and password). Given: " + params.length +  ".");
-                return null;
+                return false;
             }
 
             String email = params[0];
@@ -163,7 +166,7 @@ public class LoginRegisterActivity extends BOActivity {
 
             if(email == null || password == null) {
                 Log.e(TAG, "Email or password are null.");
-                return null;
+                return false;
             }
 
             OkHttpClient client = new OkHttpClient();
@@ -185,39 +188,44 @@ public class LoginRegisterActivity extends BOActivity {
 
                 if(response.code() != 201) {
                     Log.e(TAG, "The response code was " + response.code() + "! Is the email a real one (correct format)?");
-                    return null;
+                    return false;
                 } else {
                     JSONObject jsonObj = new JSONObject(response.body().string());
                     long remoteId = jsonObj.getLong("id");
 
-                    // Create user
+                    // Create user and set as current user
                     User user = new User(remoteId, email, password);
+                    _userManager.setCurrentUser(user);
 
-                    return user;
+                    return true;
                 }
             } catch(IOException e) {
                 e.printStackTrace();
-                return null;
+                return false;
             } catch(JSONException e) {
                 e.printStackTrace();
-                return null;
+                return false;
             }
         }
 
         @Override
-        protected void onPostExecute(User user) {
-            super.onPostExecute(user);
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
 
-            if(user != null) {
-                // Registration successful, finish the Activity with RESULT_OK
-                Intent resultData = new Intent();
-                resultData.putExtra(UserManager.KEY_USER, user);
-                setResult(Activity.RESULT_OK, resultData);
+            _loginRegisterSuccessful = success;
 
+            if(success) {
                 finish();
             } else {
                 // TODO: Handle error (retry registration or finish Activity with an error)
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        _userManager.loginRegisterDone(_loginRegisterSuccessful);
     }
 }
