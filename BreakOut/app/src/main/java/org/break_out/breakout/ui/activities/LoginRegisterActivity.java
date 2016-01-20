@@ -48,7 +48,7 @@ public class LoginRegisterActivity extends BOActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_start);
+        setContentView(R.layout.activity_login_register);
 
         _userManager = UserManager.getInstance(this);
 
