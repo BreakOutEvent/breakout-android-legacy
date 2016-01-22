@@ -2,8 +2,9 @@ package org.break_out.breakout.manager;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
-import org.break_out.breakout.ui.activities.BecomeTeamMemberActivity;
+import org.break_out.breakout.ui.activities.BecomeParticipantActivity;
 import org.break_out.breakout.ui.activities.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.activities.BOActivity;
@@ -16,6 +17,14 @@ public class UserManager {
     public static final int REQUEST_CODE_LOGIN = 0;
     public static final int REQUEST_CODE_BECOME_MEMBER = 1;
 
+    public static final String PREF_KEY = "pref_key_user";
+
+    private static final String KEY_REMOTE_ID = "key_id";
+    private static final String KEY_ROLE = "key_role";
+    private static final String KEY_EMAIL = "key_email";
+    private static final String KEY_PASSWORD = "key_password";
+    private static final String KEY_ACCESS_TOKEN = "key_access_token";
+
     public static final String KEY_USER = "key_user";
 
     private static UserManager _instance;
@@ -24,17 +33,16 @@ public class UserManager {
 
     private User _currUser = new User();
 
-    private UserUpgradeListener _listener = null;
+    private UserLoginListener _listener = null;
 
-    public interface UserUpgradeListener {
+    public interface UserLoginListener {
         public void upgradeSuccessful();
         public void upgradeFailed();
     }
 
     private UserManager(Context context) {
         _context = context;
-
-        _currUser = User.loadFromPrefs(context);
+        loadCurrUserFromPrefs();
     }
 
     /**
@@ -53,12 +61,15 @@ public class UserManager {
 
     /**
      * Set the currently logged in user.
+     * Notice: You should never need to call this method! It will
+     * only be called by the {@link LoginRegisterActivity} or the
+     * {@link BecomeParticipantActivity}.
      *
      * @param user The currently logged in user
      */
     public void setCurrentUser(User user) {
         _currUser = user;
-        user.saveToPrefs(_context);
+        saveCurrUserToPrefs();
     }
 
     /**
@@ -68,7 +79,7 @@ public class UserManager {
      *
      * @param listener The listener for the login/register process
      */
-    public void loginOrRegisterUser(UserUpgradeListener listener) {
+    public void loginOrRegisterUser(UserLoginListener listener) {
         _listener = listener;
 
         Intent intent = new Intent(_context, LoginRegisterActivity.class);
@@ -79,12 +90,12 @@ public class UserManager {
      * Logs out the current user.
      * Afterwards, the current user will be an empty dummy user
      * with the role {@code VISITOR}.<br />
-     * You should think about rebuilding the UI after logging out the
+     * You should consider rebuilding the UI after logging out the
      * user.
      */
     public void logOutCurrentUser() {
         _currUser = new User();
-        _currUser.saveToPrefs(_context);
+        saveCurrUserToPrefs();
     }
 
     /**
@@ -138,6 +149,61 @@ public class UserManager {
      */
     public void loginRegisterDone(boolean success) {
         callListener(success);
+    }
+
+    /**
+     * Stores the current user to the SharedPreferences.
+     * Note that there can always be only one user stored in the
+     * preferences.
+     */
+    private void saveCurrUserToPrefs() {
+        SharedPreferences sharedPref = _context.getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        editor.putLong(KEY_REMOTE_ID, _currUser.getRemoteId());
+        editor.putString(KEY_ROLE, _currUser.getRole().toString());
+        editor.putString(KEY_EMAIL, _currUser.getEmail());
+        editor.putString(KEY_PASSWORD, _currUser.getPassword());
+        editor.putString(KEY_ACCESS_TOKEN, _currUser.getAccessToken());
+
+        editor.commit();
+    }
+
+    /**
+     * This method will restore the user from the SharedPreferences.
+     * If no user had been stored, this method will set an empty User
+     * with the role {@code VISITOR}.
+     *
+     * @return The stored user
+     */
+    private void loadCurrUserFromPrefs() {
+        SharedPreferences sharedPref = _context.getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE);
+
+        long remoteId = sharedPref.getLong(KEY_REMOTE_ID, -1);
+        User.Role role = User.Role.fromString(sharedPref.getString(KEY_ROLE, ""));
+        String email = sharedPref.getString(KEY_EMAIL, "");
+        String password = sharedPref.getString(KEY_PASSWORD, "");
+        String accessToken = sharedPref.getString(KEY_ACCESS_TOKEN, "");
+
+        User user = new User();
+        user.setRole(role);
+
+        if(role == User.Role.VISITOR) {
+            _currUser = user;
+            return;
+        }
+
+        user.setRemoteId(remoteId);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setAccessToken(accessToken);
+
+        if(role == User.Role.USER) {
+            _currUser = user;
+            return;
+        }
+
+        // TODO: Set attributes that are only available for team members
     }
 
 }

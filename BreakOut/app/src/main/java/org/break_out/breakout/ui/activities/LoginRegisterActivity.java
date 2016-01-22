@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -37,7 +38,6 @@ public class LoginRegisterActivity extends BOActivity {
 
     private TextView _tvAbout;
 
-    private RelativeLayout _rlContainer;
     private RelativeLayout _rlHintWrapper;
 
     private EditText _etEmail;
@@ -53,8 +53,6 @@ public class LoginRegisterActivity extends BOActivity {
         _userManager = UserManager.getInstance(this);
 
         _tvAbout = (TextView) findViewById(R.id.start_textView_about);
-
-        _rlContainer = (RelativeLayout) findViewById(R.id.start_relativeLayout_mainWrapper);
         _rlHintWrapper = (RelativeLayout) findViewById(R.id.start_relativeLayout_popupWrapper);
 
         _etEmail = (EditText) findViewById(R.id.start_editText_email);
@@ -81,22 +79,21 @@ public class LoginRegisterActivity extends BOActivity {
     }
 
     /**
-     * Method called to login
+     * Method called to login.
      */
     private void login() {
-        // LogIn method
         // check if both fields are populated, show error otherwise
         String input_email = _etEmail.getText().toString();
         String input_password = _etPassword.getText().toString();
         if(input_email.isEmpty() || input_password.isEmpty()) {
             showHint();
         } else {
-            // Start login
+            // TODO: Start login
         }
     }
 
     /**
-     * Call code to register online
+     * Call code to register online.
      */
     private void register() {
         String email = _etEmail.getText().toString();
@@ -105,7 +102,7 @@ public class LoginRegisterActivity extends BOActivity {
         if(email.isEmpty() || password.isEmpty()) {
             showHint();
         } else {
-            // Start registering
+            // Start registration
             new RegisterTask().execute(email, password);
         }
     }
@@ -169,43 +166,35 @@ public class LoginRegisterActivity extends BOActivity {
                 return false;
             }
 
-            OkHttpClient client = new OkHttpClient();
+            // Create user with email and password
+            User user = new User(email, password);
 
-            // Construct json for POST request
-            String json = "{\n" +
-                    "  \"email\": \"" + email + "\",\n" +
-                    "  \"password\": \"" + password + "\"\n" +
-                    "}";
+            // Register user to the server
+            boolean registerSuccess = user.registerOnServerSynchronously();
 
-            RequestBody body = RequestBody.create(JSON, json);
-            Request request = new Request.Builder()
-                    .url(BASE_URL + "/user/")
-                    .post(body)
-                    .build();
+            if(!registerSuccess) {
+                Log.e(TAG, "Account could not be created on the server.");
 
-            try {
-                Response response = client.newCall(request).execute();
+                // TODO: Handle registration error (and retry login?)
 
-                if(response.code() != 201) {
-                    Log.e(TAG, "The response code was " + response.code() + "! Is the email a real one (correct format)?");
-                    return false;
-                } else {
-                    JSONObject jsonObj = new JSONObject(response.body().string());
-                    long remoteId = jsonObj.getLong("id");
-
-                    // Create user and set as current user
-                    User user = new User(remoteId, email, password);
-                    _userManager.setCurrentUser(user);
-
-                    return true;
-                }
-            } catch(IOException e) {
-                e.printStackTrace();
-                return false;
-            } catch(JSONException e) {
-                e.printStackTrace();
                 return false;
             }
+
+            // Log user in via OAuth
+            boolean loginSuccess = user.loginOnServerSynchronously();
+
+            if(!loginSuccess) {
+                Log.e(TAG, "Account has been created but login via OAuth failed.");
+
+                // TODO: Handle login error (and retry login?)
+
+                return false;
+            }
+
+            // Everything went well -> set user as current user in UserManager
+            _userManager.setCurrentUser(user);
+
+            return true;
         }
 
         @Override

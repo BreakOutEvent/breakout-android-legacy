@@ -19,8 +19,8 @@ import org.break_out.breakout.R;
 
 import java.util.ArrayList;
 
-public class BecomeTeamMemberActivity extends AppCompatActivity {
-    private static final String TAG = "BecomeTeamMemberActivity";
+public class BecomeParticipantActivity extends AppCompatActivity {
+    private static final String TAG = "BecomeParticipantActivity";
     private ScrollView _scrollView_credentials;
 
     private ImageView _imageView_chosenImage;

@@ -27,7 +27,7 @@
                   android:parentActivityName=".ui.activities.LoginRegisterActivity">
         </activity>
 
-        <activity android:name=".ui.activities.BecomeTeamMemberActivity"
+        <activity android:name=".ui.activities.BecomeParticipantActivity"
             android:windowSoftInputMode="stateVisible|adjustPan"
             android:parentActivityName=".ui.activities.LoginRegisterActivity">
         </activity>
