@@ -9,6 +9,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.instabug.wrapper.support.activity.InstabugAppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.Map;
 /**
  * Created by Maximilian Duehr on 21.12.2015.
  */
-public abstract class BOActivity extends AppCompatActivity {
+public abstract class BOActivity extends InstabugAppCompatActivity {
 
     private static final String TAG = "BOActivity";
 
