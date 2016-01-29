@@ -31,3 +31,6 @@ local.properties
 *.ipr
 *~
 *.swp
+
+# Ignore secret files
+BOSecrets.java
