@@ -27,13 +27,23 @@ public class User implements Serializable {
 
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
+    private Role _role = Role.VISITOR;
+
+    // User information
     private long _remoteId = -1;
     private String _email = "";
     private String _password = "";
-
-    private Role _role = Role.VISITOR;
-
     private String _accessToken = "";
+
+    // Participant information
+    // TODO: Use enums where possible (and define them in a separate constants class)
+    private String _gender = "";
+    private String _firstName = "";
+    private String _lastName = "";
+    private String _emergencyNumber = "";
+    private String _hometown = "";
+    private String _phoneNumber = "";
+    private String _tShirtSize = "";
 
     /**
      * Represents the role of a user.
@@ -53,7 +63,7 @@ public class User implements Serializable {
     }
 
     public User() {
-
+        // Empty constructor
     }
 
     public User(String email, String password) {
@@ -198,6 +208,86 @@ public class User implements Serializable {
             default:
                 return false;
         }
+    }
+
+    public void setGender(String gender) {
+        if(gender == null) {
+            return;
+        }
+
+        _gender = gender;
+    }
+
+    public String getGender() {
+        return _gender;
+    }
+
+    public void setFirstName(String firstName) {
+        if(firstName == null) {
+            return;
+        }
+
+        _firstName = firstName;
+    }
+
+    public String getFirstName() {
+        return _firstName;
+    }
+
+    public void setLastName(String lastName) {
+        if(lastName == null) {
+            return;
+        }
+
+        _lastName = lastName;
+    }
+
+    public String getLastName() {
+        return _lastName;
+    }
+
+    public void setEmergencyNumber(String emergencyNumber) {
+        if(emergencyNumber == null) {
+            return;
+        }
+
+        _emergencyNumber = emergencyNumber;
+    }
+
+    public String getEmergencyNumber() {
+        return _emergencyNumber;
+    }
+
+    public void setHometown(String hometown) {
+        if(hometown == null) {
+            return;
+        }
+
+        _hometown = hometown;
+    }
+
+    public String getHometown() {
+        return _hometown;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        if(phoneNumber == null) {
+            return;
+        }
+
+        _phoneNumber = phoneNumber;
+    }
+
+    public String getPhoneNumber() {
+        return _phoneNumber;
+    }
+
+    public void setTShirtSize(String tShirtSize) {
+        if(tShirtSize == null) {
+            return;
+        }
+
+        _tShirtSize = tShirtSize;
     }
 
     /**
