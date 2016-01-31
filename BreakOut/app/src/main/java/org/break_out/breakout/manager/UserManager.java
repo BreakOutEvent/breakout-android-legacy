@@ -33,9 +33,9 @@ public class UserManager {
 
     private User _currUser = new User();
 
-    private UserLoginListener _listener = null;
+    private UserLoginRegisterListener _listener = null;
 
-    public interface UserLoginListener {
+    public interface UserLoginRegisterListener {
         public void upgradeSuccessful();
         public void upgradeFailed();
     }
@@ -79,7 +79,7 @@ public class UserManager {
      *
      * @param listener The listener for the login/register process
      */
-    public void loginOrRegisterUser(UserLoginListener listener) {
+    public void loginOrRegisterUser(UserLoginRegisterListener listener) {
         _listener = listener;
 
         Intent intent = new Intent(_context, LoginRegisterActivity.class);
@@ -125,14 +125,14 @@ public class UserManager {
      * Depending on the boolean passed as a parameter, the corresponding
      * method of the listener will be called.
      *
-     * @param loginSuccessful If the login was successful or not
+     * @param loginRegistrationSuccessful If the login/registration was successful or not
      */
-    private void callListener(boolean loginSuccessful) {
+    private void callLoginRegisterListener(boolean loginRegistrationSuccessful) {
         if(_listener == null) {
             return;
         }
 
-        if(loginSuccessful) {
+        if(loginRegistrationSuccessful) {
             _listener.upgradeSuccessful();
         } else {
             _listener.upgradeFailed();
@@ -148,7 +148,7 @@ public class UserManager {
      * @param success If the login/register process was successful
      */
     public void loginRegisterDone(boolean success) {
-        callListener(success);
+        callLoginRegisterListener(success);
     }
 
     /**

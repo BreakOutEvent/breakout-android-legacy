@@ -8,38 +8,33 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class LoginRegisterActivity extends BOActivity {
 
     private static final String TAG = "LoginRegiserActivity";
 
+    // TODO: Relocate to a network helper class (and to the app secrets)
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final String BASE_URL = "http://breakout-development.herokuapp.com";
 
+    /**
+     * Global state of success regarding the login/registration
+     * process for this Activity.
+     */
     private boolean _loginRegisterSuccessful = false;
+
     private UserManager _userManager = null;
 
     private TextView _tvAbout;
-
     private RelativeLayout _rlHintWrapper;
-
     private EditText _etEmail;
     private EditText _etPassword;
     private Button _btLogin;
@@ -79,21 +74,7 @@ public class LoginRegisterActivity extends BOActivity {
     }
 
     /**
-     * Method called to login.
-     */
-    private void login() {
-        // check if both fields are populated, show error otherwise
-        String input_email = _etEmail.getText().toString();
-        String input_password = _etPassword.getText().toString();
-        if(input_email.isEmpty() || input_password.isEmpty()) {
-            showHint();
-        } else {
-            // TODO: Start login
-        }
-    }
-
-    /**
-     * Call code to register online.
+     * Call code to register on the server.
      */
     private void register() {
         String email = _etEmail.getText().toString();
@@ -103,14 +84,31 @@ public class LoginRegisterActivity extends BOActivity {
             showHint();
         } else {
             // Start registration
-            new RegisterTask().execute(email, password);
+            new LoginRegisterTask(true).execute(email, password);
+        }
+    }
+
+    /**
+     * Method called to log in the current user on the server.
+     */
+    private void login() {
+        // Check if both fields are populated, show error otherwise
+        String email = _etEmail.getText().toString();
+        String password = _etPassword.getText().toString();
+
+        if(email.isEmpty() || password.isEmpty()) {
+            showHint();
+        } else {
+            // Start login
+            new LoginRegisterTask(false).execute(email, password);
         }
     }
 
     private void checkIfEnoughInput() {
-        String input_email = _etEmail.getText().toString();
-        String input_password = _etPassword.getText().toString();
-        if(!input_email.isEmpty()&&!input_password.isEmpty()) {
+        String email = _etEmail.getText().toString();
+        String password = _etPassword.getText().toString();
+
+        if(!email.isEmpty() && !password.isEmpty()) {
             hideHint();
         }
     }
@@ -143,19 +141,30 @@ public class LoginRegisterActivity extends BOActivity {
 
     /**
      * This AsyncTask will register a user on the server and set it
-     * as the current user in the {@link UserManager}.<br />
+     * as the current user in the {@link UserManager}, if {@code registerBeforeLogin}
+     * is set to {@code true}. Otherwise it will skip the registration and
+     * directly log in the user.<br />
      * This task expects two Strings as parameters when executing:
      * the user's email and the desired password.
      */
-    private class RegisterTask extends AsyncTask<String, Void, Boolean> {
+    private class LoginRegisterTask extends AsyncTask<String, Void, Void> {
+
+        /**
+         * Set to true to register the user before logging in
+         */
+        boolean register = false;
+
+        public LoginRegisterTask(boolean registerBeforeLogin) {
+            register = registerBeforeLogin;
+        }
 
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected Void doInBackground(String... params) {
 
             // Get email and password
             if(params.length != 2) {
-                Log.e(TAG, "The RegisterTask needs 2 arguments (email and password). Given: " + params.length +  ".");
-                return false;
+                Log.e(TAG, "The LoginRegisterTask needs 2 arguments (email and password). Given: " + params.length + ".");
+                return null;
             }
 
             String email = params[0];
@@ -163,58 +172,44 @@ public class LoginRegisterActivity extends BOActivity {
 
             if(email == null || password == null) {
                 Log.e(TAG, "Email or password are null.");
-                return false;
+                return null;
             }
 
             // Create user with email and password
             User user = new User(email, password);
 
-            // Register user to the server
-            boolean registerSuccess = user.registerOnServerSynchronously();
+            if(register) {
+                // Register user to the server
+                boolean registerSuccess = user.registerOnServerSynchronously();
 
-            if(!registerSuccess) {
-                Log.e(TAG, "Account could not be created on the server.");
+                if(!registerSuccess) {
+                    Log.e(TAG, "Account could not be created on the server.");
 
-                // TODO: Handle registration error (and retry login?)
+                    // TODO: Handle registration error (and retry login?)
 
-                return false;
+                    return null;
+                }
             }
 
             // Log user in via OAuth
             boolean loginSuccess = user.loginOnServerSynchronously();
 
             if(!loginSuccess) {
-                Log.e(TAG, "Account has been created but login via OAuth failed.");
+                Log.e(TAG, "Login via OAuth failed.");
 
                 // TODO: Handle login error (and retry login?)
 
-                return false;
+                return null;
             }
+
+            // TODO: Set remote ID of the user before saving in the UserManager
 
             // Everything went well -> set user as current user in UserManager
             _userManager.setCurrentUser(user);
 
-            return true;
+            finish();
+
+            return null;
         }
-
-        @Override
-        protected void onPostExecute(Boolean success) {
-            super.onPostExecute(success);
-
-            _loginRegisterSuccessful = success;
-
-            if(success) {
-                finish();
-            } else {
-                // TODO: Handle error (retry registration or finish Activity with an error)
-            }
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        _userManager.loginRegisterDone(_loginRegisterSuccessful);
     }
 }
