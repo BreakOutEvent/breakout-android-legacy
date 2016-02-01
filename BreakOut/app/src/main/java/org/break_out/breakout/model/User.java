@@ -35,11 +35,13 @@ public class User implements Serializable {
     private String _password = "";
     private String _accessToken = "";
 
-    // Participant information
-    // TODO: Use enums where possible (and define them in a separate constants class)
-    private String _gender = "";
+    // Optional user information
     private String _firstName = "";
     private String _lastName = "";
+
+    // Participant information
+    // TODO: Use enums where possible (and define them in a separate constants file)
+    private String _gender = "";
     private String _emergencyNumber = "";
     private String _hometown = "";
     private String _phoneNumber = "";
@@ -290,6 +292,10 @@ public class User implements Serializable {
         _tShirtSize = tShirtSize;
     }
 
+    public String getTShirtSize() {
+        return _tShirtSize;
+    }
+
     /**
      * Calling this method will start a synchronous network call registering
      * this user to the server. If successful, the {@link #_remoteId} of this
@@ -297,7 +303,7 @@ public class User implements Serializable {
      *
      * @return True if the registration has been successful, false otherwise
      */
-    public boolean registerOnServerSynchronously() {
+    public boolean registerOnServerSync() {
         OkHttpClient client = new OkHttpClient();
 
         // Construct JSON for POST request
@@ -342,10 +348,11 @@ public class User implements Serializable {
      *
      * @return True if the login has been successful, false otherwise
      */
-    public boolean loginOnServerSynchronously() {
+    public boolean loginOnServerSync() {
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl url = new HttpUrl.Builder()
+        // Build URL
+        HttpUrl loginUrl = new HttpUrl.Builder()
                 .scheme("https")
                 .host("breakout-development.herokuapp.com")
                 .addPathSegment("oauth")
@@ -358,34 +365,53 @@ public class User implements Serializable {
                 .addQueryParameter("grant_type", "password")
                 .build();
 
-        // A body is mandatory for every POST request -> use empty String as body
-        RequestBody body = RequestBody.create(JSON, "");
+        HttpUrl getOwnDataUrl = HttpUrl.parse("https://breakout-development.herokuapp.com/me/");
 
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
+        // A body is mandatory for every POST request -> use empty String as body
+        RequestBody emptyBody = RequestBody.create(JSON, "");
+
+        Request loginRequest = new Request.Builder()
+                .url(loginUrl)
+                .post(emptyBody)
                 .addHeader("Authorization", Credentials.basic("breakout_app", "123456789"))
                 .build();
 
         try {
-            Response response = client.newCall(request).execute();
+            Response loginResponse = client.newCall(loginRequest).execute();
 
-            if(response.isSuccessful()) {
-                // Get access token from JSON body and set it to this user
-                JSONObject responseJson = new JSONObject(response.body().string());
-                _accessToken = responseJson.getString("access_token");
-
-                // Set role to user, as the user is now logged in
-                _role = Role.USER;
-
-                return true;
-            } else {
+            if(!loginResponse.isSuccessful()) {
                 return false;
             }
+
+            // Get access token from JSON body and set it to this user
+            JSONObject loginResponseJson = new JSONObject(loginResponse.body().string());
+            _accessToken = loginResponseJson.getString("access_token");
+
+            // Get remote ID from server
+            Request getOwnDataRequest = new Request.Builder()
+                    .url(getOwnDataUrl)
+                    .get()
+                    .addHeader("Authorization", "Bearer " + _accessToken)
+                    .build();
+
+            Response getOwnDataResponse = client.newCall(getOwnDataRequest).execute();
+
+            if(!getOwnDataResponse.isSuccessful()) {
+                return false;
+            }
+
+            // Get access token from JSON body and set it to this user
+            JSONObject getOwnDataResponseJson = new JSONObject(getOwnDataResponse.body().string());
+            _remoteId = getOwnDataResponseJson.getLong("id");
+
+            // Set role to user, as the user is now logged in
+            _role = Role.USER;
+
+            return true;
         } catch(IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
         } catch(JSONException e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
         }
 
         return false;

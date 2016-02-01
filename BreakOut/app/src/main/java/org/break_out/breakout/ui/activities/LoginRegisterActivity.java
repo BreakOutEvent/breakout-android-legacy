@@ -180,7 +180,7 @@ public class LoginRegisterActivity extends BOActivity {
 
             if(register) {
                 // Register user to the server
-                boolean registerSuccess = user.registerOnServerSynchronously();
+                boolean registerSuccess = user.registerOnServerSync();
 
                 if(!registerSuccess) {
                     Log.e(TAG, "Account could not be created on the server.");
@@ -192,7 +192,7 @@ public class LoginRegisterActivity extends BOActivity {
             }
 
             // Log user in via OAuth
-            boolean loginSuccess = user.loginOnServerSynchronously();
+            boolean loginSuccess = user.loginOnServerSync();
 
             if(!loginSuccess) {
                 Log.e(TAG, "Login via OAuth failed.");
@@ -207,9 +207,18 @@ public class LoginRegisterActivity extends BOActivity {
             // Everything went well -> set user as current user in UserManager
             _userManager.setCurrentUser(user);
 
+            _loginRegisterSuccessful = true;
+
             finish();
 
             return null;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        _userManager.loginRegisterDone(_loginRegisterSuccessful);
     }
 }

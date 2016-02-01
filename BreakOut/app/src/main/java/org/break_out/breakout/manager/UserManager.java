@@ -33,11 +33,11 @@ public class UserManager {
 
     private User _currUser = new User();
 
-    private UserLoginRegisterListener _listener = null;
+    private LoginRegisterListener _listener = null;
 
-    public interface UserLoginRegisterListener {
-        public void upgradeSuccessful();
-        public void upgradeFailed();
+    public interface LoginRegisterListener {
+        public void loginRegisterSuccessful();
+        public void loginRegisterFailed();
     }
 
     private UserManager(Context context) {
@@ -79,7 +79,7 @@ public class UserManager {
      *
      * @param listener The listener for the login/register process
      */
-    public void loginOrRegisterUser(UserLoginRegisterListener listener) {
+    public void loginOrRegisterUser(LoginRegisterListener listener) {
         _listener = listener;
 
         Intent intent = new Intent(_context, LoginRegisterActivity.class);
@@ -133,9 +133,9 @@ public class UserManager {
         }
 
         if(loginRegistrationSuccessful) {
-            _listener.upgradeSuccessful();
+            _listener.loginRegisterSuccessful();
         } else {
-            _listener.upgradeFailed();
+            _listener.loginRegisterFailed();
         }
 
         _listener = null;
