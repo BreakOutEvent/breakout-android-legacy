@@ -40,7 +40,6 @@ public class User implements Serializable {
     private String _lastName = "";
 
     // Participant information
-    // TODO: Use enums where possible (and define them in a separate constants file)
     private String _gender = "";
     private String _emergencyNumber = "";
     private String _hometown = "";
@@ -322,7 +321,7 @@ public class User implements Serializable {
             Response response = client.newCall(request).execute();
 
             if(!response.isSuccessful()) {
-                Log.e(TAG, "Registering user failed (response code " + response.code() + ")! Is the email in the correct format and the password long enough?");
+                Log.e(TAG, "Registering user failed (response code " + response.code() + ")! Possible reasons: Email format, email already existing, password too short.");
 
                 // TODO: Handle errors according to response code?
             } else {
@@ -365,8 +364,6 @@ public class User implements Serializable {
                 .addQueryParameter("grant_type", "password")
                 .build();
 
-        HttpUrl getOwnDataUrl = HttpUrl.parse("https://breakout-development.herokuapp.com/me/");
-
         // A body is mandatory for every POST request -> use empty String as body
         RequestBody emptyBody = RequestBody.create(JSON, "");
 
@@ -385,36 +382,203 @@ public class User implements Serializable {
 
             // Get access token from JSON body and set it to this user
             JSONObject loginResponseJson = new JSONObject(loginResponse.body().string());
+            loginResponse.body().close();
+
             _accessToken = loginResponseJson.getString("access_token");
+            _role = Role.USER;
 
-            // Get remote ID from server
-            Request getOwnDataRequest = new Request.Builder()
-                    .url(getOwnDataUrl)
-                    .get()
-                    .addHeader("Authorization", "Bearer " + _accessToken)
-                    .build();
+            Log.d(TAG, "OAuth access token: " + _accessToken);
 
-            Response getOwnDataResponse = client.newCall(getOwnDataRequest).execute();
-
-            if(!getOwnDataResponse.isSuccessful()) {
+            boolean updateSuccessful = updateFromServerSync();
+            if(!updateSuccessful) {
+                Log.e(TAG, "Login process failed: Could not finish due to error while updating user.");
                 return false;
             }
-
-            // Get access token from JSON body and set it to this user
-            JSONObject getOwnDataResponseJson = new JSONObject(getOwnDataResponse.body().string());
-            _remoteId = getOwnDataResponseJson.getLong("id");
-
-            // Set role to user, as the user is now logged in
-            _role = Role.USER;
 
             return true;
         } catch(IOException e) {
             Log.e(TAG, e.getMessage());
         } catch(JSONException e) {
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
         }
 
         return false;
+    }
+
+    /**
+     * Calling this method will overwrite all data saved in this
+     * user with the date of this user on the server. Local changes
+     * that have not been updated on the server yet will be lost!
+     * This method will run synchronously.
+     *
+     * @return If the update was successful or not
+     */
+    public boolean updateFromServerSync() {
+        if(_role == Role.VISITOR) {
+            Log.e(TAG, "Could not update user because it does not have an account.");
+            return false;
+        }
+
+        OkHttpClient client = new OkHttpClient();
+
+        HttpUrl updateUrl = HttpUrl.parse("https://breakout-development.herokuapp.com/me/");
+
+        // Get remote ID from server
+        Request updateRequest = new Request.Builder()
+                .url(updateUrl)
+                .get()
+                .addHeader("Authorization", "Bearer " + _accessToken)
+                .build();
+
+        try {
+            Response updateResponse = client.newCall(updateRequest).execute();
+
+            if(!updateResponse.isSuccessful()) {
+                Log.e(TAG, "Could not update the user from the server (" + updateResponse.code() + ").");
+                return false;
+            }
+
+            JSONObject responseObj = new JSONObject(updateResponse.body().string());
+            updateResponse.body().close();
+
+            // Get values
+            long remoteId = (responseObj.has("id") ? responseObj.getLong("id") : -1);
+            String firstName = (responseObj.has("firstname") ? responseObj.getString("firstname") : null);
+            String lastName = (responseObj.has("lastname") ? responseObj.getString("lastname") : null);
+            String email = (responseObj.has("email") ? responseObj.getString("email") : null);
+            String gender = (responseObj.has("gender") ? responseObj.getString("gender") : null);
+
+            String emergencyNumber = null;
+            String phoneNumber = null;
+            String tShirtSize = null;
+            String hometown = null;
+
+            // Get participant values
+            if(!responseObj.isNull("participant")) {
+                JSONObject participantObj = responseObj.getJSONObject("participant");
+
+                // The user is a participant
+                emergencyNumber = (participantObj.has("emergencynumber") ? participantObj.getString("emergencynumber") : null);
+                phoneNumber = (participantObj.has("phonenumber") ? participantObj.getString("phonenumber") : null);
+                tShirtSize = (participantObj.has("tshirtsize") ? participantObj.getString("tshirtsize") : null);
+                hometown = (participantObj.has("hometown") ? participantObj.getString("hometown") : null);
+
+                _role = Role.PARTICIPANT;
+            } else {
+                _role  = Role.USER;
+            }
+
+            // Set user values
+            _remoteId= (remoteId >= 0 ? remoteId : -1);
+            _firstName = (firstName != null ? firstName : "");
+            _lastName = (lastName != null ? lastName : "");
+            _email = (email != null ? email : "");
+            _gender = (gender != null ? gender : "");
+
+            // Set participant values
+            _emergencyNumber = (emergencyNumber != null ? emergencyNumber : "");
+            _phoneNumber = (phoneNumber != null ? phoneNumber : "");
+            _tShirtSize = (tShirtSize != null ? tShirtSize : "");
+            _hometown = (hometown != null ? hometown : "");
+
+            return true;
+        } catch(IOException e) {
+            e.printStackTrace();
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * This method will upload this user to the server and update
+     * its information online. The data on the server will be overwritten.
+     *
+     * @return If the update was successful or not
+     */
+    public boolean updateOnServerSync() {
+        if(_role == Role.VISITOR) {
+            Log.e(TAG, "Could not update user because it does not have an account.");
+            return false;
+        }
+
+        OkHttpClient client = new OkHttpClient();
+
+        // Build URL
+        HttpUrl updateUrl = HttpUrl.parse("https://breakout-development.herokuapp.com/user/" + _remoteId + "/");
+
+        // Build body
+        JSONObject userJSON = toJSON();
+
+        if(userJSON == null) {
+            Log.e(TAG, "Could not create a valid JSON object for this user. The update has been cancelled.");
+            return false;
+        }
+
+        RequestBody updateBody = RequestBody.create(JSON, userJSON.toString());
+
+        Log.d(TAG, toJSON().toString());
+
+        Request updateRequest = new Request.Builder()
+                .url(updateUrl)
+                .put(updateBody)
+                .addHeader("Authorization", "Bearer " + _accessToken)
+                .build();
+
+        try {
+            Response updateResponse = client.newCall(updateRequest).execute();
+
+            if(!updateResponse.isSuccessful()) {
+                Log.e(TAG, "The network call for updating the user was not successful (" + updateResponse.code() + ").");
+                return false;
+            }
+
+            Log.d(TAG, "User has been updated.");
+
+            return true;
+
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * This method will return a JSON object representation of this user.
+     *
+     * @return JSON representation of this user or null if an error occured
+     */
+    private JSONObject toJSON() {
+        JSONObject userObj = new JSONObject();
+
+        try {
+            userObj.put("email", _email);
+            userObj.put("firstname", _firstName);
+            userObj.put("lastname", _lastName);
+            userObj.put("gender", _gender);
+
+            // Note: The password cannot be changed!
+
+            if(_role == Role.PARTICIPANT) {
+                JSONObject participantObject = new JSONObject();
+
+                participantObject.put("emergencynumber", _emergencyNumber);
+                participantObject.put("hometown", _hometown);
+                participantObject.put("phonenumber", _phoneNumber);
+                participantObject.put("tshirtsize", _tShirtSize);
+
+                // Add participant object to user object
+                userObj.put("participant", participantObject);
+            }
+
+            return userObj;
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override

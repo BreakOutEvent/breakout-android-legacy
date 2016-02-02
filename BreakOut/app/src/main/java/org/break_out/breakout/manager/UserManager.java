@@ -25,6 +25,14 @@ public class UserManager {
     private static final String KEY_PASSWORD = "key_password";
     private static final String KEY_ACCESS_TOKEN = "key_access_token";
 
+    private static final String KEY_FIRST_NAME = "key_first_name";
+    private static final String KEY_LAST_NAME = "key_last_name";
+
+    private static final String KEY_EMERGENCY_NUMBER = "key_emergency_number";
+    private static final String KEY_HOMETOWN = "key_hometown";
+    private static final String KEY_PHONE_NUMBER = "key_phone_number";
+    private static final String KEY_T_SHIRT_SIZE = "key_t_shirt_size";
+
     public static final String KEY_USER = "key_user";
 
     private static UserManager _instance;
@@ -166,6 +174,14 @@ public class UserManager {
         editor.putString(KEY_PASSWORD, _currUser.getPassword());
         editor.putString(KEY_ACCESS_TOKEN, _currUser.getAccessToken());
 
+        editor.putString(KEY_FIRST_NAME, _currUser.getFirstName());
+        editor.putString(KEY_LAST_NAME, _currUser.getLastName());
+
+        editor.putString(KEY_EMERGENCY_NUMBER, _currUser.getEmergencyNumber());
+        editor.putString(KEY_HOMETOWN, _currUser.getHometown());
+        editor.putString(KEY_PHONE_NUMBER, _currUser.getPhoneNumber());
+        editor.putString(KEY_T_SHIRT_SIZE, _currUser.getTShirtSize());
+
         editor.commit();
     }
 
@@ -179,12 +195,22 @@ public class UserManager {
     private void loadCurrUserFromPrefs() {
         SharedPreferences sharedPref = _context.getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE);
 
+        // Get values from prefs
         long remoteId = sharedPref.getLong(KEY_REMOTE_ID, -1);
         User.Role role = User.Role.fromString(sharedPref.getString(KEY_ROLE, ""));
         String email = sharedPref.getString(KEY_EMAIL, "");
         String password = sharedPref.getString(KEY_PASSWORD, "");
         String accessToken = sharedPref.getString(KEY_ACCESS_TOKEN, "");
 
+        String firstName = sharedPref.getString(KEY_FIRST_NAME, "");
+        String lastName = sharedPref.getString(KEY_LAST_NAME, "");
+
+        String emergencyNumber = sharedPref.getString(KEY_EMERGENCY_NUMBER, "");
+        String hometown = sharedPref.getString(KEY_HOMETOWN, "");
+        String phoneNumber = sharedPref.getString(KEY_PHONE_NUMBER, "");
+        String tShirtSize = sharedPref.getString(KEY_T_SHIRT_SIZE, "");
+
+        // Create user
         User user = new User();
         user.setRole(role);
 
@@ -193,17 +219,27 @@ public class UserManager {
             return;
         }
 
+        // User specific information
         user.setRemoteId(remoteId);
         user.setEmail(email);
         user.setPassword(password);
         user.setAccessToken(accessToken);
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
 
         if(role == User.Role.USER) {
             _currUser = user;
             return;
         }
 
-        // TODO: Set attributes that are only available for team members
+        // Participant specific information
+        user.setEmergencyNumber(emergencyNumber);
+        user.setHometown(hometown);
+        user.setPhoneNumber(phoneNumber);
+        user.setTShirtSize(tShirtSize);
+
+        _currUser = user;
     }
 
 }
