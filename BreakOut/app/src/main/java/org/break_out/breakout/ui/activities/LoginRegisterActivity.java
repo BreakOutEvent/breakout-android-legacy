@@ -8,37 +8,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
 
-import okhttp3.MediaType;
-
-public class LoginRegisterActivity extends BOActivity {
+public class LoginRegisterActivity extends BackgroundImageActivity {
 
     private static final String TAG = "LoginRegiserActivity";
 
-    // TODO: Relocate to a network helper class (and to the app secrets)
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private static final String BASE_URL = "http://breakout-development.herokuapp.com";
-
     /**
-     * Global state of success regarding the login/registration
+     * Global state of success in the login/registration
      * process for this Activity.
      */
     private boolean _loginRegisterSuccessful = false;
 
     private UserManager _userManager = null;
 
-    private TextView _tvAbout;
-    private RelativeLayout _rlHintWrapper;
+    private View _rlHintWrapper;
     private EditText _etEmail;
     private EditText _etPassword;
-    private Button _btLogin;
-    private Button _btRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,25 +36,24 @@ public class LoginRegisterActivity extends BOActivity {
 
         _userManager = UserManager.getInstance(this);
 
-        _tvAbout = (TextView) findViewById(R.id.start_textView_about);
-        _rlHintWrapper = (RelativeLayout) findViewById(R.id.start_relativeLayout_popupWrapper);
+        _rlHintWrapper = findViewById(R.id.popup_wrapper);
 
         _etEmail = (EditText) findViewById(R.id.start_editText_email);
-        _etPassword = (EditText) findViewById(R.id.start_editText_password);
-        _btLogin = (Button) findViewById(R.id.start_button_logIn);
-        _btRegister = (Button) findViewById(R.id.start_button_register);
-
         _etEmail.addTextChangedListener(new LoginRegisterTextWatcher());
+
+        _etPassword = (EditText) findViewById(R.id.start_editText_password);
         _etPassword.addTextChangedListener(new LoginRegisterTextWatcher());
 
-        _btLogin.setOnClickListener(new View.OnClickListener() {
+        Button btLogin = (Button) findViewById(R.id.start_button_logIn);
+        btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
             }
         });
 
-        _btRegister.setOnClickListener(new View.OnClickListener() {
+        Button btRegister = (Button) findViewById(R.id.start_button_register);
+        btRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 register();

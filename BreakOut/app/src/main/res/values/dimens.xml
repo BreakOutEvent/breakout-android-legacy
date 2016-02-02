@@ -3,8 +3,14 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <!-- These items can be used to express match_parent and wrap_content in dimension resources -->
+    <item name="match_parent" type="dimen">-1</item>
+    <item name="wrap_content" type="dimen">-2</item>
+
     <dimen name="popup_vertical_margin">16dp</dimen>
     <dimen name="popup_horizontal_margin">28dp</dimen>
 
     <dimen name="linearLayout_vertical_margin_elements">10dp</dimen>
+
+    <dimen name="background_activity_width">@dimen/match_parent</dimen>
 </resources>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="org.break_out.breakout"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    package="org.break_out.breakout"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -13,8 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".ui.activities.MainActivity"
-            android:screenOrientation="portrait">
+        <activity
+            android:name=".ui.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -22,14 +23,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activities.LoginRegisterActivity"
-                  android:windowSoftInputMode="stateVisible|adjustPan"
-                  android:parentActivityName=".ui.activities.LoginRegisterActivity">
+        <activity
+            android:name=".ui.activities.LoginRegisterActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
 
-        <activity android:name=".ui.activities.BecomeParticipantActivity"
-            android:windowSoftInputMode="stateVisible|adjustPan"
-            android:parentActivityName=".ui.activities.LoginRegisterActivity">
+        <activity
+            android:name=".ui.activities.BecomeParticipantActivity"
+            android:windowSoftInputMode="stateVisible|adjustPan">
         </activity>
     </application>
 
