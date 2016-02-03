@@ -33,6 +33,7 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_register);
+        setHeaderImage(R.drawable.logo_login);
 
         _userManager = UserManager.getInstance(this);
 
@@ -106,7 +107,7 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
     }
 
     private void hideHint() {
-        _rlHintWrapper.setVisibility(View.INVISIBLE);
+        _rlHintWrapper.setVisibility(View.GONE);
     }
 
     private class LoginRegisterTextWatcher implements TextWatcher {

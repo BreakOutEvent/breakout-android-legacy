@@ -3,8 +3,10 @@ package org.break_out.breakout.ui.activities;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 
 import org.break_out.breakout.R;
 
@@ -29,48 +31,95 @@ import org.break_out.breakout.R;
  *     +-----------+
  *     |           |
  *     |-----------|   ^
- *     |Your layout|   |
- *     |           |   | scrollable
+ *     |Your image |   |
+ *     |-----------|   |
  *     |           |   |
- *     |-----------|   v
- *     |           |
+ *     |-----------|   | scrollable
+ *     |Your layout|   |
+ *     |           |   |
+ *     |           |   v
  *     +-----------+
  * </pre>
  *
  * Bigger than 400dp:
  * <pre>
- *     +----------------------------------+
- *     |                                  |
- *     |          +-----------+           |   ^
- *     |          |Your layout|           |   |
- *     |          |           |           |   | scrollable
- *     |          |           |           |   |
- *     |          +-----------+           |   v
- *     |                                  |
- *     +----------------------------------+
+ *     +---------------------------------+
+ *     |                                 |
+ *     |          +-----------+          |   ^
+ *     |          |Your image |          |   |
+ *     |----------+-----------+----------|   |
+ *     |          |Your layout|          |   | scrollable
+ *     |          |           |          |   |
+ *     |          |           |          |   |
+ *     |          +-----------+          |   v
+ *     |                                 |
+ *     +---------------------------------+
  * </pre>
+ *
+ * Set your layout file using {@link #setContentView(int)} as always.
+ *
+ * <br />
+ *
+ * To set a custom header image use {@link #setHeaderImage(int)}.
  *
  * <br /><br />
  *
  * Created by Tino on 02.02.2016.
  */
-public class BackgroundImageActivity extends BOActivity {
+public class BackgroundImageActivity extends BOActivity implements ViewTreeObserver.OnScrollChangedListener{
 
-    private FrameLayout _flPlaceHolder = null;
+    private static final String TAG = "BackgroundImageActivity";
+
+    private ImageView _ivHeader = null;
+    private FrameLayout _flPlaceholderContent = null;
+
     private ImageView _ivBackground = null;
+    private View _vBackgroundBlack = null;
 
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(R.layout.activity_background_image);
 
-        _flPlaceHolder = (FrameLayout) findViewById(R.id.placeholder);
-        _ivBackground = (ImageView) findViewById(R.id.background_image);
+        _ivHeader = (ImageView) findViewById(R.id.placeholder_header);
+        _flPlaceholderContent = (FrameLayout) findViewById(R.id.placeholder_content);
 
+        _ivBackground = (ImageView) findViewById(R.id.background_image);
+        _vBackgroundBlack = findViewById(R.id.background_black);
+
+        View vOuterLayout = findViewById(R.id.outer_layout);
+        vOuterLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                updateBackgroundPosition();
+            }
+        });
+
+        ScrollView svContent = (ScrollView) findViewById(R.id.scrollview);
+        svContent.getViewTreeObserver().addOnScrollChangedListener(this);
+
+        setContentLayout(layoutResID);
+    }
+
+    /**
+     * Set a custom layout as the main content of the activity.
+     *
+     * @param layoutResID The layout to replace the content placeholder
+     */
+    private void setContentLayout(int layoutResID) {
         LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = layoutInflater.inflate(layoutResID, null);
 
-        _flPlaceHolder.removeAllViews();
-        _flPlaceHolder.addView(v);
+        _flPlaceholderContent.removeAllViews();
+        _flPlaceholderContent.addView(v);
+    }
+
+    /**
+     * Sets a custom header image for this activity.
+     *
+     * @param imageResID The image resource id (e.g. R.drawable.image)
+     */
+    public void setHeaderImage(int imageResID) {
+        _ivHeader.setImageResource(imageResID);
     }
 
     /**
@@ -82,5 +131,21 @@ public class BackgroundImageActivity extends BOActivity {
      */
     public void setBackgroundImage(int imageResID) {
         _ivBackground.setImageResource(imageResID);
+    }
+
+    @Override
+    public void onScrollChanged() {
+        updateBackgroundPosition();
+    }
+
+    /**
+     * This method will update the y position of the transparent black
+     * background view to align with the top of the content view.
+     */
+    private void updateBackgroundPosition() {
+        int[] loc = new int[2];
+        _flPlaceholderContent.getLocationInWindow(loc);
+
+        _vBackgroundBlack.setY(loc[1]);
     }
 }
