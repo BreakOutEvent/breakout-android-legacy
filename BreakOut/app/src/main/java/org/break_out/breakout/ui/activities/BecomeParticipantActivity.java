@@ -2,8 +2,6 @@ package org.break_out.breakout.ui.activities;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
@@ -19,27 +17,30 @@ import org.break_out.breakout.R;
 
 import java.util.ArrayList;
 
-public class BecomeParticipantActivity extends AppCompatActivity {
+public class BecomeParticipantActivity extends BackgroundImageActivity {
+
     private static final String TAG = "BecomeParticipantActivity";
+
     private ScrollView _scrollView_credentials;
 
-    private ImageView _imageView_chosenImage;
-    private EditText _editText_firstname;
-    private EditText _editText_lastname;
-    private EditText _editText_email;
-    private EditText _editText_password;
-    private EditText _editText_passwordRepeat;
-    private EditText _editText_shirtSize;
-    private EditText _editText_city;
-    private EditText _editText_phoneNumber;
-    private EditText _editText_emergencyNumber;
-    private Button _button_register;
+    private ImageView _ivChosenImage;
+    private EditText _etFirstName;
+    private EditText _etLastName;
+    private EditText _etEmail;
+    private EditText _etPassword;
+    private EditText _etPasswordRepeat;
+    private EditText _etTShirtSize;
+    private EditText _etCity;
+    private EditText _etPhoneNumber;
+    private EditText _etEmergencyNumber;
+    private Button _btRegister;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
         initViews();
     }
 
@@ -47,21 +48,22 @@ public class BecomeParticipantActivity extends AppCompatActivity {
      * instantiate views and set neededl listener(s)
      */
     private void initViews() {
-        _imageView_chosenImage = (ImageView) findViewById(R.id.register_imageView_addProfileImage);
+        /*
+        _ivChosenImage = (ImageView) findViewById(R.id.register_imageView_addProfileImage);
         _scrollView_credentials = (ScrollView) findViewById(R.id.register_scrollView_credentials);
-        _editText_firstname = (EditText) findViewById(R.id.register_editText_firstname);
-        _editText_lastname = (EditText) findViewById(R.id.register_editText_lastname);
-        _editText_email = (EditText) findViewById(R.id.register_editText_email);
-        _editText_password = (EditText) findViewById(R.id.register_editText_password);
-        _editText_passwordRepeat = (EditText) findViewById(R.id.register_editText_passwordRepeat);
-        _editText_shirtSize = (EditText) findViewById(R.id.register_editText_shirtSize);
-        _editText_city = (EditText) findViewById(R.id.register_editText_city);
-        _editText_phoneNumber = (EditText) findViewById(R.id.register_editText_phoneNumber);
-        _editText_emergencyNumber = (EditText) findViewById(R.id.register_editText_emergencyNumber);
-        _button_register = (Button) findViewById(R.id.register_button_register);
+        _etFirstName = (EditText) findViewById(R.id.register_editText_firstname);
+        _etLastName = (EditText) findViewById(R.id.register_editText_lastname);
+        _etEmail = (EditText) findViewById(R.id.register_editText_email);
+        _etPassword = (EditText) findViewById(R.id.register_editText_password);
+        _etPasswordRepeat = (EditText) findViewById(R.id.register_editText_passwordRepeat);
+        _etTShirtSize = (EditText) findViewById(R.id.register_editText_shirtSize);
+        _etCity = (EditText) findViewById(R.id.register_editText_city);
+        _etPhoneNumber = (EditText) findViewById(R.id.register_editText_phoneNumber);
+        _etEmergencyNumber = (EditText) findViewById(R.id.register_editText_emergencyNumber);
+        _btRegister = (Button) findViewById(R.id.register_button_register);
 
-        _editText_emergencyNumber.setOnEditorActionListener(new OnUserInputFinishedListener());
-        _button_register.setOnClickListener(new View.OnClickListener() {
+        _etEmergencyNumber.setOnEditorActionListener(new OnUserInputFinishedListener());
+        _btRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ArrayList<InputError> inputErrors = checkInput();
@@ -69,10 +71,11 @@ public class BecomeParticipantActivity extends AppCompatActivity {
                     //user input correct, handle
                 } else {
                     //user input incorrect/missing something, handle
-                    Toast.makeText(getApplicationContext(),"Errors!",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Errors!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+        */
     }
 
     /**
@@ -112,15 +115,15 @@ public class BecomeParticipantActivity extends AppCompatActivity {
      * @return ArrayList containing InputError objects that reference the errors
      */
     private ArrayList<InputError> checkInput() {
-        String firstname = getInputText(_editText_firstname);
-        String lastname = getInputText(_editText_lastname);
-        String email = getInputText(_editText_email);
-        String password = getInputText(_editText_password);
-        String passwordRepeat = getInputText(_editText_passwordRepeat);
-        String shirtSize = getInputText(_editText_shirtSize);
-        String city = getInputText(_editText_city);
-        String phoneNumber = getInputText(_editText_phoneNumber);
-        String emergencyNumber = getInputText(_editText_emergencyNumber);
+        String firstname = getInputText(_etFirstName);
+        String lastname = getInputText(_etLastName);
+        String email = getInputText(_etEmail);
+        String password = getInputText(_etPassword);
+        String passwordRepeat = getInputText(_etPasswordRepeat);
+        String shirtSize = getInputText(_etTShirtSize);
+        String city = getInputText(_etCity);
+        String phoneNumber = getInputText(_etPhoneNumber);
+        String emergencyNumber = getInputText(_etEmergencyNumber);
         ArrayList<InputError> result = new ArrayList<>();
 
         if(firstname.isEmpty()) {
@@ -190,7 +193,7 @@ public class BecomeParticipantActivity extends AppCompatActivity {
          */
         private void hideKeyboard() {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(_editText_emergencyNumber.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(_etEmergencyNumber.getWindowToken(), 0);
         }
     }
 

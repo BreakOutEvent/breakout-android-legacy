@@ -4,18 +4,35 @@
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_firstname">Vorname</string>
-    <string name="hint_lastname">Nachname</string>
-    <string name="hint_repeatPassword">Passwort wiederholen</string>
-    <string name="hint_shirtsize">T-Shirt Größe</string>
-    <string name="hint_city">Heimatstadt</string>
-    <string name="hint_phoneNumber">Telefon Nummer"</string>
-    <string name="hint_emergencyNumber">Notfall Nummer</string>
+    <string name="hint_lastname">Name</string>
+    <string name="hint_repeat_password">Passwort wiederholen</string>
+    <string name="hint_hometown">Heimatstadt</string>
+    <string name="hint_phone_number">Telefonnummer"</string>
+    <string name="hint_emergency_number">Notfall-Nummer</string>
+    <string name="hint_gender">Geschlecht</string>
+    <string name="hint_t_shirt_size">T-Shirt Größe</string>
 
     <string name="button_login">Einloggen</string>
     <string name="button_start_register">Kostenlos Registrieren</string>
     <string name="button_continue">Weiter</string>
     <string name="button_register">Registrieren</string>
+    <string name="button_participate">Kostenpflichtig teilnehmen</string>
+
+    <string name="explanation_participate">Durch Klicken des Registrieren-Buttons registriere ich mich verbindlich und zahle den Event-Beitrag von 30,00€ sobald ich ein Team erstellt habe.</string>
 
     <string name="textview_about">Was ist Breakout?</string>
     <string name="popup_usernamePassword">Bitte gib deine Mail und ein Password ein </string>
+
+    <string-array name="gender_array">
+        <item>Männlich</item>
+        <item>Weiblich</item>
+    </string-array>
+
+    <string-array name="t_shirt_size_array">
+        <item>S</item>
+        <item>M</item>
+        <item>L</item>
+        <item>XL</item>
+    </string-array>
+
 </resources>

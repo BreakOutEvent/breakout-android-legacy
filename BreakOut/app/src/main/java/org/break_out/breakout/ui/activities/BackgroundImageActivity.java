@@ -123,6 +123,16 @@ public class BackgroundImageActivity extends BOActivity implements ViewTreeObser
     }
 
     /**
+     * This method allows you to set a custom {@link android.view.View.OnClickListener} to
+     * this activity's header image view.
+     *
+     * @param listener The listener
+     */
+    public void setHeaderImageOnClickListener(View.OnClickListener listener) {
+        _ivHeader.setOnClickListener(listener);
+    }
+
+    /**
      * Set a custom background image to this background image
      * activity. By default there will be a blurry background image
      * in the style of BreakOut.
