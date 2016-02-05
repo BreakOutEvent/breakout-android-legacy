@@ -15,10 +15,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/popover_login_white"
-        android:paddingBottom="@dimen/popup_vertical_margin"
+        android:paddingBottom="@dimen/popup_margin_bottom"
         android:paddingLeft="@dimen/popup_horizontal_margin"
         android:paddingRight="@dimen/popup_horizontal_margin"
-        android:paddingTop="@dimen/popup_vertical_margin"
+        android:paddingTop="@dimen/popup_margin_top"
         android:visibility="gone">
 
         <TextView
