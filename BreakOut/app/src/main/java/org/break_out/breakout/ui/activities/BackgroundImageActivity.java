@@ -111,6 +111,14 @@ public class BackgroundImageActivity extends BOActivity implements ViewTreeObser
 
         _flPlaceholderContent.removeAllViews();
         _flPlaceholderContent.addView(v);
+
+        View closeButton = findViewById(R.id.close);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     /**
