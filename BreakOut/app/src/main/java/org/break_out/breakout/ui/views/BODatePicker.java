@@ -14,7 +14,6 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import org.break_out.breakout.R;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -44,7 +43,7 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
     public View initCustomContent() {
         TextView dateView = new TextView(getContext());
         dateView.setOnClickListener(this);
-        dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent));
+        dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
         dateView.setText(getHint());
         dateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 

@@ -30,7 +30,7 @@
             android:imeOptions="flagNoExtractUi"
             android:inputType="textCapWords"
             android:textColor="@color/white"
-            android:textColorHint="@color/white_transparent"
+            android:textColorHint="@color/white_transparent_50"
             android:theme="@style/AppTheme.EditText"/>
 
         <EditText
@@ -42,7 +42,7 @@
             android:imeOptions="flagNoExtractUi"
             android:inputType="textCapWords"
             android:textColor="@color/white"
-            android:textColorHint="@color/white_transparent"
+            android:textColorHint="@color/white_transparent_50"
             android:theme="@style/AppTheme.EditText"/>
 
     </LinearLayout>
@@ -58,7 +58,7 @@
         android:imeOptions="flagNoExtractUi"
         android:inputType="textEmailAddress"
         android:textColor="@color/white"
-        android:textColorHint="@color/white_transparent"
+        android:textColorHint="@color/white_transparent_50"
         android:theme="@style/AppTheme.EditText"/>
 
     <org.break_out.breakout.ui.views.BOSpinner
@@ -88,7 +88,7 @@
         android:imeOptions="flagNoExtractUi"
         android:inputType="phone"
         android:textColor="@color/white"
-        android:textColorHint="@color/white_transparent"
+        android:textColorHint="@color/white_transparent_50"
         android:theme="@style/AppTheme.EditText"/>
 
     <EditText
@@ -102,7 +102,7 @@
         android:imeOptions="flagNoExtractUi"
         android:inputType="phone"
         android:textColor="@color/white"
-        android:textColorHint="@color/white_transparent"
+        android:textColorHint="@color/white_transparent_50"
         android:theme="@style/AppTheme.EditText"/>
 
     <org.break_out.breakout.ui.views.BODatePicker

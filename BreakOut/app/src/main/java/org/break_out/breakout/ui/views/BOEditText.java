@@ -1,7 +1,6 @@
 package org.break_out.breakout.ui.views;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -33,7 +32,7 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
     public View initCustomContent() {
         EditText editText = new EditText(getContext());
         editText.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
-        editText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent));
+        editText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
         editText.setBackgroundResource(0);
         editText.setHint(getHint());
 

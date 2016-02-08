@@ -5,6 +5,7 @@
     <color name="colorAccent">#F7931D</color>
 
     <color name="white">#FFF</color>
-    <color name="white_transparent">#7FFF</color>
+    <color name="white_transparent_50">#8FFF</color>
+    <color name="white_transparent_80">#CFFF</color>
     <color name="black_transparent">#4000</color>
 </resources>
