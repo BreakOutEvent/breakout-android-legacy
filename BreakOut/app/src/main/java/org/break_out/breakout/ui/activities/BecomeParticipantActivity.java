@@ -4,14 +4,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.break_out.breakout.R;
 
@@ -45,7 +43,7 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
     }
 
     /**
-     * instantiate views and set neededl listener(s)
+     * instantiate views and set needed listener(s)
      */
     private void initViews() {
         /*

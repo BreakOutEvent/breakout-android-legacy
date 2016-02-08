@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="BOSpinner">
+    <declare-styleable name="BOUnderlinedView">
         <attr name="drawableLeft" format="reference"/>
         <attr name="drawableRight" format="reference"/>
+        <attr name="android:hint"/>
+    </declare-styleable>
+
+    <declare-styleable name="BOSpinner">
         <attr name="android:entries"/>
     </declare-styleable>
 </resources>

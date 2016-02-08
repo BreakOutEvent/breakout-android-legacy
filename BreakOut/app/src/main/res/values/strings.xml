@@ -11,6 +11,7 @@
     <string name="hint_emergency_number">Notfall-Nummer</string>
     <string name="hint_gender">Geschlecht</string>
     <string name="hint_t_shirt_size">T-Shirt Größe</string>
+    <string name="hint_birthday">Geburtstag</string>
 
     <string name="button_login">Einloggen</string>
     <string name="button_start_register">Kostenlos Registrieren</string>
