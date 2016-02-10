@@ -1,11 +1,11 @@
 package org.break_out.breakout.ui.views;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -14,6 +14,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.model.BOSpinnerState;
+
+import java.io.Serializable;
 
 /**
  * Created by Tino on 06.02.2016.
@@ -23,6 +26,10 @@ public class BOSpinner extends BOUnderlinedView {
     private static final String TAG = "BOSpinner";
 
     private boolean _selected = false;
+
+    private class State implements Serializable {
+        public Integer selectedIndex = null;
+    }
 
     public BOSpinner(Context context) {
         super(context);
@@ -76,7 +83,7 @@ public class BOSpinner extends BOUnderlinedView {
                 for(int i = 0; i < entries.length; i++) {
                     entryStrings[i] = entries[i].toString();
                 }
-                ArrayAdapter<String> adapter = new BOSpinnerAdapter(getContext(), R.layout.item_spinner, entryStrings);
+                ArrayAdapter<String> adapter = new BOSpinnerAdapter(getContext(), entryStrings);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
                 Spinner spinner = getContentView(Spinner.class);
@@ -88,13 +95,40 @@ public class BOSpinner extends BOUnderlinedView {
         }
     }
 
+    @Override
+    public Serializable getState() {
+        BOSpinnerState state = new BOSpinnerState();
+        state.selectedIndex = getContentView(Spinner.class).getSelectedItemPosition();
+
+        return state;
+    }
+
+    @Override
+    public void setState(Serializable serializedState) {
+        if(serializedState == null || !(serializedState instanceof BOSpinnerState)) {
+            Log.e(TAG, "Could not load state from serializable (null or wrong state type).");
+            return;
+        }
+
+        Spinner spinner = getContentView(Spinner.class);
+
+        BOSpinnerState state = (BOSpinnerState) serializedState;
+        int selectedIndex = state.selectedIndex;
+
+        if(selectedIndex == -1 || selectedIndex > spinner.getAdapter().getCount()-1) {
+            return;
+        }
+
+        spinner.setSelection(selectedIndex);
+    }
+
     private class BOSpinnerAdapter extends ArrayAdapter<String> {
 
         private String[] items;
         private String hint = "";
 
-        public BOSpinnerAdapter(Context context, int txtViewResourceId, String[] entries) {
-            super(context, txtViewResourceId, entries);
+        public BOSpinnerAdapter(Context context, String[] entries) {
+            super(context, android.R.layout.simple_spinner_item, entries);
 
             items = entries;
             hint = getHint();
@@ -102,9 +136,8 @@ public class BOSpinner extends BOUnderlinedView {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = ((Activity)getContext()).getLayoutInflater();
-            View v = inflater.inflate(R.layout.item_spinner, parent, false);
-            TextView textView = (TextView) v.findViewById(R.id.spinner_textview);
+            TextView textView = new TextView(getContext());
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
             if(position == getCount()) {
                 textView.setText(hint);
@@ -114,7 +147,7 @@ public class BOSpinner extends BOUnderlinedView {
                 textView.setText(items[position]);
             }
 
-            return v;
+            return textView;
         }
     }
 

@@ -3,8 +3,8 @@
 
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
-    <string name="hint_firstname">Vorname</string>
-    <string name="hint_lastname">Name</string>
+    <string name="hint_first_name">Vorname</string>
+    <string name="hint_last_name">Name</string>
     <string name="hint_repeat_password">Passwort wiederholen</string>
     <string name="hint_hometown">Heimatstadt</string>
     <string name="hint_phone_number">Telefonnummer"</string>

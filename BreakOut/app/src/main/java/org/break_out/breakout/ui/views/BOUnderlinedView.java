@@ -10,6 +10,8 @@ import android.widget.ImageView;
 
 import org.break_out.breakout.R;
 
+import java.io.Serializable;
+
 /**
  * Created by Tino on 08.02.2016.
  */
@@ -115,6 +117,10 @@ public abstract class BOUnderlinedView extends FrameLayout {
     public abstract View initCustomContent();
 
     public abstract void processCustomAttrs(AttributeSet attrs);
+
+    public abstract Serializable getState();
+
+    public abstract void setState(Serializable serializedState);
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {

@@ -1,12 +1,18 @@
 package org.break_out.breakout.ui.views;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.model.BOEditTextState;
+
+import java.io.Serializable;
 
 /**
  * Created by Tino on 08.02.2016.
@@ -30,10 +36,19 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
     @Override
     public View initCustomContent() {
         EditText editText = new EditText(getContext());
-        editText.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+        editText.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_80));
         editText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
         editText.setBackgroundResource(0);
         editText.setHint(getHint());
+        editText.setPadding(0, 0, 0, 0);
+        editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+
+        // Remove background (underline)
+        if(android.os.Build.VERSION.SDK_INT >= 16) {
+            editText.setBackground(null);
+        } else {
+            editText.setBackgroundDrawable(null);
+        }
 
         editText.setOnFocusChangeListener(this);
 
@@ -42,7 +57,40 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
 
     @Override
     public void processCustomAttrs(AttributeSet attrs) {
+        // Get attributes
+        TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.BOEditText);
+        try {
+            // Entries
+            int inputType = ta.getInt(R.styleable.BOEditText_android_inputType, -1);
 
+            EditText editText = getContentView(EditText.class);
+            editText.setInputType(inputType);
+        } finally {
+            ta.recycle();
+        }
+    }
+
+    @Override
+    public Serializable getState() {
+        EditText editText = getContentView(EditText.class);
+
+        BOEditTextState state = new BOEditTextState();
+        state.text = editText.getText().toString();
+
+        return state;
+    }
+
+    @Override
+    public void setState(Serializable serializedState) {
+        if(serializedState == null || !(serializedState instanceof BOEditTextState)) {
+            Log.e(TAG, "Could not load state from serializable (null or wrong state type).");
+            return;
+        }
+
+        EditText editText = getContentView(EditText.class);
+
+        BOEditTextState state = (BOEditTextState) serializedState;
+        editText.setText(state.text);
     }
 
     @Override
@@ -52,5 +100,9 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
         } else {
             unhighlight();
         }
+    }
+
+    public String getText() {
+        return getContentView(EditText.class).getText().toString();
     }
 }

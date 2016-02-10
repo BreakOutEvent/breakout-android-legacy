@@ -16,50 +16,34 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <EditText
+        <org.break_out.breakout.ui.views.BOEditText
             android:id="@+id/et_last_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
             android:layout_weight="5"
-            android:drawableLeft="@drawable/ic_person_white_24dp"
-            android:drawablePadding="10dp"
-            android:drawableStart="@drawable/ic_person_white_24dp"
-            android:hint="@string/hint_lastname"
-            android:imeOptions="flagNoExtractUi"
+            android:hint="@string/hint_last_name"
             android:inputType="textCapWords"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white_transparent_50"
-            android:theme="@style/AppTheme.EditText"/>
+            app:drawableLeft="@drawable/ic_person_white_24dp"/>
 
-        <EditText
+        <org.break_out.breakout.ui.views.BOEditText
             android:id="@+id/et_first_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginStart="15dp"
             android:layout_weight="4"
-            android:hint="@string/hint_firstname"
-            android:imeOptions="flagNoExtractUi"
-            android:inputType="textCapWords"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white_transparent_50"
-            android:theme="@style/AppTheme.EditText"/>
+            android:hint="@string/hint_first_name"
+            android:inputType="textCapWords"/>
 
     </LinearLayout>
 
-    <EditText
+    <org.break_out.breakout.ui.views.BOEditText
         android:id="@+id/et_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_mail_outline_white_24dp"
-        android:drawablePadding="10dp"
-        android:drawableStart="@drawable/ic_mail_outline_white_24dp"
         android:hint="@string/hint_email"
-        android:imeOptions="flagNoExtractUi"
         android:inputType="textEmailAddress"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white_transparent_50"
-        android:theme="@style/AppTheme.EditText"/>
+        app:drawableLeft="@drawable/ic_mail_outline_white_24dp"/>
 
     <org.break_out.breakout.ui.views.BOSpinner
         android:id="@+id/sp_gender"
@@ -79,35 +63,26 @@
         app:drawableLeft="@drawable/ic_tshirt_white_24dp"
         app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
-    <EditText
+    <org.break_out.breakout.ui.views.BOEditText
         android:id="@+id/et_phone_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_phone_white_24dp"
-        android:drawablePadding="10dp"
-        android:drawableStart="@drawable/ic_phone_white_24dp"
         android:hint="@string/hint_phone_number"
-        android:imeOptions="flagNoExtractUi"
         android:inputType="phone"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white_transparent_50"
-        android:theme="@style/AppTheme.EditText"/>
+        app:drawableLeft="@drawable/ic_phone_white_24dp"
+        app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
-    <EditText
+    <org.break_out.breakout.ui.views.BOEditText
         android:id="@+id/et_emergency_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_sos_white_24dp"
-        android:drawablePadding="10dp"
-        android:drawableStart="@drawable/ic_sos_white_24dp"
         android:hint="@string/hint_emergency_number"
-        android:imeOptions="flagNoExtractUi"
         android:inputType="phone"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white_transparent_50"
-        android:theme="@style/AppTheme.EditText"/>
+        app:drawableLeft="@drawable/ic_sos_white_24dp"
+        app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
     <org.break_out.breakout.ui.views.BODatePicker
+        android:id="@+id/dp_birthday"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/hint_birthday"

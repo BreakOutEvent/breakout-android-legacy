@@ -12,7 +12,9 @@ import android.widget.TextView;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.model.BODatePickerState;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -43,9 +45,9 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
     public View initCustomContent() {
         TextView dateView = new TextView(getContext());
         dateView.setOnClickListener(this);
-        dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
-        dateView.setText(getHint());
         dateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+
+        refreshTextView(dateView);
 
         return dateView;
     }
@@ -53,6 +55,27 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
     @Override
     public void processCustomAttrs(AttributeSet attrs) {
         // No custom attributes needed for this view
+    }
+
+    @Override
+    public Serializable getState() {
+        BODatePickerState state = new BODatePickerState();
+        state.date = _date;
+
+        return state;
+    }
+
+    @Override
+    public void setState(Serializable serializedState) {
+        if(serializedState == null || !(serializedState instanceof BODatePickerState)) {
+            Log.e(TAG, "Could not load state from serializable (null or wrong state type).");
+            return;
+        }
+
+        BODatePickerState state = (BODatePickerState) serializedState;
+
+        _date = state.date;
+        refreshTextView(getContentView(TextView.class));
     }
 
     public Calendar getSelectedDate() {
@@ -68,7 +91,12 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
 
         Activity activity = (Activity) getContext();
 
-        DatePickerDialog dpd = DatePickerDialog.newInstance(this, 1990, Calendar.JANUARY, 1);
+        DatePickerDialog dpd;
+        if(_date == null) {
+            dpd = DatePickerDialog.newInstance(this, 1990, Calendar.JANUARY, 1);
+        } else {
+            dpd = DatePickerDialog.newInstance(this, _date.get(Calendar.YEAR), _date.get(Calendar.MONTH), _date.get(Calendar.DAY_OF_MONTH));
+        }
         dpd.showYearPickerFirst(true);
         dpd.setThemeDark(false);
         dpd.vibrate(false);
@@ -80,11 +108,20 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
         Calendar date = new GregorianCalendar(year, monthOfYear, dayOfMonth);
         date.set(year, monthOfYear, dayOfMonth);
+        _date = date;
 
+        refreshTextView(getContentView(TextView.class));
+    }
+
+    private void refreshTextView(TextView dateView) {
         DateFormat format = DateFormat.getDateInstance(DateFormat.LONG);
 
-        TextView dateView = getContentView(TextView.class);
-        dateView.setText(format.format(date.getTime()));
-        dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_80));
+        if(_date != null) {
+            dateView.setText(format.format(_date.getTime()));
+            dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_80));
+        } else {
+            dateView.setText(getHint());
+            dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
+        }
     }
 }

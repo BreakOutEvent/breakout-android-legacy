@@ -9,4 +9,8 @@
     <declare-styleable name="BOSpinner">
         <attr name="android:entries"/>
     </declare-styleable>
+
+    <declare-styleable name="BOEditText">
+        <attr name="android:inputType"/>
+    </declare-styleable>
 </resources>
