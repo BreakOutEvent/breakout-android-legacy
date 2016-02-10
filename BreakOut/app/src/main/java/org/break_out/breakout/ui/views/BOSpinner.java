@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,9 +52,7 @@ public class BOSpinner extends BOUnderlinedView {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                _selected = true;
-
-                Log.d(TAG, getSelectedValue());
+                _selected = (position != getContentView(Spinner.class).getAdapter().getCount());
             }
 
             @Override
@@ -81,20 +78,24 @@ public class BOSpinner extends BOUnderlinedView {
                 }
                 ArrayAdapter<String> adapter = new BOSpinnerAdapter(getContext(), R.layout.item_spinner, entryStrings);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                getContentView(Spinner.class).setAdapter(adapter);
+
+                Spinner spinner = getContentView(Spinner.class);
+                spinner.setAdapter(adapter);
+                spinner.setSelection(adapter.getCount());
             }
         } finally {
             ta.recycle();
         }
     }
 
-    public class BOSpinnerAdapter extends ArrayAdapter<String> {
+    private class BOSpinnerAdapter extends ArrayAdapter<String> {
 
         private String[] items;
         private String hint = "";
 
         public BOSpinnerAdapter(Context context, int txtViewResourceId, String[] entries) {
             super(context, txtViewResourceId, entries);
+
             items = entries;
             hint = getHint();
         }
@@ -105,7 +106,7 @@ public class BOSpinner extends BOUnderlinedView {
             View v = inflater.inflate(R.layout.item_spinner, parent, false);
             TextView textView = (TextView) v.findViewById(R.id.spinner_textview);
 
-            if(!_selected) {
+            if(position == getCount()) {
                 textView.setText(hint);
                 textView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
             } else {
