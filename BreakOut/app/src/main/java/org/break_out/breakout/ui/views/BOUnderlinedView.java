@@ -55,8 +55,8 @@ public abstract class BOUnderlinedView extends FrameLayout {
         _ivDrawableLeft = (ImageView) findViewById(R.id.drawable_left);
         _ivDrawableRight = (ImageView) findViewById(R.id.drawable_right);
 
-        _vUnderlineNormal = findViewById(R.id.spinner_underline_normal);
-        _vUnderlineHighlight = findViewById(R.id.spinner_underline_hightlight);
+        _vUnderlineNormal = findViewById(R.id.underline_normal);
+        _vUnderlineHighlight = findViewById(R.id.underline_highlight);
     }
 
     private void initFromAttrs(AttributeSet attrs) {
@@ -139,13 +139,13 @@ public abstract class BOUnderlinedView extends FrameLayout {
     private boolean isClick(float startX, float endX, float startY, float endY) {
         float differenceX = Math.abs(startX - endX);
         float differenceY = Math.abs(startY - endY);
-        if (differenceX > 5 || differenceY > 5) {
+        if(differenceX > 5 || differenceY > 5) {
             return false;
         }
         return true;
     }
 
-    public <T extends View> T getContent(Class<T> type) {
+    public <T extends View> T getContentView(Class<T> type) {
         return (T) _vContent;
     }
 

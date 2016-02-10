@@ -3,7 +3,6 @@ package org.break_out.breakout.ui.views;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -37,8 +36,6 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
         editText.setHint(getHint());
 
         editText.setOnFocusChangeListener(this);
-
-        Log.d(TAG, "x");
 
         return editText;
     }

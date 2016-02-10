@@ -83,8 +83,8 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
 
         DateFormat format = DateFormat.getDateInstance(DateFormat.LONG);
 
-        TextView dateView = getContent(TextView.class);
+        TextView dateView = getContentView(TextView.class);
         dateView.setText(format.format(date.getTime()));
-        dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+        dateView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_80));
     }
 }

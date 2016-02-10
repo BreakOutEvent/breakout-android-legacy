@@ -66,6 +66,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:entries="@array/gender_array"
+        android:hint="@string/hint_gender"
         app:drawableLeft="@drawable/ic_wc_white_24dp"
         app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
@@ -74,6 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:entries="@array/t_shirt_size_array"
+        android:hint="@string/hint_t_shirt_size"
         app:drawableLeft="@drawable/ic_tshirt_white_24dp"
         app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 

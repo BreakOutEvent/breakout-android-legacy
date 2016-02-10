@@ -37,7 +37,7 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_become_participant);
 
         initViews();
     }
