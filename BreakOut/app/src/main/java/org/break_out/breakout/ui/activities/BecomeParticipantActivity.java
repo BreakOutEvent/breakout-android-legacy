@@ -6,15 +6,12 @@ import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.ui.views.BODatePicker;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOSpinner;
-
-import java.util.ArrayList;
 
 public class BecomeParticipantActivity extends BackgroundImageActivity {
 
@@ -42,6 +39,7 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_become_participant);
+        setHeaderImage(R.drawable.btn_camera_round);
 
         initViews();
     }

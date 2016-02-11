@@ -48,18 +48,18 @@ public class BOSpinner extends BOUnderlinedView {
             return null;
         }
 
-        Spinner spinner = getContentView(Spinner.class);
+        Spinner spinner = getCustomContentView(Spinner.class);
         return spinner.getSelectedItem().toString();
     }
 
     @Override
-    public View initCustomContent() {
+    public View initCustomContentView() {
         Spinner spinner = new Spinner(getContext());
         spinner.setBackgroundResource(R.drawable.ic_arrow_drop_down_white_24dp);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                _selected = (position != getContentView(Spinner.class).getAdapter().getCount());
+                _selected = (position != getCustomContentView(Spinner.class).getAdapter().getCount());
             }
 
             @Override
@@ -86,7 +86,7 @@ public class BOSpinner extends BOUnderlinedView {
                 ArrayAdapter<String> adapter = new BOSpinnerAdapter(getContext(), entryStrings);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-                Spinner spinner = getContentView(Spinner.class);
+                Spinner spinner = getCustomContentView(Spinner.class);
                 spinner.setAdapter(adapter);
                 spinner.setSelection(adapter.getCount());
             }
@@ -98,7 +98,7 @@ public class BOSpinner extends BOUnderlinedView {
     @Override
     public Serializable getState() {
         BOSpinnerState state = new BOSpinnerState();
-        state.selectedIndex = getContentView(Spinner.class).getSelectedItemPosition();
+        state.selectedIndex = getCustomContentView(Spinner.class).getSelectedItemPosition();
 
         return state;
     }
@@ -110,7 +110,7 @@ public class BOSpinner extends BOUnderlinedView {
             return;
         }
 
-        Spinner spinner = getContentView(Spinner.class);
+        Spinner spinner = getCustomContentView(Spinner.class);
 
         BOSpinnerState state = (BOSpinnerState) serializedState;
         int selectedIndex = state.selectedIndex;

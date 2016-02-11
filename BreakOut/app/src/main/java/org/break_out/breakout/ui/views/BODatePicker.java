@@ -42,7 +42,7 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
     }
 
     @Override
-    public View initCustomContent() {
+    public View initCustomContentView() {
         TextView dateView = new TextView(getContext());
         dateView.setOnClickListener(this);
         dateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
@@ -75,7 +75,7 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
         BODatePickerState state = (BODatePickerState) serializedState;
 
         _date = state.date;
-        refreshTextView(getContentView(TextView.class));
+        refreshTextView(getCustomContentView(TextView.class));
     }
 
     public Calendar getSelectedDate() {
@@ -110,7 +110,7 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
         date.set(year, monthOfYear, dayOfMonth);
         _date = date;
 
-        refreshTextView(getContentView(TextView.class));
+        refreshTextView(getCustomContentView(TextView.class));
     }
 
     private void refreshTextView(TextView dateView) {

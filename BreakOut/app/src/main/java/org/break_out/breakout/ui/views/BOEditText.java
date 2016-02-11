@@ -34,7 +34,7 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
     }
 
     @Override
-    public View initCustomContent() {
+    public View initCustomContentView() {
         EditText editText = new EditText(getContext());
         editText.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_80));
         editText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
@@ -63,7 +63,7 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
             // Entries
             int inputType = ta.getInt(R.styleable.BOEditText_android_inputType, -1);
 
-            EditText editText = getContentView(EditText.class);
+            EditText editText = getCustomContentView(EditText.class);
             editText.setInputType(inputType);
         } finally {
             ta.recycle();
@@ -72,7 +72,7 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
 
     @Override
     public Serializable getState() {
-        EditText editText = getContentView(EditText.class);
+        EditText editText = getCustomContentView(EditText.class);
 
         BOEditTextState state = new BOEditTextState();
         state.text = editText.getText().toString();
@@ -87,7 +87,7 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
             return;
         }
 
-        EditText editText = getContentView(EditText.class);
+        EditText editText = getCustomContentView(EditText.class);
 
         BOEditTextState state = (BOEditTextState) serializedState;
         editText.setText(state.text);
@@ -103,6 +103,6 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
     }
 
     public String getText() {
-        return getContentView(EditText.class).getText().toString();
+        return getCustomContentView(EditText.class).getText().toString();
     }
 }

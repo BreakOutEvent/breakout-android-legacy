@@ -13,9 +13,19 @@ import org.break_out.breakout.R;
 import java.io.Serializable;
 
 /**
+ * This view implements the basic functionality for any view with
+ * a simple line at the bottom. This line will be highlighted in
+ * the primaryColor when the view has been selected (gained focus).
+ * <br />
+ * There are two drawables: One on the left of the view and one on
+ * the right. Both are on the bottom line. Only the right drawable
+ * is clickable. You can apply a listener to it using {@link #setRightDrawableOnClickListener(OnClickListener)}.
+ * <br /><br />
  * Created by Tino on 08.02.2016.
  */
 public abstract class BOUnderlinedView extends FrameLayout {
+
+    private static final String TAG = "BOUnderlinedView";
 
     private View _vContent;
 
@@ -107,19 +117,67 @@ public abstract class BOUnderlinedView extends FrameLayout {
         });
     }
 
+    /**
+     * Set the content view (above the bottom line)
+     * to be the custom view returned by {@link #initCustomContentView()}.
+     */
     private void initContent() {
         FrameLayout placeholder = (FrameLayout) findViewById(R.id.placeholder);
         placeholder.removeAllViews();
-        _vContent = initCustomContent();
+        _vContent = initCustomContentView();
         placeholder.addView(_vContent);
     }
 
-    public abstract View initCustomContent();
+    /**
+     * Create any view in this method to be displayed
+     * on the bottom line of the underlined view.<br />
+     * <b>Don't keep a reference to this view to modify it later!
+     * Always use {@link #getCustomContentView(Class)} to get a reference
+     * to your custom view.</b>
+     *
+     * @return The view to be displayed above the bottom line
+     */
+    public abstract View initCustomContentView();
 
+    /**
+     * Call this method to get a reference to the custom view
+     * being displayed above the bottom line.
+     * Specify the class of your custom content view in the parameters
+     * to automatically receive the correct type of view.
+     *
+     * @param type The class of the custom content view
+     * @param <T> The class of the custom content view
+     *
+     * @return A reference to the custom content view
+     */
+    public <T extends View> T getCustomContentView(Class<T> type) {
+        return (T) _vContent;
+    }
+
+    /**
+     * This method will be called after processing more general style attributes
+     * (like hint and drawables) to let you specify and process custom attributes
+     * when implementing {@link BOUnderlinedView}.
+     *
+     * @param attrs The attributes of the view as specified in XML
+     */
     public abstract void processCustomAttrs(AttributeSet attrs);
 
+    /**
+     * Return any instance of {@link Serializable} storing the state
+     * of the custom view. This method can be used to save the state
+     * of the view (e.g. when the Activity is paused).
+     *
+     * @return Any Serializable storing the state of the custom content view
+     */
     public abstract Serializable getState();
 
+    /**
+     * Set a formerly stored {@link Serializable} to be the state of
+     * the custom content view again.
+     *
+     * @param serializedState The saved state
+     */
     public abstract void setState(Serializable serializedState);
 
     @Override
@@ -142,6 +200,19 @@ public abstract class BOUnderlinedView extends FrameLayout {
         return false;
     }
 
+    /**
+     * Detect if a tap by the user is a click or not (might e.g. also
+     * be scrolling). This method takes the start and end coordinates
+     * of the touch action to calculate a distance between pressing and
+     * releasing and deciding if this is a click or not.
+     *
+     * @param startX The x position of the touch down action
+     * @param endX The x position of the touch up action
+     * @param startY The y position of the touch down action
+     * @param endY The y position of the touch up action
+     *
+     * @return True if the touch actions belong to a click, false otherwise
+     */
     private boolean isClick(float startX, float endX, float startY, float endY) {
         float differenceX = Math.abs(startX - endX);
         float differenceY = Math.abs(startY - endY);
@@ -151,10 +222,11 @@ public abstract class BOUnderlinedView extends FrameLayout {
         return true;
     }
 
-    public <T extends View> T getContentView(Class<T> type) {
-        return (T) _vContent;
-    }
-
+    /**
+     * Returns the hint for this view as specified via XML.
+     *
+     * @return The hint or an empty String if no hint is available
+     */
     public String getHint() {
         return _hint;
     }
@@ -169,7 +241,14 @@ public abstract class BOUnderlinedView extends FrameLayout {
         _vUnderlineHighlight.setVisibility(View.GONE);
     }
 
-    public void setOnRightDrawableClickListener(OnClickListener listener) {
+    /**
+     * Set an {@link android.view.View.OnClickListener} to the right drawable
+     * of the underlined view. This might be useful to e.g. provide further information
+     * on how to fill a field.
+     *
+     * @param listener The listener
+     */
+    public void setRightDrawableOnClickListener(OnClickListener listener) {
         _ivDrawableRight.setOnClickListener(listener);
     }
 
