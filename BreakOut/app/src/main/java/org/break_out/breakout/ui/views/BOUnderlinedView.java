@@ -72,6 +72,10 @@ public abstract class BOUnderlinedView extends FrameLayout {
     }
 
     private void initFromAttrs(AttributeSet attrs) {
+        if(attrs == null) {
+            return;
+        }
+
         // Get attributes
         TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.BOUnderlinedView);
         try {

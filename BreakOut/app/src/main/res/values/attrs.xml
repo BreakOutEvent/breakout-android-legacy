@@ -13,4 +13,13 @@
     <declare-styleable name="BOEditText">
         <attr name="android:inputType"/>
     </declare-styleable>
+
+    <declare-styleable name="BOFlatButton">
+        <attr name="buttonColor" format="enum">
+            <enum name="orange" value="0"/>
+            <enum name="white" value="1"/>
+        </attr>
+        <attr name="showBorder" format="boolean"/>
+        <attr name="android:text"/>
+    </declare-styleable>
 </resources>

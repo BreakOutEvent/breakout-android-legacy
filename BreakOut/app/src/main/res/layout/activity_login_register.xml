@@ -2,11 +2,12 @@
 <LinearLayout
     android:id="@+id/start_relativeLayout_contentWrapper"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="28dp"
-    android:paddingBottom="28dp">
+    android:paddingBottom="28dp"
+    android:paddingTop="28dp">
 
     <FrameLayout
         android:id="@+id/popup_wrapper"
@@ -26,60 +27,41 @@
             android:text="@string/popup_usernamePassword"/>
     </FrameLayout>
 
-    <EditText
+    <org.break_out.breakout.ui.views.BOEditText
         android:id="@+id/start_editText_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:drawableLeft="@drawable/ic_mail_outline_white_24dp"
-        android:drawablePadding="8dp"
-        android:drawableStart="@drawable/ic_mail_outline_white_24dp"
         android:hint="@string/hint_email"
-        android:imeOptions="flagNoExtractUi"
         android:inputType="textEmailAddress"
-        android:textColor="@color/white_transparent_80"
-        android:textColorHint="@color/white_transparent_50"
-        android:theme="@style/AppTheme.EditText"/>
+        app:drawableLeft="@drawable/ic_mail_outline_white_24dp"/>
 
-    <EditText
+    <org.break_out.breakout.ui.views.BOEditText
         android:id="@+id/start_editText_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:drawableLeft="@drawable/ic_lock_outline_white_24dp"
-        android:drawablePadding="8dp"
-        android:drawableStart="@drawable/ic_lock_outline_white_24dp"
         android:hint="@string/hint_password"
-        android:imeOptions="flagNoExtractUi"
         android:inputType="textPassword"
-        android:textColor="@color/white_transparent_80"
-        android:textColorHint="@color/white_transparent_50"
-        android:theme="@style/AppTheme.EditText"/>
+        app:drawableLeft="@drawable/ic_lock_outline_white_24dp"/>
 
-    <Button
+    <org.break_out.breakout.ui.views.BOFlatButton
         android:id="@+id/start_button_logIn"
-        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:background="@drawable/btn_rounded_orange_50dp"
-        android:foreground="?android:attr/selectableItemBackground"
         android:text="@string/button_login"
-        android:textColor="@color/white"
-        android:textSize="15sp"/>
+        app:buttonColor="orange"/>
 
-    <Button
+    <org.break_out.breakout.ui.views.BOFlatButton
         android:id="@+id/start_button_register"
-        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
-        android:background="@drawable/btn_rounded_white_50dp"
-        android:foreground="?android:attr/selectableItemBackground"
         android:text="@string/button_start_register"
-        android:textSize="15sp"/>
+        app:buttonColor="white"/>
 
     <TextView
         android:id="@+id/start_textView_about"

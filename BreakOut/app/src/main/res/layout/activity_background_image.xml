@@ -48,7 +48,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
                     android:layout_margin="16dp"
-                    android:foreground="?android:attr/selectableItemBackground"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
                     android:src="@drawable/ic_close_black_24dp"/>
 
                 <ImageView

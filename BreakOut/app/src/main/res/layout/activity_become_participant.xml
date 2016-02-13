@@ -98,16 +98,13 @@
 
     </LinearLayout>
 
-    <Button
+    <org.break_out.breakout.ui.views.BOFlatButton
         android:id="@+id/bt_participate"
-        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:background="@drawable/btn_rounded_orange_50dp"
-        android:foreground="?android:attr/selectableItemBackground"
         android:text="@string/button_participate"
-        android:textColor="@color/white"/>
+        app:buttonColor="orange"/>
 
     <TextView
         android:layout_width="match_parent"

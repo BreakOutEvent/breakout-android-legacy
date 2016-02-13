@@ -6,12 +6,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.ui.views.BOEditText;
+import org.break_out.breakout.ui.views.BOFlatButton;
 
 public class LoginRegisterActivity extends BackgroundImageActivity {
 
@@ -25,9 +25,11 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
     private UserManager _userManager = null;
 
-    private View _rlHintWrapper;
-    private EditText _etEmail;
-    private EditText _etPassword;
+    private View _rlHintWrapper = null;
+    private BOEditText _etEmail = null;
+    private BOEditText _etPassword = null;
+    private BOFlatButton _btLogin = null;
+    private BOFlatButton _btRegister = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,22 +40,22 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
         _rlHintWrapper = findViewById(R.id.popup_wrapper);
 
-        _etEmail = (EditText) findViewById(R.id.start_editText_email);
+        _etEmail = (BOEditText) findViewById(R.id.start_editText_email);
         _etEmail.addTextChangedListener(new LoginRegisterTextWatcher());
 
-        _etPassword = (EditText) findViewById(R.id.start_editText_password);
+        _etPassword = (BOEditText) findViewById(R.id.start_editText_password);
         _etPassword.addTextChangedListener(new LoginRegisterTextWatcher());
 
-        Button btLogin = (Button) findViewById(R.id.start_button_logIn);
-        btLogin.setOnClickListener(new View.OnClickListener() {
+        _btLogin = (BOFlatButton) findViewById(R.id.start_button_logIn);
+        _btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
             }
         });
 
-        Button btRegister = (Button) findViewById(R.id.start_button_register);
-        btRegister.setOnClickListener(new View.OnClickListener() {
+        _btRegister = (BOFlatButton) findViewById(R.id.start_button_register);
+        _btRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 register();
@@ -147,6 +149,17 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            if(register) {
+                _btRegister.setShowLoadingIndicator(true);
+            } else {
+                _btLogin.setShowLoadingIndicator(true);
+            }
+        }
+
+        @Override
         protected Void doInBackground(String... params) {
 
             // Get email and password
@@ -200,6 +213,17 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             finish();
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            if(register) {
+                _btRegister.setShowLoadingIndicator(false);
+            } else {
+                _btLogin.setShowLoadingIndicator(false);
+            }
         }
     }
 

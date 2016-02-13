@@ -3,6 +3,7 @@ package org.break_out.breakout.ui.views;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -100,6 +101,10 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
         } else {
             unhighlight();
         }
+    }
+
+    public void addTextChangedListener(TextWatcher textWatcher) {
+        getCustomContentView(EditText.class).addTextChangedListener(textWatcher);
     }
 
     public String getText() {

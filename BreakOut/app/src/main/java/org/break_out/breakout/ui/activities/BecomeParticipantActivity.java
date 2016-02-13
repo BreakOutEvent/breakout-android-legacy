@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import org.break_out.breakout.R;
 import org.break_out.breakout.ui.views.BODatePicker;
 import org.break_out.breakout.ui.views.BOEditText;
+import org.break_out.breakout.ui.views.BOFlatButton;
 import org.break_out.breakout.ui.views.BOSpinner;
 
 public class BecomeParticipantActivity extends BackgroundImageActivity {
