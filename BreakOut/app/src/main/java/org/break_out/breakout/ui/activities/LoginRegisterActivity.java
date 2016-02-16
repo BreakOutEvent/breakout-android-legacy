@@ -12,6 +12,7 @@ import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOFlatButton;
+import org.break_out.breakout.util.NotificationUtils;
 
 public class LoginRegisterActivity extends BackgroundImageActivity {
 
@@ -154,8 +155,10 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
             if(register) {
                 _btRegister.setShowLoadingIndicator(true);
+                _btLogin.setEnabled(false);
             } else {
                 _btLogin.setShowLoadingIndicator(true);
+                _btRegister.setEnabled(false);
             }
         }
 
@@ -187,6 +190,12 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
                     Log.e(TAG, "Account could not be created on the server.");
 
                     // TODO: Handle registration error (and retry login?)
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
+                        }
+                    });
 
                     return null;
                 }
@@ -199,6 +208,12 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
                 Log.e(TAG, "Login via OAuth failed.");
 
                 // TODO: Handle login error (and retry login?)
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
+                    }
+                });
 
                 return null;
             }
@@ -210,8 +225,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
             _loginRegisterSuccessful = true;
 
-            finish();
-
             return null;
         }
 
@@ -219,10 +232,13 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            if(register) {
-                _btRegister.setShowLoadingIndicator(false);
+            if(_loginRegisterSuccessful) {
+                finish();
             } else {
+                _btLogin.setEnabled(true);
+                _btRegister.setEnabled(true);
                 _btLogin.setShowLoadingIndicator(false);
+                _btRegister.setShowLoadingIndicator(false);
             }
         }
     }

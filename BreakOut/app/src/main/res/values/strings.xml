@@ -1,32 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">BreakOut</string>
 
+    <string name="account_not_created">The account could not be created.</string>
+    <string name="button_continue">next</string>
+    <string name="error">Error</string>
+    <string name="explanation_participate">By pressing the register button I bindingly register to the event and accept to pay the event fee of 30.00€ as soon as I created a team.</string>
+    <string name="hint_birthday">Birthday</string>
     <string name="hint_email">Email</string>
+    <string name="hint_emergency_number">Emergency number</string>
+    <string name="hint_first_name">First name</string>
+    <string name="hint_gender">Last name</string>
+    <string name="hint_hometown">Hometown</string>
+    <string name="hint_last_name">Last name</string>
     <string name="hint_password">Password</string>
-    <string name="hint_first_name">Vorname</string>
-    <string name="hint_last_name">Name</string>
-    <string name="hint_repeat_password">Passwort wiederholen</string>
-    <string name="hint_hometown">Heimatstadt</string>
-    <string name="hint_phone_number">Telefonnummer"</string>
-    <string name="hint_emergency_number">Notfall-Nummer</string>
-    <string name="hint_gender">Geschlecht</string>
-    <string name="hint_t_shirt_size">T-Shirt Größe</string>
-    <string name="hint_birthday">Geburtstag</string>
-
-    <string name="button_login">Einloggen</string>
-    <string name="button_start_register">Kostenlos Registrieren</string>
-    <string name="button_continue">Weiter</string>
-    <string name="button_register">Registrieren</string>
-    <string name="button_participate">Kostenpflichtig teilnehmen</string>
-
-    <string name="explanation_participate">Durch Klicken des Registrieren-Buttons registriere ich mich verbindlich und zahle den Event-Beitrag von 30,00€ sobald ich ein Team erstellt habe.</string>
-
-    <string name="textview_about">Was ist Breakout?</string>
-    <string name="popup_usernamePassword">Bitte gib deine Mail und ein Password ein </string>
+    <string name="hint_phone_number">phone number</string>
+    <string name="hint_repeat_password">Repeat password</string>
+    <string name="hint_t_shirt_size">T-shirt size</string>
+    <string name="login_failed">The login on the server failed.</string>
+    <string name="popup_usernamePassword">Please enter an email and a password.</string>
+    <string name="textview_about">What is BreakOut?</string>
+    <string name="button_login">Login</string>
+    <string name="button_participate">Participate (fee required)</string>
+    <string name="button_register">Register</string>
+    <string name="button_start_register">Register for free</string>
 
     <string-array name="gender_array">
-        <item>Männlich</item>
-        <item>Weiblich</item>
+        <item>Male</item>
+        <item>Female</item>
     </string-array>
 
     <string-array name="t_shirt_size_array">
