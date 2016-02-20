@@ -126,7 +126,8 @@ public class ExpPostingLoader {
             return true;
         }
 
-        // TODO: Download postings with ids from server
+        Log.d("Loader", "Downloading: " + ids);
+
         List<ExpPosting> postings = new ArrayList<ExpPosting>();
 
         String idsJson = "[";

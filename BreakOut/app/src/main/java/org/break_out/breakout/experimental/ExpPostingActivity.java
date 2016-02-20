@@ -4,67 +4,85 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Tino on 20.02.2016.
  */
-public class ExpPostingActivity extends AppCompatActivity {
+public class ExpPostingActivity extends AppCompatActivity implements AbsListView.OnScrollListener {
 
     private static final String TAG = "ExpPostingActivity";
+
+    private ExpPostingLoader _loader = null;
+
+    private ListView _listView = null;
+    private ArrayAdapter<ExpPosting> _adapter = null;
+    private List<ExpPosting> _items = new ArrayList<ExpPosting>();
+
+    private boolean _isFirst = true;
+    private int _minId = -1;
+    private boolean _isLoading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exp_posting);
 
-        final TextView tv = (TextView) findViewById(R.id.textview);
+        _listView = (ListView) findViewById(R.id.listview);
 
-        final ExpPostingLoader loader = new ExpPostingLoader(this);
+        _loader = new ExpPostingLoader(this);
 
+        _adapter = new ArrayAdapter<ExpPosting>(this, android.R.layout.simple_list_item_1, _items);
+        _listView.setAdapter(_adapter);
+        _listView.setOnScrollListener(this);
+
+        updateAdapter();
+    }
+
+    private void updateAdapter() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                //loader.updateMissingIdsFromServer();
-                //loader.getPostings(loader.loadInt(ExpPostingLoader.KEY_LAST_KNOWN_ID), loader.loadInt(ExpPostingLoader.KEY_LAST_KNOWN_ID)-9);
-                loader.getPostings(10, 20);
+                List<ExpPosting> newItems;
 
-                int lastKnown = loader.loadInt(ExpPostingLoader.KEY_LAST_KNOWN_ID);
-                List<Integer> missing = loader.loadMissingIdsArr();
+                if(_isFirst) {
+                    int lastKnown = _loader.loadInt(ExpPostingLoader.KEY_LAST_KNOWN_ID);
+                    newItems = _loader.getPostings(lastKnown, lastKnown-9);
 
-                List<ExpPosting> existingPostings = ExpPosting.listAll(ExpPosting.class);
-                List<Integer> existingIds = new ArrayList<Integer>();
-                for(ExpPosting p : existingPostings) {
-                    existingIds.add(p.getId().intValue());
+                    _minId = lastKnown - 10;
+                    _isFirst = false;
+                } else {
+                    newItems = _loader.getPostings(_minId, _minId-9);
+
+                    _minId -= 10;
                 }
 
-                String text = "";
-                for(int i = 0; i <= lastKnown; i++) {
-                    if(missing.contains(i) && !existingIds.contains(i)) {
-                        text += "<font color=red>[" + i + "]</font><br />";
-                    } else if(existingIds.contains(i)) {
-                        text += "<font color=green>" + getPostingWithId(i, existingPostings).toString() + "</font><br />";
-                    } else {
-                        text += "[" + i + "] Not missing but <b>should be missing</b><br />";
-                    }
+                for(int i = newItems.size()-1; i >= 0; i--) {
+                    _items.add(newItems.get(i));
                 }
 
-                final String html = text;
+                Log.d(TAG, _items.toString());
+
+                _isLoading = false;
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        tv.setText(Html.fromHtml(html));
+                        _adapter.notifyDataSetChanged();
                     }
                 });
             }
         }).start();
-
     }
 
     private ExpPosting getPostingWithId(int id, List<ExpPosting> postings) {
@@ -77,4 +95,18 @@ public class ExpPostingActivity extends AppCompatActivity {
         return null;
     }
 
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        if(firstVisibleItem + visibleItemCount == totalItemCount && totalItemCount != 0) {
+            if(!_isLoading) {
+                _isLoading = true;
+                updateAdapter();
+            }
+        }
+    }
 }
