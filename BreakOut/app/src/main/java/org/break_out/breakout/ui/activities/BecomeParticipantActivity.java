@@ -1,13 +1,9 @@
 package org.break_out.breakout.ui.activities;
 
-import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.ui.views.BODatePicker;
@@ -37,6 +33,8 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
     private BOEditText _etEmergencyNumber = null;
     private BODatePicker _dpBirthday = null;
 
+    private BOFlatButton _btParticipate = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +53,14 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
         _etPhoneNumber = (BOEditText) findViewById(R.id.et_phone_number);
         _etEmergencyNumber = (BOEditText) findViewById(R.id.et_emergency_number);
         _dpBirthday = (BODatePicker) findViewById(R.id.dp_birthday);
+
+        _btParticipate = (BOFlatButton) findViewById(R.id.bt_participate);
+        _btParticipate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                participate();
+            }
+        });
     }
 
     @Override
@@ -94,6 +100,19 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
         outState.putSerializable(KEY_BIRTHDAY, _dpBirthday.getState());
     }
 
+    private void participate() {
+        new ParticipateTask().execute();
+        if(!isValidEmail(_etEmail.getText())) {
+            // TODO: Handle error
+        } else if(!isValidPhoneNumber(_etPhoneNumber.getText())) {
+            // TODO: Handle error
+        } else if(!isValidPhoneNumber(_etEmergencyNumber.getText())) {
+            // TODO: Handle error
+        } else {
+            new ParticipateTask().execute();
+        }
+    }
+
     /**
      * Check if input is email
      * @return
@@ -111,38 +130,27 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
         return Patterns.PHONE.matcher("").matches();
     }
 
-    /**
-     * Check the input for errors
-     * @return ArrayList containing InputError objects that reference the errors
-     */
-    private boolean isInputOk() {
-        // TODO
-        return false;
-    }
+    private class ParticipateTask extends AsyncTask<String, Void, Void> {
 
-    /**
-     * Get input from EditText
-     * @param editText
-     * @return
-     */
-    private String getInputText(EditText editText) {
-        return editText.getText().toString();
-    }
-
-    // Detect if the user has entered the credential and scroll down to the end of the list if yes
-    private class OnUserInputFinishedListener implements TextView.OnEditorActionListener {
         @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            hideKeyboard();
-            return true;
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            _btParticipate.setShowLoadingIndicator(true);
         }
 
-        /**
-         * hide the soft input keyboard
-         */
-        private void hideKeyboard() {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(_etEmergencyNumber.getWindowToken(), 0);
+        @Override
+        protected Void doInBackground(String... params) {
+            // TODO
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            _btParticipate.setShowLoadingIndicator(false);
         }
     }
 }
