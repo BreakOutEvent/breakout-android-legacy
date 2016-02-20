@@ -7,8 +7,18 @@ import com.orm.SugarRecord;
  */
 public class ExpPosting extends SugarRecord {
 
+    private String _text = null;
+
+    public void setText(String text) {
+        _text = text;
+    }
+
+    public String getText() {
+        return _text;
+    }
+
     @Override
     public String toString() {
-        return "[" + getId() + "]";
+        return "[" + getId() + "] " + _text;
     }
 }

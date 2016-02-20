@@ -30,8 +30,9 @@ public class ExpPostingActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                //loader.getLatestPostings();
-                loader.getPostingsInRange(200, 300);
+                //loader.updateMissingIdsFromServer();
+                //loader.getPostings(loader.loadInt(ExpPostingLoader.KEY_LAST_KNOWN_ID), loader.loadInt(ExpPostingLoader.KEY_LAST_KNOWN_ID)-9);
+                loader.getPostings(10, 20);
 
                 int lastKnown = loader.loadInt(ExpPostingLoader.KEY_LAST_KNOWN_ID);
                 List<Integer> missing = loader.loadMissingIdsArr();
@@ -45,9 +46,11 @@ public class ExpPostingActivity extends AppCompatActivity {
                 String text = "";
                 for(int i = 0; i <= lastKnown; i++) {
                     if(missing.contains(i) && !existingIds.contains(i)) {
-                        text += "<font color=red>" + i + "</font><br />";
+                        text += "<font color=red>[" + i + "]</font><br />";
                     } else if(existingIds.contains(i)) {
-                        text += "<font color=green>" + i + "</font><br />";
+                        text += "<font color=green>" + getPostingWithId(i, existingPostings).toString() + "</font><br />";
+                    } else {
+                        text += "[" + i + "] Not missing but <b>should be missing</b><br />";
                     }
                 }
 
@@ -57,12 +60,21 @@ public class ExpPostingActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         tv.setText(Html.fromHtml(html));
-                        Log.d(TAG, html);
                     }
                 });
             }
         }).start();
 
+    }
+
+    private ExpPosting getPostingWithId(int id, List<ExpPosting> postings) {
+        for(ExpPosting p : postings) {
+            if(p.getId() == id) {
+                return p;
+            }
+        }
+
+        return null;
     }
 
 }

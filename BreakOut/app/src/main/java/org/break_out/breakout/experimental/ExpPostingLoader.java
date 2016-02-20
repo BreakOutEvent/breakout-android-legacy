@@ -7,14 +7,17 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -25,6 +28,8 @@ public class ExpPostingLoader {
     private static final String KEY_ID_ARR = "id_arr";
     public static final String KEY_LAST_KNOWN_ID = "last_known_id";
 
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
     private static final String SEPARATOR = ",";
 
     private Context _context = null;
@@ -33,37 +38,32 @@ public class ExpPostingLoader {
         _context = context;
     }
 
-    public List<ExpPosting> getLatestPostings() {
+    public List<ExpPosting> getPostings(int limit) {
         // 1) Get missing IDs
-        int lastKnownIdBefore = loadInt(KEY_LAST_KNOWN_ID);
-        List<Integer> missingIds = loadMissingIdsArr();
-        missingIds.addAll(getMissingIdsFromServer(lastKnownIdBefore));
+        List<Integer> missingIds = updateMissingIdsFromServer();
 
         // 2) Download 10 latest postings if needed
-        int lastKnownIdAfter = loadInt(KEY_LAST_KNOWN_ID);
-        if(lastKnownIdBefore != lastKnownIdAfter) {
-            boolean success = downloadPostingsToLocalDB(missingIds.subList(Math.max(0, missingIds.size()-10), missingIds.size()-1));
+        boolean success = downloadPostingsToLocalDB(missingIds.subList(Math.max(0, missingIds.size()-limit), missingIds.size()-1));
 
-            if(success) {
-                // Remove successfully uploaded postings from missing IDs list
-                missingIds = missingIds.subList(0, Math.max(0, missingIds.size()-11));
-            }
+        if(success) {
+            // Remove successfully uploaded postings from missing IDs list
+            missingIds = missingIds.subList(0, Math.max(0, missingIds.size()-(limit+1)));
         }
 
         // 3) Store missing posting IDs
         storeMissingIdsArr(missingIds);
 
-        return getLastLocalPostings();
+        return getLastLocalPostings(limit);
     }
 
-    public List<ExpPosting> getPostingsInRange(int first, int last) {
+    public List<ExpPosting> getPostings(int first, int last) {
         if(first > last) {
-            return new ArrayList<ExpPosting>();
+            int tempFirst = first;
+            first = last;
+            last = tempFirst;
         }
 
-        int lastKnownIdBefore = loadInt(KEY_LAST_KNOWN_ID);
-        List<Integer> allMissingIDs = loadMissingIdsArr();
-        allMissingIDs.addAll(getMissingIdsFromServer(lastKnownIdBefore));
+        List<Integer> allMissingIDs = updateMissingIdsFromServer();
 
         List<Integer> neededIDs = new ArrayList<Integer>();
 
@@ -89,6 +89,16 @@ public class ExpPostingLoader {
         }
 
         return getLocalPostingsById(rangeIds);
+    }
+
+    public List<Integer> updateMissingIdsFromServer() {
+        int lastKnownIdBefore = loadInt(KEY_LAST_KNOWN_ID);
+        List<Integer> allMissingIDs = loadMissingIdsArr();
+        allMissingIDs.addAll(getMissingIDsFromServer(lastKnownIdBefore));
+
+        storeMissingIdsArr(allMissingIDs);
+
+        return allMissingIDs;
     }
 
     private List<ExpPosting> getLocalPostingsById(List<Integer> ids) {
@@ -119,12 +129,42 @@ public class ExpPostingLoader {
         // TODO: Download postings with ids from server
         List<ExpPosting> postings = new ArrayList<ExpPosting>();
 
-        // FIXME: Test code with dummy data
+        String idsJson = "[";
         for(int id : ids) {
-            ExpPosting p = new ExpPosting();
-            p.setId(new Long(id));
+            idsJson += (idsJson.equals("[") ? "" + id : "," + id);
+        }
+        idsJson += "]";
 
-            postings.add(p);
+        OkHttpClient client = new OkHttpClient();
+
+        RequestBody body = RequestBody.create(JSON, idsJson);
+        Request request = new Request.Builder()
+                .url("http://breakout-development.herokuapp.com/posting/get/ids")
+                .post(body)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            String bodyPostingsString = response.body().string();
+
+            Log.d("Loader", "Response body: " + bodyPostingsString);
+
+            JSONArray idsArr = new JSONArray(bodyPostingsString);
+            for(int i = 0; i < idsArr.length(); i++) {
+                JSONObject postingObj = idsArr.getJSONObject(i);
+
+                ExpPosting p = new ExpPosting();
+                p.setId(postingObj.getLong("id"));
+                p.setText(postingObj.getString("text"));
+
+                postings.add(p);
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch(JSONException e) {
+            e.printStackTrace();
+            return false;
         }
 
         for(ExpPosting p : postings) {
@@ -134,20 +174,19 @@ public class ExpPostingLoader {
         return true;
     }
 
-    private List<ExpPosting> getLastLocalPostings() {
+    private List<ExpPosting> getLastLocalPostings(int limit) {
         List<ExpPosting> postings = new ArrayList<ExpPosting>();
 
-        for(ExpPosting p : ExpPosting.find(ExpPosting.class, null, null, null, null, "10")) {
+        for(ExpPosting p : ExpPosting.find(ExpPosting.class, null, null, null, null, "" + limit)) {
             postings.add(p);
         }
 
         return postings;
     }
 
-    private List<Integer> getMissingIdsFromServer(int since) {
+    private List<Integer> getMissingIDsFromServer(int since) {
         List<Integer> missingIds = new ArrayList<Integer>();
 
-        // TODO: Get IDs from server
         int lastKnownId = loadInt(KEY_LAST_KNOWN_ID);
 
         OkHttpClient client = new OkHttpClient();
