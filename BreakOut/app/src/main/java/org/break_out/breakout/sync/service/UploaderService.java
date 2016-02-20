@@ -61,8 +61,6 @@ public class UploaderService extends Service {
      * @return The next entity to be uploaded, updated or deleted on server or null
      */
     private SyncEntity getNextPendingUpload() {
-
-        List<SyncEntity> entitiesToUpload = new ArrayList<SyncEntity>();
         String whereClause = SyncEntity.IS_UPLOADING_NAME + " = ? OR " + SyncEntity.IS_UPDATING_NAME + " = ? OR " + SyncEntity.IS_DELETING + " = ?";
         String[] attrs = {"1", "1", "1"};
 

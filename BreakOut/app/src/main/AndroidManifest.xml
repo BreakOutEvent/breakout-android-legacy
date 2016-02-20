@@ -21,7 +21,7 @@
 
         <service android:name=".sync.service.UploaderService" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".experimental.ExpPostingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
