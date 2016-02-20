@@ -8,4 +8,5 @@
     <color name="white_transparent_50">#8FFF</color>
     <color name="white_transparent_80">#CFFF</color>
     <color name="black_transparent">#4000</color>
+    <color name="black_transparent_50">#8000</color>
 </resources>

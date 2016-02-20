@@ -37,6 +37,8 @@ public abstract class BOUnderlinedView extends FrameLayout {
 
     private String _hint = "";
 
+    private boolean _isUnderlined = true;
+
     private float _touchStartX, _touchStartY;
 
     public BOUnderlinedView(Context context) {
@@ -82,6 +84,8 @@ public abstract class BOUnderlinedView extends FrameLayout {
             // Drawables
             int drawableLeft = ta.getResourceId(R.styleable.BOUnderlinedView_drawableLeft, -1);
             int drawableRight = ta.getResourceId(R.styleable.BOUnderlinedView_drawableRight, -1);
+            float drawableLeftAlpha = ta.getFloat(R.styleable.BOUnderlinedView_drawableLeftAlpha, 1.0f);
+            float drawableRightAlpha = ta.getFloat(R.styleable.BOUnderlinedView_drawableRightAlpha, 1.0f);
 
             if(drawableLeft != -1) {
                 _ivDrawableLeft.setImageResource(drawableLeft);
@@ -95,11 +99,20 @@ public abstract class BOUnderlinedView extends FrameLayout {
                 _ivDrawableRight.setVisibility(View.GONE);
             }
 
+            // Set alpha values
+            _ivDrawableLeft.setAlpha(drawableLeftAlpha);
+            _ivDrawableRight.setAlpha(drawableRightAlpha);
+
             // Hint
             String hint = ta.getString(R.styleable.BOUnderlinedView_android_hint);
             if(hint != null) {
                 _hint = hint;
             }
+
+            // Underlined or not
+            _isUnderlined = ta.getBoolean(R.styleable.BOUnderlinedView_underlined, true);
+            _vUnderlineNormal.setVisibility(_isUnderlined ? View.VISIBLE : View.GONE);
+            _vUnderlineHighlight.setVisibility(_isUnderlined ? View.VISIBLE : View.GONE);
         } finally {
             ta.recycle();
         }
@@ -236,13 +249,17 @@ public abstract class BOUnderlinedView extends FrameLayout {
     }
 
     public void highlight() {
-        _vUnderlineNormal.setVisibility(View.GONE);
-        _vUnderlineHighlight.setVisibility(View.VISIBLE);
+        if(_isUnderlined) {
+            _vUnderlineNormal.setVisibility(View.GONE);
+            _vUnderlineHighlight.setVisibility(View.VISIBLE);
+        }
     }
 
     public void unhighlight() {
-        _vUnderlineNormal.setVisibility(View.VISIBLE);
-        _vUnderlineHighlight.setVisibility(View.GONE);
+        if(_isUnderlined) {
+            _vUnderlineNormal.setVisibility(View.VISIBLE);
+            _vUnderlineHighlight.setVisibility(View.GONE);
+        }
     }
 
     /**

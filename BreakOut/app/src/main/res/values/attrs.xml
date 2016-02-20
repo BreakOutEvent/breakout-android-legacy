@@ -3,7 +3,10 @@
     <declare-styleable name="BOUnderlinedView">
         <attr name="drawableLeft" format="reference"/>
         <attr name="drawableRight" format="reference"/>
+        <attr name="drawableLeftAlpha" format="float"/>
+        <attr name="drawableRightAlpha" format="float"/>
         <attr name="android:hint"/>
+        <attr name="underlined" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="BOSpinner">

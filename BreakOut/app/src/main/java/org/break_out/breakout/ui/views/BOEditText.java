@@ -44,7 +44,7 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
         editText.setPadding(0, 0, 0, 0);
         editText.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
-        // Remove background (underline)
+        // Remove default background (underline)
         if(android.os.Build.VERSION.SDK_INT >= 16) {
             editText.setBackground(null);
         } else {
