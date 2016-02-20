@@ -22,7 +22,7 @@
     <string name="popup_usernamePassword">Please enter an email and a password.</string>
     <string name="textview_about">What is BreakOut?</string>
     <string name="button_login">Login</string>
-    <string name="button_participate">Participate (fee required)</string>
+    <string name="button_participate_fee_required">Participate (fee required)</string>
     <string name="button_register">Register</string>
     <string name="button_start_register">Register for free</string>
 
