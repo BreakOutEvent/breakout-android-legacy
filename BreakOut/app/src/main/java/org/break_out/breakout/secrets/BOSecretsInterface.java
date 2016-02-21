@@ -16,4 +16,6 @@ public interface BOSecretsInterface {
 
     public String getInstabugToken();
 
+    public String getFlurryToken();
+
 }
