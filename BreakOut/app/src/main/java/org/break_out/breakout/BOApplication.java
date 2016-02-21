@@ -2,6 +2,7 @@ package org.break_out.breakout;
 
 import android.app.Application;
 
+import com.flurry.android.FlurryAgent;
 import com.instabug.library.Instabug;
 
 import org.break_out.breakout.secrets.BOSecrets;
@@ -15,7 +16,15 @@ public class BOApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Instabug.initialize(this, new BOSecrets().getInstabugToken());
+        BOSecrets secrets = new BOSecrets();
+
+        Instabug.initialize(this, secrets.getInstabugToken());
+
+        // configure Flurry
+        FlurryAgent.setLogEnabled(false);
+
+        // init Flurry
+        FlurryAgent.init(this, secrets.getFlurryToken());
     }
 
 }

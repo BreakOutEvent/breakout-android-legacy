@@ -2,6 +2,8 @@ package org.break_out.breakout;
 
 import android.os.Bundle;
 
+import com.flurry.android.FlurryAgent;
+
 public class MainActivity extends BOActivity {
 
     @Override
