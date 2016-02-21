@@ -83,11 +83,11 @@ public abstract class SyncEntity extends SugarRecord {
         return _isDeleting;
     }
 
-    public abstract boolean uploadToServer();
+    public abstract boolean uploadToServerSync();
 
-    public abstract boolean updateOnServer();
+    public abstract boolean updateOnServerSync();
 
-    public abstract boolean deleteOnServer();
+    public abstract boolean deleteOnServerSync();
 
     @Override
     public boolean equals(Object obj) {

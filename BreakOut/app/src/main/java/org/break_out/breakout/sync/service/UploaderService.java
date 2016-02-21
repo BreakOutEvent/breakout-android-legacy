@@ -6,12 +6,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
 import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.BOSyncReceiver;
-import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.sync.model.SyncEntity;
 
 import java.util.ArrayList;
@@ -104,13 +100,13 @@ public class UploaderService extends Service {
                     boolean success = false;
                     switch(entity.getState()) {
                         case UPLOADING:
-                            success = entity.uploadToServer();
+                            success = entity.uploadToServerSync();
                             break;
                         case UPDATING:
-                            success = entity.updateOnServer();
+                            success = entity.updateOnServerSync();
                             break;
                         case DELETING:
-                            success = entity.deleteOnServer();
+                            success = entity.deleteOnServerSync();
                             break;
                     }
 

@@ -1,11 +1,14 @@
 package org.break_out.breakout.sync.model;
 
 import android.location.Location;
-import android.util.Log;
 
 import com.orm.dsl.Ignore;
 
+import org.break_out.breakout.sync.BOEntityLoader;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -59,7 +62,7 @@ public class Posting extends SyncEntity {
     }
 
     @Override
-    public boolean uploadToServer() {
+    public boolean uploadToServerSync() {
         boolean success = false;
 
         // Get current timestamp as the sent timestamp
@@ -90,15 +93,28 @@ public class Posting extends SyncEntity {
     }
 
     @Override
-    public boolean updateOnServer() {
+    public boolean updateOnServerSync() {
         // TODO: Currently randomly returns success or failure
         return (Math.random() > 0.5);
     }
 
     @Override
-    public boolean deleteOnServer() {
+    public boolean deleteOnServerSync() {
         // TODO: Currently randomly returns success or failure
         return (Math.random() > 0.5);
+    }
+
+    public static PostingLoader getLoader() {
+        return new PostingLoader();
+    }
+
+    public static class PostingLoader implements BOEntityLoader<Posting> {
+
+        @Override
+        public List<Posting> load(int first, int last) {
+            // TODO
+            return new ArrayList<Posting>();
+        }
     }
 
     @Override

@@ -16,6 +16,8 @@ import java.util.List;
  */
 public class BOSyncController {
 
+    private static final String TAG = "BOSyncController";
+
     private static BOSyncController _instance = null;
 
     private List<Class<? extends SyncEntity>> _entities = new ArrayList<>();
@@ -54,6 +56,8 @@ public class BOSyncController {
     }
 
     public void registerUploadListener(DataChangedListener listener) {
+        // TODO: Make it possible to register listeners only for a certain entity class
+
         if(listener != null && !_listeners.contains(listener)) {
             _listeners.add(listener);
         }
@@ -82,9 +86,9 @@ public class BOSyncController {
         entity.save();
         notifyDataChangedListeners();
 
-        Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
+        Log.d(TAG, "Saved entity " + entity.toString());
         tryUploadAll();
-        Log.i("breakout", "[BOSyncController] Called Service");
+        Log.d(TAG, "Called Service");
     }
 
     public void update(SyncEntity entity) {
@@ -93,13 +97,29 @@ public class BOSyncController {
         entity.save();
         notifyDataChangedListeners();
 
-        Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
+        Log.d(TAG, "Saved entity " + entity.toString());
         tryUploadAll();
-        Log.i("breakout", "[BOSyncController] Called Service");
+        Log.d(TAG, "Called Service");
     }
 
     public <T extends SyncEntity> List<T> getAll(Class<T> type) {
         return SyncEntity.listAll(type);
+    }
+
+    /**
+     * Call this method to get all entities with IDs within a certain range (between
+     * first and last). The loader is an implementation of {@link BOEntityLoader} and implements
+     * the actual download and DB access for the entity. For hints on how to implement it see {@link BOEntityLoader}.
+     *
+     * @param first The first ID in the range you want to get
+     * @param last The last ID in the range you want to get
+     * @param loader A loader handling the loading of the specific entity
+     * @param <T> Your entities
+     * @return
+     */
+    public <T extends SyncEntity> List<T> get(int first, int last, BOEntityLoader<T> loader) {
+        // TODO
+        return loader.load(first, last);
     }
 
     public void delete(SyncEntity entity) {
@@ -108,9 +128,9 @@ public class BOSyncController {
         entity.save();
         notifyDataChangedListeners();
 
-        Log.i("breakout", "[BOSyncController] Saved entity " + entity.toString());
+        Log.d(TAG, "Saved entity " + entity.toString());
         tryUploadAll();
-        Log.i("breakout", "[BOSyncController] Called Service");
+        Log.d(TAG, "Called Service");
     }
 
 }
