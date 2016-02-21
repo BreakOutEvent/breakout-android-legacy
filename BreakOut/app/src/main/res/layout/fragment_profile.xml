@@ -3,12 +3,16 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:layout_marginBottom="@dimen/default_screen_padding"
+              android:layout_marginTop="@dimen/default_screen_padding"
               android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/default_screen_padding"
+        android:paddingRight="@dimen/default_screen_padding">
 
         <ImageView
             android:layout_width="64dp"
@@ -44,6 +48,7 @@
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/default_screen_padding"
         android:text="Bild ändern"
         android:textColor="@color/colorPrimary"/>
 
@@ -54,41 +59,49 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/default_screen_padding">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_mail_outline_black_24dp"
-            android:alpha="0.54"/>
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="t.est@example.com"
-            android:gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:inputType="textEmailAddress"/>
+            android:layout_height="wrap_content">
 
-    </LinearLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:alpha="0.54"
+                android:src="@drawable/ic_mail_outline_black_24dp"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"
+                android:inputType="textEmailAddress"
+                android:text="t.est@example.com"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_lock_outline_black_24dp"
-            android:alpha="0.54"/>
+        </LinearLayout>
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="secret password"
-            android:gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:inputType="textPassword"/>
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:alpha="0.54"
+                android:src="@drawable/ic_lock_outline_black_24dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"
+                android:inputType="textPassword"
+                android:text="secret password"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -97,29 +110,37 @@
         android:layout_height="1dp"
         android:background="@color/black_transparent_50"/>
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Event information"
-        android:textColor="@color/colorPrimary"
-        android:textStyle="bold"/>
+        android:orientation="vertical"
+        android:padding="@dimen/default_screen_padding">
 
-    <org.break_out.breakout.ui.views.BOSpinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:drawableLeft="@drawable/ic_wc_black_24dp"
-        app:drawableLeftAlpha="0.54"
-        app:underlined="false"
-        android:entries="@array/gender_array"
-        android:hint="@string/hint_gender"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event information"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"/>
 
-    <org.break_out.breakout.ui.views.BOSpinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:drawableLeft="@drawable/ic_tshirt_black_24dp"
-        app:drawableLeftAlpha="0.54"
-        app:underlined="false"
-        android:entries="@array/t_shirt_size_array"
-        android:hint="@string/hint_t_shirt_size"/>
+        <org.break_out.breakout.ui.views.BOSpinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/gender_array"
+            android:hint="@string/hint_gender"
+            app:drawableLeft="@drawable/ic_wc_black_24dp"
+            app:drawableLeftAlpha="0.54"
+            app:underlined="false"/>
+
+        <org.break_out.breakout.ui.views.BOSpinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/t_shirt_size_array"
+            android:hint="@string/hint_t_shirt_size"
+            app:drawableLeft="@drawable/ic_tshirt_black_24dp"
+            app:drawableLeftAlpha="0.54"
+            app:underlined="false"/>
+
+    </LinearLayout>
 
 </LinearLayout>

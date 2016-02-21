@@ -1,7 +1,6 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="default_screen_padding">16dp</dimen>
 
     <!-- These items can be used to express match_parent and wrap_content in dimension resources -->
     <item name="match_parent" type="dimen">-1</item>
