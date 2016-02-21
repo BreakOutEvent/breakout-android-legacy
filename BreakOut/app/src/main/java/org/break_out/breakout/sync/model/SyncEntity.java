@@ -17,15 +17,25 @@ public abstract class SyncEntity extends SugarRecord {
     @Ignore
     public static final String IS_DELETING = "_is_deleting";
 
-    private boolean _isUploading;
-    private boolean _isUpdating;
-    private boolean _isDeleting;
+    @Ignore
+    public static final String IS_DOWNLOADING = "_is_downloading";
+
+    @Ignore
+    public static final String DOWNLOAD_PRIORITY = "_download_priorty";
+
+    private boolean _isUploading = false;
+    private boolean _isUpdating = false;
+    private boolean _isDeleting = false;
+    private boolean _isDownloading = false;
+
+    private int _downloadPriority = 0;
 
     @Ignore
     public enum SyncState {
         UPLOADING,
         UPDATING,
         DELETING,
+        DOWNLOADING,
         NORMAL
     }
 
@@ -40,21 +50,31 @@ public abstract class SyncEntity extends SugarRecord {
                 _isUploading = true;
                 _isUpdating = false;
                 _isDeleting = false;
+                _isDownloading = false;
                 break;
             case UPDATING:
                 _isUploading = false;
                 _isUpdating = true;
                 _isDeleting = false;
+                _isDownloading = false;
                 break;
             case DELETING:
                 _isUploading = false;
                 _isUpdating = false;
                 _isDeleting = true;
+                _isDownloading = false;
+                break;
+            case DOWNLOADING:
+                _isUploading = false;
+                _isUpdating = false;
+                _isDeleting = false;
+                _isDownloading = true;
                 break;
             default:
                 _isUploading = false;
                 _isUpdating = false;
                 _isDeleting = false;
+                _isDownloading = false;
                 break;
         }
     }
@@ -66,6 +86,8 @@ public abstract class SyncEntity extends SugarRecord {
             return SyncState.UPDATING;
         } else if(_isDeleting) {
             return SyncState.DELETING;
+        } else if(_isDownloading) {
+            return SyncState.DOWNLOADING;
         } else {
             return SyncState.NORMAL;
         }
@@ -81,6 +103,10 @@ public abstract class SyncEntity extends SugarRecord {
 
     public boolean isDeleting() {
         return _isDeleting;
+    }
+
+    public boolean isDownloading() {
+        return _isDownloading;
     }
 
     public abstract boolean uploadToServerSync();

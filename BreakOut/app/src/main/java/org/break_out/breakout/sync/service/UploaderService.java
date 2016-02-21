@@ -17,16 +17,20 @@ import java.util.List;
  * This Service will iterate over all entities returned by {@link BOSyncController#getEntityClasses()}
  * and upload the pending uploads, updates and deletions.
  *
+ * <br /><br />
+ *
  * Created by Tino on 18.12.2015.
  */
 public class UploaderService extends Service {
+
+    private static final String TAG = "UploaderService";
 
     private boolean _isRunning = false;
     private List<SyncEntity> _processedEntities = new ArrayList<SyncEntity>();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("breakout", "[UploaderService] --- START COMMAND ---");
+        Log.d(TAG, "--- START COMMAND ---");
 
         startUploading();
         return START_STICKY;
@@ -80,7 +84,7 @@ public class UploaderService extends Service {
         broadcastIntent.setAction(BOSyncReceiver.ACTION);
         sendBroadcast(broadcastIntent);
 
-        Log.i("breakout", "[UploaderService] Sent broadcast");
+        Log.d(TAG, "Sent broadcast");
     }
 
     private class UploaderThread extends Thread {
@@ -94,7 +98,7 @@ public class UploaderService extends Service {
                 if(entity == null) {
                     _isRunning = false;
                 } else {
-                    Log.i("breakout", "[UploaderService] Starting upload of \"" + entity.toString() + "\"");
+                    Log.d(TAG, "Starting upload of \"" + entity.toString() + "\"");
 
                     // Upload, update or delete entity
                     boolean success = false;
@@ -111,7 +115,7 @@ public class UploaderService extends Service {
                     }
 
                     if(success) {
-                        Log.i("breakout", "[UploaderService] > " + entity.getState().toString() + " operation on server successful");
+                        Log.d(TAG, entity.getState().toString() + " operation on server successful");
 
                         if(entity.getState() != SyncEntity.SyncState.DELETING) {
                             // Update local DB with NORMAL state
@@ -125,14 +129,14 @@ public class UploaderService extends Service {
                         // Send broadcast indicating the change of the data
                         sendResult();
                     } else {
-                        Log.i("breakout", "[UploaderService] > " + entity.getState().toString() + " operation on server failed");
+                        Log.d(TAG, entity.getState().toString() + " operation on server failed");
                     }
                 }
             }
 
             stopSelf();
 
-            Log.i("breakout", "[UploaderService] --- STOPPED SERVICE ---");
+            Log.d(TAG, "--- STOPPED SERVICE ---");
         }
     }
 

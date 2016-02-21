@@ -9,8 +9,10 @@ import java.util.List;
  * functionality for an Entity. The {@link BOSyncController} will use
  * implementations of this loader interface to load entities (download
  * and/or get from local DB) in the {@link BOSyncController#get(int, int, BOEntityLoader)}
- * method.<br />
- * The recommended way to implement this interface is the following:<br />
+ * method.
+ * <br />
+ * The recommended way to implement this interface is the following:
+ * <br />
  * <ol>
  *     <li>Create a static inner class implementing {@link BOEntityLoader} in your
  *     entity class with the entity class as the generic type.</li>
