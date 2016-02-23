@@ -4,7 +4,7 @@ import android.location.Location;
 
 import com.orm.dsl.Ignore;
 
-import org.break_out.breakout.sync.BOEntityLoader;
+import org.break_out.breakout.sync.BOEntityDownloader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,24 +104,36 @@ public class Posting extends SyncEntity {
         return (Math.random() > 0.5);
     }
 
-    public static PostingLoader getLoader() {
-        return new PostingLoader();
+    public static PostingDownloader getDownloader() {
+        return new PostingDownloader();
     }
 
-    public static class PostingLoader implements BOEntityLoader<Posting> {
+    public static class PostingDownloader extends BOEntityDownloader<Posting> {
 
         @Override
-        public List<Posting> load(int first, int last) {
-            // TODO
-            return new ArrayList<Posting>();
+        public List<Posting> download(List<Long> idsToDownload) {
+            // TODO: Replace this dummy code
+
+            List<Posting> postings = new ArrayList<Posting>();
+
+            if(idsToDownload.size() > 0) {
+                Posting p = new Posting();
+                p.setId(idsToDownload.get((int) (Math.random() * idsToDownload.size())));
+                p.setText("Placeholder text");
+
+                postings.add(p);
+            }
+
+            return postings;
         }
     }
 
     @Override
     public String toString() {
         return "Posting{" +
-                "text='" + _text + '\'' +
-                "state='" + getState() + '\'' +
+                "text(" + _text + ") " +
+                "state=(" + getState() + ") " +
+                "downPrio=(" + getDownloadPriority() + ")" +
                 "}";
     }
 

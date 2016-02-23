@@ -19,9 +19,10 @@
         <meta-data android:name="QUERY_LOG" android:value="false" />
         <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="org.break_out.breakout" />
 
-        <service android:name=".sync.service.UploaderService" />
+        <service android:name=".sync.service.UploadService" />
+        <service android:name=".sync.service.DownloadService" />
 
-        <activity android:name=".experimental.ExpPostingActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

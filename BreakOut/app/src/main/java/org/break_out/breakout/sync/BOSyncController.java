@@ -6,10 +6,13 @@ import android.util.Log;
 
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.sync.model.SyncEntity;
-import org.break_out.breakout.sync.service.UploaderService;
+import org.break_out.breakout.sync.service.UploadService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Tino on 07.01.2016.
@@ -20,7 +23,7 @@ public class BOSyncController {
 
     private static BOSyncController _instance = null;
 
-    private List<Class<? extends SyncEntity>> _entities = new ArrayList<>();
+    private Map<Class<? extends SyncEntity>, BOEntityDownloader<? extends SyncEntity>> _entities = new HashMap<>();
     private Context _context = null;
 
     private List<DataChangedListener> _listeners = new ArrayList<DataChangedListener>();
@@ -44,15 +47,25 @@ public class BOSyncController {
     }
 
     private void initEntities() {
-        // The order of the entities represents the priority (first -> most important)
-
-        // Highest priority
-        _entities.add(Posting.class);
-        // Lowest priority
+        // Register all your entities here
+        registerEntity(Posting.class, Posting.getDownloader());
     }
 
-    public List<Class<? extends SyncEntity>> getEntityClasses() {
-        return _entities;
+    private <T extends SyncEntity> void registerEntity(Class<T> type, BOEntityDownloader<T> entityLoader) {
+        _entities.put(type, entityLoader);
+    }
+
+    public Set<Class<? extends SyncEntity>> getEntityClasses() {
+        return _entities.keySet();
+    }
+
+    public <T extends SyncEntity> BOEntityDownloader<T> getDownloader(Class<T> type) {
+        if(!_entities.keySet().contains(type)) {
+            Log.e(TAG, "Cannot get the downloader for the entity type " + type.getSimpleName() + "! Have you registered this entity type?");
+            return null;
+        }
+
+        return (BOEntityDownloader<T>) _entities.get(type);
     }
 
     public void registerUploadListener(DataChangedListener listener) {
@@ -76,7 +89,7 @@ public class BOSyncController {
     }
 
     public void tryUploadAll() {
-        Intent intent = new Intent(_context, UploaderService.class);
+        Intent intent = new Intent(_context, UploadService.class);
         _context.startService(intent);
     }
 
@@ -102,24 +115,16 @@ public class BOSyncController {
         Log.d(TAG, "Called Service");
     }
 
-    public <T extends SyncEntity> List<T> getAll(Class<T> type) {
-        return SyncEntity.listAll(type);
-    }
-
     /**
-     * Call this method to get all entities with IDs within a certain range (between
-     * first and last). The loader is an implementation of {@link BOEntityLoader} and implements
-     * the actual download and DB access for the entity. For hints on how to implement it see {@link BOEntityLoader}.
+     * Returns all items of the given entity type from the
+     * <b>local database</b>.
      *
-     * @param first The first ID in the range you want to get
-     * @param last The last ID in the range you want to get
-     * @param loader A loader handling the loading of the specific entity
-     * @param <T> Your entities
-     * @return
+     * @param type The type of entity you want to receive
+     * @param <T> The tpye of entity you want to receive
+     * @return A list of all items of that entity type from the local database
      */
-    public <T extends SyncEntity> List<T> get(int first, int last, BOEntityLoader<T> loader) {
-        // TODO
-        return loader.load(first, last);
+    public <T extends SyncEntity> List<T> getAll(Class<T> type) {
+        return T.listAll(type);
     }
 
     public void delete(SyncEntity entity) {

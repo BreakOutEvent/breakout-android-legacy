@@ -21,7 +21,7 @@ public abstract class SyncEntity extends SugarRecord {
     public static final String IS_DOWNLOADING = "_is_downloading";
 
     @Ignore
-    public static final String DOWNLOAD_PRIORITY = "_download_priorty";
+    public static final String DOWNLOAD_PRIORITY = "_download_priority";
 
     private boolean _isUploading = false;
     private boolean _isUpdating = false;
@@ -29,6 +29,8 @@ public abstract class SyncEntity extends SugarRecord {
     private boolean _isDownloading = false;
 
     private int _downloadPriority = 0;
+
+    private boolean _isDeleted = false;
 
     @Ignore
     public enum SyncState {
@@ -63,6 +65,10 @@ public abstract class SyncEntity extends SugarRecord {
                 _isUpdating = false;
                 _isDeleting = true;
                 _isDownloading = false;
+
+                // Mark as deleted
+                markAsDeleted();
+
                 break;
             case DOWNLOADING:
                 _isUploading = false;
@@ -114,6 +120,26 @@ public abstract class SyncEntity extends SugarRecord {
     public abstract boolean updateOnServerSync();
 
     public abstract boolean deleteOnServerSync();
+
+    public void setDownloadPriority(int priority) {
+        if(priority < 0) {
+            priority = 0;
+        }
+
+        _downloadPriority = priority;
+    }
+
+    public int getDownloadPriority() {
+        return _downloadPriority;
+    }
+
+    private void markAsDeleted() {
+        _isDeleted = true;
+    }
+
+    public boolean isDeleted() {
+        return _isDeleted;
+    }
 
     @Override
     public boolean equals(Object obj) {

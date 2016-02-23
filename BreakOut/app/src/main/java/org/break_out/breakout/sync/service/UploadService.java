@@ -21,9 +21,9 @@ import java.util.List;
  *
  * Created by Tino on 18.12.2015.
  */
-public class UploaderService extends Service {
+public class UploadService extends Service {
 
-    private static final String TAG = "UploaderService";
+    private static final String TAG = "UploadService";
 
     private boolean _isRunning = false;
     private List<SyncEntity> _processedEntities = new ArrayList<SyncEntity>();
@@ -64,8 +64,7 @@ public class UploaderService extends Service {
         String whereClause = SyncEntity.IS_UPLOADING_NAME + " = ? OR " + SyncEntity.IS_UPDATING_NAME + " = ? OR " + SyncEntity.IS_DELETING + " = ?";
         String[] attrs = {"1", "1", "1"};
 
-        List<Class<? extends SyncEntity>> entityClasses = BOSyncController.getInstance(this).getEntityClasses();
-        for(Class<? extends SyncEntity> entityClass : entityClasses) {
+        for(Class<? extends SyncEntity> entityClass : BOSyncController.getInstance(this).getEntityClasses()) {
             List<? extends SyncEntity> candidates = SyncEntity.find(entityClass, whereClause , attrs);
 
             for(SyncEntity entity : candidates) {
@@ -117,14 +116,8 @@ public class UploaderService extends Service {
                     if(success) {
                         Log.d(TAG, entity.getState().toString() + " operation on server successful");
 
-                        if(entity.getState() != SyncEntity.SyncState.DELETING) {
-                            // Update local DB with NORMAL state
-                            entity.setState(SyncEntity.SyncState.NORMAL);
-                            entity.save();
-                        } else {
-                            // Delete entity locally
-                            entity.delete();
-                        }
+                        // Update local DB with NORMAL state
+                        entity.setState(SyncEntity.SyncState.NORMAL);
 
                         // Send broadcast indicating the change of the data
                         sendResult();
