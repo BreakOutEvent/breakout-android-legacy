@@ -26,7 +26,7 @@ public class BOSyncController {
     private Map<Class<? extends SyncEntity>, BOEntityDownloader<? extends SyncEntity>> _entities = new HashMap<>();
     private Context _context = null;
 
-    private List<DataChangedListener> _listeners = new ArrayList<DataChangedListener>();
+    private Map<Class<? extends SyncEntity>, List<DataChangedListener>> _listeners = new HashMap<>();
 
     public interface DataChangedListener {
         public void dataChanged();
@@ -68,22 +68,38 @@ public class BOSyncController {
         return (BOEntityDownloader<T>) _entities.get(type);
     }
 
-    public void registerUploadListener(DataChangedListener listener) {
-        // TODO: Make it possible to register listeners only for a certain entity class
+    public <T extends SyncEntity> void registerUploadListener(Class<T> entityType, DataChangedListener listener) {
+        if(!_listeners.keySet().contains(entityType)) {
+            _listeners.put(entityType, new ArrayList<DataChangedListener>());
+        }
 
-        if(listener != null && !_listeners.contains(listener)) {
-            _listeners.add(listener);
+        List<DataChangedListener> typeListeners = _listeners.get(entityType);
+
+        if(listener != null && !typeListeners.contains(listener)) {
+            typeListeners.add(listener);
         }
     }
 
     public void unregisterListener(DataChangedListener listener) {
-        if(listener != null && _listeners.contains(listener)) {
-            _listeners.remove(listener);
+        if(listener == null) {
+            return;
+        }
+
+        for(Class<? extends SyncEntity> key : _listeners.keySet()) {
+            List<DataChangedListener> typeListeners = _listeners.get(key);
+
+            if(typeListeners.contains(listener)) {
+                typeListeners.remove(listener);
+            }
         }
     }
 
-    public void notifyDataChangedListeners() {
-        for(DataChangedListener listener : _listeners) {
+    public void notifyDataChangedListeners(Class<? extends SyncEntity> type) {
+        if(!_listeners.containsKey(type) || _listeners.get(type) == null) {
+            return;
+        }
+
+        for(DataChangedListener listener : _listeners.get(type)) {
             listener.dataChanged();
         }
     }
@@ -97,7 +113,7 @@ public class BOSyncController {
         // Set sync state
         entity.setState(SyncEntity.SyncState.UPLOADING);
         entity.save();
-        notifyDataChangedListeners();
+        notifyDataChangedListeners(entity.getClass());
 
         Log.d(TAG, "Saved entity " + entity.toString());
         tryUploadAll();
@@ -108,7 +124,7 @@ public class BOSyncController {
         // Set sync state
         entity.setState(SyncEntity.SyncState.UPDATING);
         entity.save();
-        notifyDataChangedListeners();
+        notifyDataChangedListeners(entity.getClass());
 
         Log.d(TAG, "Saved entity " + entity.toString());
         tryUploadAll();
@@ -131,7 +147,7 @@ public class BOSyncController {
         // Set sync state
         entity.setState(SyncEntity.SyncState.DELETING);
         entity.save();
-        notifyDataChangedListeners();
+        notifyDataChangedListeners(entity.getClass());
 
         Log.d(TAG, "Saved entity " + entity.toString());
         tryUploadAll();

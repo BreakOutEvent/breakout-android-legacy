@@ -82,12 +82,13 @@ public class DownloadService extends Service {
         return candidateIds;
     }
 
-    private void sendResult() {
+    private void notifyDataChanged(Class<? extends SyncEntity> type) {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(BOSyncReceiver.ACTION);
+        broadcastIntent.putExtra(BOSyncReceiver.ENTITY_TYPE, type);
         sendBroadcast(broadcastIntent);
 
-        Log.d(TAG, "Sent broadcast");
+        Log.d(TAG, "Sent broadcast for entity type " + type.getSimpleName());
     }
 
     private class DownloaderThread extends Thread {
@@ -112,7 +113,7 @@ public class DownloadService extends Service {
                 }
 
                 if(downloadedSomething) {
-                    sendResult();
+                    notifyDataChanged(type);
                 }
             }
 

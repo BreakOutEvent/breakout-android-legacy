@@ -7,10 +7,7 @@ import java.util.List;
 
 /**
  * Interface to be implemented when you want to provide download
- * functionality for an Entity. The {@link BOSyncController} will use
- * implementations of this loader interface to download entities (download
- * and/or get from local DB) in the {@link BOSyncController#get(int, int, BOEntityDownloader)}
- * method.
+ * functionality for an Entity.
  * <br />
  * The recommended way to implement this interface is the following:
  * <br />

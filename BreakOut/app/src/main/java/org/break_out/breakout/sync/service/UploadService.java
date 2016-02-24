@@ -78,12 +78,13 @@ public class UploadService extends Service {
         return null;
     }
 
-    private void sendResult() {
+    private void notifyDataChanged(Class<? extends SyncEntity> type) {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(BOSyncReceiver.ACTION);
+        broadcastIntent.putExtra(BOSyncReceiver.ENTITY_TYPE, type);
         sendBroadcast(broadcastIntent);
 
-        Log.d(TAG, "Sent broadcast");
+        Log.d(TAG, "Sent broadcast for entity type " + type.getSimpleName());
     }
 
     private class UploaderThread extends Thread {
@@ -120,7 +121,7 @@ public class UploadService extends Service {
                         entity.setState(SyncEntity.SyncState.NORMAL);
 
                         // Send broadcast indicating the change of the data
-                        sendResult();
+                        notifyDataChanged(entity.getClass());
                     } else {
                         Log.d(TAG, entity.getState().toString() + " operation on server failed");
                     }

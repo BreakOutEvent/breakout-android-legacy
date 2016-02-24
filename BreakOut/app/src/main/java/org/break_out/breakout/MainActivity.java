@@ -3,6 +3,7 @@ package org.break_out.breakout;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import org.break_out.breakout.sync.BOSyncController;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements BOSyncController.DataChangedListener {
+
+    private static final String TAG = "MainActivity";
 
     private BOSyncController _syncController;
     private TextView _tv;
@@ -100,18 +103,23 @@ public class MainActivity extends AppCompatActivity implements BOSyncController.
     @Override
     public void dataChanged() {
         updateView();
+        Log.d(TAG, "Data change listener called. Refreshing view.");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
         _syncController.unregisterListener(this);
+        Log.d(TAG, "Unregistered listener");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        _syncController.registerUploadListener(this);
+
+        _syncController.registerUploadListener(Posting.class, this);
+        Log.d(TAG, "Registered listener");
         updateView();
     }
 }
