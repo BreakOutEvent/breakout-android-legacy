@@ -1,10 +1,13 @@
 package org.break_out.breakout.sync.model;
 
 import android.location.Location;
+import android.util.Log;
 
 import com.orm.dsl.Ignore;
 
 import org.break_out.breakout.sync.BOEntityDownloader;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +23,9 @@ import okhttp3.Response;
  * Created by Tino on 14.12.2015.
  */
 
-public class Posting extends SyncEntity {
+public class Posting extends BOSyncEntity {
+
+    private static final String TAG = "Posting";
 
     @Ignore
     public static final String BASE_URL = "http://breakout-development.herokuapp.com";
@@ -70,7 +75,7 @@ public class Posting extends SyncEntity {
 
         RequestBody body = RequestBody.create(JSON, toJSON());
         Request request = new Request.Builder()
-                .url(BASE_URL + "/test/post/")
+                .url(BASE_URL + "/posting/")
                 .post(body)
                 .build();
         OkHttpClient client = new OkHttpClient();
@@ -111,7 +116,7 @@ public class Posting extends SyncEntity {
     public static class PostingDownloader extends BOEntityDownloader<Posting> {
 
         @Override
-        public List<Posting> download(List<Long> idsToDownload) {
+        public List<Posting> downloadSync(List<Long> idsToDownload) {
             // TODO: Replace this dummy code
 
             List<Posting> postings = new ArrayList<Posting>();
@@ -126,11 +131,45 @@ public class Posting extends SyncEntity {
 
             return postings;
         }
+
+        @Override
+        public List<Long> downloadNewIDsSync(long lastKnownId) {
+            List<Long> newIds = new ArrayList<Long>();
+
+            Request request = new Request.Builder()
+                    .url(BASE_URL + "/posting/get/since/" + lastKnownId + "/")
+                    .build();
+
+            OkHttpClient client = new OkHttpClient();
+
+            try {
+                Response response = response = client.newCall(request).execute();
+                if(response.code() == 200) {
+                    String jsonString = response.body().string();
+                    if(jsonString == null) {
+                        return newIds;
+                    }
+
+                    JSONArray idArr = new JSONArray(jsonString);
+
+                    for(int i = 0; i < idArr.length(); i++) {
+                        newIds.add(idArr.getLong(i));
+                    }
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            } catch(JSONException e) {
+                e.printStackTrace();
+                Log.d(TAG, "Requesting the server for new IDs didn't return a JSON array");
+            }
+
+            return newIds;
+        }
     }
 
     @Override
     public String toString() {
-        return "Posting{" +
+        return "Posting(" + getId() + ") {" +
                 "text(" + _text + ") " +
                 "state=(" + getState() + ") " +
                 "downPrio=(" + getDownloadPriority() + ")" +

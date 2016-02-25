@@ -6,22 +6,25 @@ import com.orm.dsl.Ignore;
 /**
  * Created by Tino on 07.01.2016.
  */
-public abstract class SyncEntity extends SugarRecord {
+public abstract class BOSyncEntity extends SugarRecord {
 
     @Ignore
-    public static final String IS_UPLOADING_NAME = "_is_uploading";
+    public static final String ID_COLUMN = "id";
 
     @Ignore
-    public static final String IS_UPDATING_NAME = "_is_updating";
+    public static final String IS_UPLOADING_COLUMN = "_is_uploading";
 
     @Ignore
-    public static final String IS_DELETING = "_is_deleting";
+    public static final String IS_UPDATING_COLUMN = "_is_updating";
 
     @Ignore
-    public static final String IS_DOWNLOADING = "_is_downloading";
+    public static final String IS_DELETING_COLUMN = "_is_deleting";
 
     @Ignore
-    public static final String DOWNLOAD_PRIORITY = "_download_priority";
+    public static final String IS_DOWNLOADING_COLUMN = "_is_downloading";
+
+    @Ignore
+    public static final String DOWNLOAD_PRIORITY_COLUMN = "_download_priority";
 
     private boolean _isUploading = false;
     private boolean _isUpdating = false;
@@ -42,7 +45,7 @@ public abstract class SyncEntity extends SugarRecord {
     }
 
     // SugarORM needs an empty constructor
-    public SyncEntity() {
+    public BOSyncEntity() {
 
     }
 
@@ -147,11 +150,11 @@ public abstract class SyncEntity extends SugarRecord {
             return false;
         }
 
-        if(!(obj instanceof SyncEntity)) {
+        if(!(obj instanceof BOSyncEntity)) {
             return false;
         }
 
-        final SyncEntity other = (SyncEntity) obj;
+        final BOSyncEntity other = (BOSyncEntity) obj;
         if(getId() != other.getId()) {
             return false;
         }

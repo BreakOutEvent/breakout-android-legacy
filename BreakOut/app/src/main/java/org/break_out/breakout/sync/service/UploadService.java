@@ -8,7 +8,7 @@ import android.util.Log;
 
 import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.BOSyncReceiver;
-import org.break_out.breakout.sync.model.SyncEntity;
+import org.break_out.breakout.sync.model.BOSyncEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class UploadService extends Service {
     private static final String TAG = "UploadService";
 
     private boolean _isRunning = false;
-    private List<SyncEntity> _processedEntities = new ArrayList<SyncEntity>();
+    private List<BOSyncEntity> _processedEntities = new ArrayList<BOSyncEntity>();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -60,14 +60,14 @@ public class UploadService extends Service {
      *
      * @return The next entity to be uploaded, updated or deleted on server or null
      */
-    private SyncEntity getNextPendingUpload() {
-        String whereClause = SyncEntity.IS_UPLOADING_NAME + " = ? OR " + SyncEntity.IS_UPDATING_NAME + " = ? OR " + SyncEntity.IS_DELETING + " = ?";
+    private BOSyncEntity getNextPendingUpload() {
+        String whereClause = BOSyncEntity.IS_UPLOADING_COLUMN + " = ? OR " + BOSyncEntity.IS_UPDATING_COLUMN + " = ? OR " + BOSyncEntity.IS_DELETING_COLUMN + " = ?";
         String[] attrs = {"1", "1", "1"};
 
-        for(Class<? extends SyncEntity> entityClass : BOSyncController.getInstance(this).getEntityClasses()) {
-            List<? extends SyncEntity> candidates = SyncEntity.find(entityClass, whereClause , attrs);
+        for(Class<? extends BOSyncEntity> entityClass : BOSyncController.getInstance(this).getEntityClasses()) {
+            List<? extends BOSyncEntity> candidates = BOSyncEntity.find(entityClass, whereClause, attrs);
 
-            for(SyncEntity entity : candidates) {
+            for(BOSyncEntity entity : candidates) {
                 if(!_processedEntities.contains(entity)) {
                     _processedEntities.add(entity);
                     return entity;
@@ -78,10 +78,11 @@ public class UploadService extends Service {
         return null;
     }
 
-    private void notifyDataChanged(Class<? extends SyncEntity> type) {
+    private void notifyDataChanged(Class<? extends BOSyncEntity> type) {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(BOSyncReceiver.ACTION);
         broadcastIntent.putExtra(BOSyncReceiver.ENTITY_TYPE, type);
+        broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         sendBroadcast(broadcastIntent);
 
         Log.d(TAG, "Sent broadcast for entity type " + type.getSimpleName());
@@ -93,7 +94,7 @@ public class UploadService extends Service {
         public void run() {
 
             while(_isRunning) {
-                SyncEntity entity = getNextPendingUpload();
+                BOSyncEntity entity = getNextPendingUpload();
 
                 if(entity == null) {
                     _isRunning = false;
@@ -118,7 +119,7 @@ public class UploadService extends Service {
                         Log.d(TAG, entity.getState().toString() + " operation on server successful");
 
                         // Update local DB with NORMAL state
-                        entity.setState(SyncEntity.SyncState.NORMAL);
+                        entity.setState(BOSyncEntity.SyncState.NORMAL);
 
                         // Send broadcast indicating the change of the data
                         notifyDataChanged(entity.getClass());

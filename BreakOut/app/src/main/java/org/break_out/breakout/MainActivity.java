@@ -1,6 +1,5 @@
 package org.break_out.breakout;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -8,8 +7,7 @@ import android.widget.TextView;
 
 import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.model.Posting;
-import org.break_out.breakout.sync.model.SyncEntity;
-import org.break_out.breakout.sync.service.DownloadService;
+import org.break_out.breakout.sync.model.BOSyncEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,16 +32,18 @@ public class MainActivity extends AppCompatActivity implements BOSyncController.
 
         _tv = (TextView) findViewById(R.id.textview);
 
-        // For testing the download:
+        // For testing the downloadSync:
 
         // First add test data
-        addTestDataMissingPostings();
+        //addTestDataMissingPostings();
 
-        // Then start download service
-        Intent intent = new Intent(this, DownloadService.class);
-        startService(intent);
+        // Then start downloadSync service
+        //Intent intent = new Intent(this, DownloadService.class);
+        //startService(intent);
 
         updateView();
+
+        _syncController.checkForNewEntities();
 
         /*
         Button addButton = (Button) findViewById(R.id.add_button);
@@ -71,19 +71,19 @@ public class MainActivity extends AppCompatActivity implements BOSyncController.
     private void addTestDataMissingPostings() {
         Posting p1 = new Posting();
         p1.setId(0L);
-        p1.setState(SyncEntity.SyncState.DOWNLOADING);
+        p1.setState(BOSyncEntity.SyncState.DOWNLOADING);
         p1.setDownloadPriority(1);
         p1.save();
 
         Posting p2 = new Posting();
         p2.setId(1L);
-        p2.setState(SyncEntity.SyncState.DOWNLOADING);
+        p2.setState(BOSyncEntity.SyncState.DOWNLOADING);
         p2.setDownloadPriority(1);
         p2.save();
 
         Posting p3 = new Posting();
         p3.setId(2L);
-        p3.setState(SyncEntity.SyncState.DOWNLOADING);
+        p3.setState(BOSyncEntity.SyncState.DOWNLOADING);
         p3.setDownloadPriority(1);
         p3.save();
     }

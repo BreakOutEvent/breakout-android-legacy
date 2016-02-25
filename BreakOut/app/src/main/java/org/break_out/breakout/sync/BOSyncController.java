@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.util.Log;
 
 import org.break_out.breakout.sync.model.Posting;
-import org.break_out.breakout.sync.model.SyncEntity;
+import org.break_out.breakout.sync.model.BOSyncEntity;
+import org.break_out.breakout.sync.service.DownloadService;
+import org.break_out.breakout.sync.service.UpdateService;
 import org.break_out.breakout.sync.service.UploadService;
 
 import java.util.ArrayList;
@@ -23,10 +25,10 @@ public class BOSyncController {
 
     private static BOSyncController _instance = null;
 
-    private Map<Class<? extends SyncEntity>, BOEntityDownloader<? extends SyncEntity>> _entities = new HashMap<>();
+    private Map<Class<? extends BOSyncEntity>, BOEntityDownloader<? extends BOSyncEntity>> _entities = new HashMap<>();
     private Context _context = null;
 
-    private Map<Class<? extends SyncEntity>, List<DataChangedListener>> _listeners = new HashMap<>();
+    private Map<Class<? extends BOSyncEntity>, List<DataChangedListener>> _listeners = new HashMap<>();
 
     public interface DataChangedListener {
         public void dataChanged();
@@ -51,15 +53,15 @@ public class BOSyncController {
         registerEntity(Posting.class, Posting.getDownloader());
     }
 
-    private <T extends SyncEntity> void registerEntity(Class<T> type, BOEntityDownloader<T> entityLoader) {
+    private <T extends BOSyncEntity> void registerEntity(Class<T> type, BOEntityDownloader<T> entityLoader) {
         _entities.put(type, entityLoader);
     }
 
-    public Set<Class<? extends SyncEntity>> getEntityClasses() {
+    public Set<Class<? extends BOSyncEntity>> getEntityClasses() {
         return _entities.keySet();
     }
 
-    public <T extends SyncEntity> BOEntityDownloader<T> getDownloader(Class<T> type) {
+    public <T extends BOSyncEntity> BOEntityDownloader<T> getDownloader(Class<T> type) {
         if(!_entities.keySet().contains(type)) {
             Log.e(TAG, "Cannot get the downloader for the entity type " + type.getSimpleName() + "! Have you registered this entity type?");
             return null;
@@ -68,7 +70,7 @@ public class BOSyncController {
         return (BOEntityDownloader<T>) _entities.get(type);
     }
 
-    public <T extends SyncEntity> void registerUploadListener(Class<T> entityType, DataChangedListener listener) {
+    public <T extends BOSyncEntity> void registerUploadListener(Class<T> entityType, DataChangedListener listener) {
         if(!_listeners.keySet().contains(entityType)) {
             _listeners.put(entityType, new ArrayList<DataChangedListener>());
         }
@@ -85,7 +87,7 @@ public class BOSyncController {
             return;
         }
 
-        for(Class<? extends SyncEntity> key : _listeners.keySet()) {
+        for(Class<? extends BOSyncEntity> key : _listeners.keySet()) {
             List<DataChangedListener> typeListeners = _listeners.get(key);
 
             if(typeListeners.contains(listener)) {
@@ -94,7 +96,7 @@ public class BOSyncController {
         }
     }
 
-    public void notifyDataChangedListeners(Class<? extends SyncEntity> type) {
+    public void notifyDataChangedListeners(Class<? extends BOSyncEntity> type) {
         if(!_listeners.containsKey(type) || _listeners.get(type) == null) {
             return;
         }
@@ -104,30 +106,44 @@ public class BOSyncController {
         }
     }
 
-    public void tryUploadAll() {
+    public void startUploadService() {
         Intent intent = new Intent(_context, UploadService.class);
         _context.startService(intent);
     }
 
-    public void upload(SyncEntity entity) {
+    public void startDownloadService() {
+        Intent intent = new Intent(_context, DownloadService.class);
+        _context.startService(intent);
+    }
+
+    public void startUpdateService() {
+        Intent intent = new Intent(_context, UpdateService.class);
+        _context.startService(intent);
+    }
+
+    public void checkForNewEntities() {
+        startUpdateService();
+    }
+
+    public void upload(BOSyncEntity entity) {
         // Set sync state
-        entity.setState(SyncEntity.SyncState.UPLOADING);
+        entity.setState(BOSyncEntity.SyncState.UPLOADING);
         entity.save();
         notifyDataChangedListeners(entity.getClass());
 
         Log.d(TAG, "Saved entity " + entity.toString());
-        tryUploadAll();
+        startUploadService();
         Log.d(TAG, "Called Service");
     }
 
-    public void update(SyncEntity entity) {
+    public void update(BOSyncEntity entity) {
         // Set sync state
-        entity.setState(SyncEntity.SyncState.UPDATING);
+        entity.setState(BOSyncEntity.SyncState.UPDATING);
         entity.save();
         notifyDataChangedListeners(entity.getClass());
 
         Log.d(TAG, "Saved entity " + entity.toString());
-        tryUploadAll();
+        startUploadService();
         Log.d(TAG, "Called Service");
     }
 
@@ -139,18 +155,52 @@ public class BOSyncController {
      * @param <T> The tpye of entity you want to receive
      * @return A list of all items of that entity type from the local database
      */
-    public <T extends SyncEntity> List<T> getAll(Class<T> type) {
+    public <T extends BOSyncEntity> List<T> getAll(Class<T> type) {
         return T.listAll(type);
     }
 
-    public void delete(SyncEntity entity) {
+    public <T extends BOSyncEntity> List<T> get(Class<T> type, long fromId, long toId) {
+        // Ensure that fromId < toId
+        if(fromId > toId) {
+            long tempId = fromId;
+            fromId = toId;
+            toId = tempId;
+        }
+
+        String[] idsToGet = new String[new Long(toId-fromId+1).intValue()];
+        for(int i = 0; i < idsToGet.length; i++) {
+            idsToGet[i] = "" + fromId + i;
+        }
+
+        List<T> localItems = T.findById(type, idsToGet);
+
+        boolean needToStartDownload = false;
+
+        // Set priorities for all items that are not downloaded yet
+        for(T item : localItems) {
+            if(item.isDownloading()) {
+                item.setDownloadPriority(1);
+                item.save();
+
+                needToStartDownload = true;
+            }
+        }
+
+        if(needToStartDownload) {
+            startDownloadService();
+        }
+
+        return localItems;
+    }
+
+    public void delete(BOSyncEntity entity) {
         // Set sync state
-        entity.setState(SyncEntity.SyncState.DELETING);
+        entity.setState(BOSyncEntity.SyncState.DELETING);
         entity.save();
         notifyDataChangedListeners(entity.getClass());
 
         Log.d(TAG, "Saved entity " + entity.toString());
-        tryUploadAll();
+        startUploadService();
         Log.d(TAG, "Called Service");
     }
 

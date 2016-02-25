@@ -13,14 +13,14 @@ import org.break_out.breakout.sync.BOEntityDownloader;
 import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.BOSyncReceiver;
 import org.break_out.breakout.sync.model.Posting;
-import org.break_out.breakout.sync.model.SyncEntity;
+import org.break_out.breakout.sync.model.BOSyncEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This Service will iterate over all entities returned by {@link BOSyncController#getEntityClasses()}
- * and download items that are still missing in the local database based on the internet connnection and
+ * and download items that are still missing in the local database based on the internet connection and
  * priorities.
  * <p/>
  * <br /><br />
@@ -57,14 +57,14 @@ public class DownloadService extends Service {
         }).start();
     }
 
-    private <T extends SyncEntity> List<Long> getIDsToDownload(Class<T> type) {
+    private <T extends BOSyncEntity> List<Long> getIDsToDownload(Class<T> type) {
         // Try to get all prioritized entries
         List<Long> candidateIds = new ArrayList<Long>();
 
         List<Posting> candidatesPrioritized =
                 Select.from(Posting.class)
-                        .where(Condition.prop(SyncEntity.IS_DOWNLOADING).eq(1),
-                                Condition.prop(SyncEntity.DOWNLOAD_PRIORITY).gt(0))
+                        .where(Condition.prop(BOSyncEntity.IS_DOWNLOADING_COLUMN).eq(1),
+                                Condition.prop(BOSyncEntity.DOWNLOAD_PRIORITY_COLUMN).gt(0))
                         .list();
 
         // Get candidates with priority
@@ -82,10 +82,11 @@ public class DownloadService extends Service {
         return candidateIds;
     }
 
-    private void notifyDataChanged(Class<? extends SyncEntity> type) {
+    private void notifyDataChanged(Class<? extends BOSyncEntity> type) {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(BOSyncReceiver.ACTION);
         broadcastIntent.putExtra(BOSyncReceiver.ENTITY_TYPE, type);
+        broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         sendBroadcast(broadcastIntent);
 
         Log.d(TAG, "Sent broadcast for entity type " + type.getSimpleName());
@@ -97,16 +98,16 @@ public class DownloadService extends Service {
         public void run() {
             BOSyncController controller = BOSyncController.getInstance(DownloadService.this);
 
-            for(Class<? extends SyncEntity> type : controller.getEntityClasses()) {
-                BOEntityDownloader<? extends SyncEntity> downloader = controller.getDownloader(type);
-                List<? extends SyncEntity> items = downloader.download(getIDsToDownload(type));
+            for(Class<? extends BOSyncEntity> type : controller.getEntityClasses()) {
+                BOEntityDownloader<? extends BOSyncEntity> downloader = controller.getDownloader(type);
+                List<? extends BOSyncEntity> items = downloader.downloadSync(getIDsToDownload(type));
 
                 boolean downloadedSomething = false;
 
-                for(SyncEntity item : items) {
+                for(BOSyncEntity item : items) {
                     downloadedSomething = true;
 
-                    item.setState(SyncEntity.SyncState.NORMAL);
+                    item.setState(BOSyncEntity.SyncState.NORMAL);
                     item.save();
 
                     Log.d(TAG, "Downloaded and saved " + item.toString());
