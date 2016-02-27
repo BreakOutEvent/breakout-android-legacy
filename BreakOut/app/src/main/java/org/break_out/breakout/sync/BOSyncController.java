@@ -160,6 +160,11 @@ public class BOSyncController {
     }
 
     public <T extends BOSyncEntity> List<T> get(Class<T> type, long fromId, long toId) {
+        if(fromId < 0 || toId < 0) {
+            Log.e(TAG, "Could not get entries from DB (fromId or toId were less than 0)!");
+            return new ArrayList<T>();
+        }
+
         // Ensure that fromId < toId
         if(fromId > toId) {
             long tempId = fromId;
@@ -169,7 +174,7 @@ public class BOSyncController {
 
         String[] idsToGet = new String[new Long(toId-fromId+1).intValue()];
         for(int i = 0; i < idsToGet.length; i++) {
-            idsToGet[i] = "" + fromId + i;
+            idsToGet[i] = "" + (fromId + i);
         }
 
         List<T> localItems = T.findById(type, idsToGet);
@@ -179,7 +184,7 @@ public class BOSyncController {
         // Set priorities for all items that are not downloaded yet
         for(T item : localItems) {
             if(item.isDownloading()) {
-                item.setDownloadPriority(1);
+                item.setDownloadPriority(BOSyncEntity.PRIORITY_HIGH);
                 item.save();
 
                 needToStartDownload = true;

@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements BOSyncController.
         updateView();
 
         _syncController.checkForNewEntities();
+        _syncController.get(Posting.class, 1, 10);
 
         /*
         Button addButton = (Button) findViewById(R.id.add_button);
@@ -72,19 +73,19 @@ public class MainActivity extends AppCompatActivity implements BOSyncController.
         Posting p1 = new Posting();
         p1.setId(0L);
         p1.setState(BOSyncEntity.SyncState.DOWNLOADING);
-        p1.setDownloadPriority(1);
+        p1.setDownloadPriority(BOSyncEntity.PRIORITY_HIGH);
         p1.save();
 
         Posting p2 = new Posting();
         p2.setId(1L);
         p2.setState(BOSyncEntity.SyncState.DOWNLOADING);
-        p2.setDownloadPriority(1);
+        p2.setDownloadPriority(BOSyncEntity.PRIORITY_HIGH);
         p2.save();
 
         Posting p3 = new Posting();
         p3.setId(2L);
         p3.setState(BOSyncEntity.SyncState.DOWNLOADING);
-        p3.setDownloadPriority(1);
+        p3.setDownloadPriority(BOSyncEntity.PRIORITY_HIGH);
         p3.save();
     }
 

@@ -99,7 +99,7 @@ public class UploadService extends Service {
                 if(entity == null) {
                     _isRunning = false;
                 } else {
-                    Log.d(TAG, "Starting upload of \"" + entity.toString() + "\"");
+                    Log.d(TAG, "Starting upload of " + entity.toString());
 
                     // Upload, update or delete entity
                     boolean success = false;
@@ -118,7 +118,11 @@ public class UploadService extends Service {
                     if(success) {
                         Log.d(TAG, entity.getState().toString() + " operation on server successful");
 
-                        // Update local DB with NORMAL state
+                        // Update local DB with NORMAL state (and set deleted flat if operation was a deletion)
+                        if(entity.getState() == BOSyncEntity.SyncState.DELETING) {
+                            entity.markAsDeleted();
+                        }
+
                         entity.setState(BOSyncEntity.SyncState.NORMAL);
 
                         // Send broadcast indicating the change of the data

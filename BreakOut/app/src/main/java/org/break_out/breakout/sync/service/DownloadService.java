@@ -64,7 +64,7 @@ public class DownloadService extends Service {
         List<Posting> candidatesPrioritized =
                 Select.from(Posting.class)
                         .where(Condition.prop(BOSyncEntity.IS_DOWNLOADING_COLUMN).eq(1),
-                                Condition.prop(BOSyncEntity.DOWNLOAD_PRIORITY_COLUMN).gt(0))
+                                Condition.prop(BOSyncEntity.DOWNLOAD_PRIORITY_COLUMN).eq(BOSyncEntity.PRIORITY_HIGH))
                         .list();
 
         // Get candidates with priority
@@ -77,7 +77,7 @@ public class DownloadService extends Service {
             return candidateIds;
         }
 
-        // TODO: Download entries that are not prioritized?
+        // TODO: Add IDs with another priority or items that are invalid and have to be updated
 
         return candidateIds;
     }

@@ -8,6 +8,7 @@ import com.orm.dsl.Ignore;
 import org.break_out.breakout.sync.BOEntityDownloader;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -117,16 +118,41 @@ public class Posting extends BOSyncEntity {
 
         @Override
         public List<Posting> downloadSync(List<Long> idsToDownload) {
-            // TODO: Replace this dummy code
 
             List<Posting> postings = new ArrayList<Posting>();
 
-            if(idsToDownload.size() > 0) {
-                Posting p = new Posting();
-                p.setId(idsToDownload.get((int) (Math.random() * idsToDownload.size())));
-                p.setText("Placeholder text");
+            String idsToDownloadJsonString = "[";
+            for(Long id : idsToDownload) {
+                idsToDownloadJsonString += idsToDownloadJsonString.equals("[") ? ("" + id) : ("," + id);
+            }
+            idsToDownloadJsonString += "]";
 
-                postings.add(p);
+            Request request = new Request.Builder()
+                    .url(BASE_URL + "/posting/get/ids/")
+                    .post(RequestBody.create(JSON, idsToDownloadJsonString))
+                    .build();
+
+            OkHttpClient client = new OkHttpClient();
+
+            try {
+                Response response = client.newCall(request).execute();
+                if(response.code() == 200) {
+                    String jsonString = response.body().string();
+                    if(jsonString == null) {
+                        return postings;
+                    }
+
+                    JSONArray idArr = new JSONArray(jsonString);
+
+                    for(int i = 0; i < idArr.length(); i++) {
+                        postings.add(Posting.fromJSON(idArr.getJSONObject(i)));
+                    }
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            } catch(JSONException e) {
+                e.printStackTrace();
+                Log.d(TAG, "Requesting the server for new IDs didn't return a JSON array");
             }
 
             return postings;
@@ -143,7 +169,7 @@ public class Posting extends BOSyncEntity {
             OkHttpClient client = new OkHttpClient();
 
             try {
-                Response response = response = client.newCall(request).execute();
+                Response response = client.newCall(request).execute();
                 if(response.code() == 200) {
                     String jsonString = response.body().string();
                     if(jsonString == null) {
@@ -165,6 +191,19 @@ public class Posting extends BOSyncEntity {
 
             return newIds;
         }
+    }
+
+    public static Posting fromJSON(JSONObject jsonObj) {
+        Posting p = new Posting();
+
+        try {
+            p.setId(jsonObj.getLong("id"));
+            p.setText(jsonObj.getString("text"));
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
+
+        return p;
     }
 
     @Override
