@@ -54,19 +54,6 @@ public class Posting extends BOSyncEntity {
         return _text;
     }
 
-    private String toJSON() {
-        return "{" +
-            "\"challenge_id\": \"" + _challengeId + "\"," +
-            "\"created\": \"" + _createdTimestamp + "\"," +
-            "\"location\": {" +
-                "\"lat\": " + (_location != null ? (int)(_location.getLatitude()) : "0") + "," +
-                "\"lon\": " + (_location != null ? (int)(_location.getLongitude()) : "0") +
-            "}," +
-            "\"sent\": \"" + _sentTimestamp + "\"," +
-            "\"text\": \"" + _text + "\"" +
-        "}";
-    }
-
     @Override
     public boolean uploadToServerSync() {
         boolean success = false;
@@ -197,7 +184,7 @@ public class Posting extends BOSyncEntity {
         Posting p = new Posting();
 
         try {
-            p.setId(jsonObj.getLong("id"));
+            p.setRemoteId(jsonObj.getLong("id"));
             p.setText(jsonObj.getString("text"));
         } catch(JSONException e) {
             e.printStackTrace();
@@ -206,9 +193,22 @@ public class Posting extends BOSyncEntity {
         return p;
     }
 
+    private String toJSON() {
+        return "{" +
+                "\"challenge_id\": \"" + _challengeId + "\"," +
+                "\"created\": \"" + _createdTimestamp + "\"," +
+                "\"location\": {" +
+                "\"lat\": " + (_location != null ? (int)(_location.getLatitude()) : "0") + "," +
+                "\"lon\": " + (_location != null ? (int)(_location.getLongitude()) : "0") +
+                "}," +
+                "\"sent\": \"" + _sentTimestamp + "\"," +
+                "\"text\": \"" + _text + "\"" +
+                "}";
+    }
+
     @Override
     public String toString() {
-        return "Posting(" + getId() + ") {" +
+        return "Posting(" + getRemoteId() + ") {" +
                 "text(" + _text + ") " +
                 "state=(" + getState() + ") " +
                 "downPrio=(" + getDownloadPriority() + ")" +

@@ -1,5 +1,7 @@
 package org.break_out.breakout.sync.model;
 
+import android.util.Log;
+
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
@@ -9,25 +11,22 @@ import com.orm.dsl.Ignore;
 public abstract class BOSyncEntity extends SugarRecord {
 
     @Ignore
-    public static final String ID_COLUMN = "id";
+    private static final String TAG = "BOSyncEntitity";
 
     @Ignore
-    public static final String IS_UPLOADING_COLUMN = "_is_uploading";
-
+    public static final String COLUMN_REMOTE_ID = "_remote_id";
     @Ignore
-    public static final String IS_UPDATING_COLUMN = "_is_updating";
-
+    public static final String COLUMN_IS_UPLOADING = "_is_uploading";
     @Ignore
-    public static final String IS_DELETING_COLUMN = "_is_deleting";
-
+    public static final String COLUMN_IS_UPDATING = "_is_updating";
     @Ignore
-    public static final String IS_DOWNLOADING_COLUMN = "_is_downloading";
-
+    public static final String COLUMN_IS_DELETING = "_is_deleting";
     @Ignore
-    public static final String IS_INVALID_COLUMN = "_is_invalid";
-
+    public static final String COLUMN_IS_DOWNLOADING = "_is_downloading";
     @Ignore
-    public static final String DOWNLOAD_PRIORITY_COLUMN = "_download_priority";
+    public static final String COLUMN_IS_INVALID = "_is_invalid";
+    @Ignore
+    public static final String COLUMN_DOWNLOAD_PRIORITY = "_download_priority";
 
     @Ignore
     public static final int PRIORITY_NONE = 0;
@@ -37,6 +36,8 @@ public abstract class BOSyncEntity extends SugarRecord {
     public static final int PRIORITY_MID = 2;
     @Ignore
     public static final int PRIORITY_HIGH = 3;
+
+    private long _remoteId = -1;
 
     private boolean _isUploading = false;
     private boolean _isUpdating = false;
@@ -61,6 +62,25 @@ public abstract class BOSyncEntity extends SugarRecord {
     // SugarORM needs an empty constructor
     public BOSyncEntity() {
 
+    }
+
+    public void setRemoteId(long remoteId) {
+        if(remoteId < 0) {
+            _remoteId = -1;
+            Log.e(TAG, "Cannot set remote ID to a negative value!");
+
+            return;
+        }
+
+        _remoteId = remoteId;
+    }
+
+    public long getRemoteId() {
+        return _remoteId;
+    }
+
+    public boolean hasRemoteId() {
+        return (_remoteId != -1);
     }
 
     public void setState(SyncState state) {
@@ -184,7 +204,7 @@ public abstract class BOSyncEntity extends SugarRecord {
         }
 
         final BOSyncEntity other = (BOSyncEntity) obj;
-        if(getId() != other.getId()) {
+        if(getRemoteId() != other.getRemoteId()) {
             return false;
         }
 
@@ -193,7 +213,7 @@ public abstract class BOSyncEntity extends SugarRecord {
 
     @Override
     public int hashCode() {
-        return getId().hashCode();
+        return new Long(getRemoteId()).hashCode();
     }
 
 }

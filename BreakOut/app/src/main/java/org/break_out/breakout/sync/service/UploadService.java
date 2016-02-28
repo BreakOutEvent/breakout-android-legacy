@@ -61,7 +61,7 @@ public class UploadService extends Service {
      * @return The next entity to be uploaded, updated or deleted on server or null
      */
     private BOSyncEntity getNextPendingUpload() {
-        String whereClause = BOSyncEntity.IS_UPLOADING_COLUMN + " = ? OR " + BOSyncEntity.IS_UPDATING_COLUMN + " = ? OR " + BOSyncEntity.IS_DELETING_COLUMN + " = ?";
+        String whereClause = BOSyncEntity.COLUMN_IS_UPLOADING + " = ? OR " + BOSyncEntity.COLUMN_IS_UPDATING + " = ? OR " + BOSyncEntity.COLUMN_IS_DELETING + " = ?";
         String[] attrs = {"1", "1", "1"};
 
         for(Class<? extends BOSyncEntity> entityClass : BOSyncController.getInstance(this).getEntityClasses()) {
@@ -103,6 +103,12 @@ public class UploadService extends Service {
 
                     // Upload, update or delete entity
                     boolean success = false;
+
+                    // If the entity is supposed to be changed but has not been uploaded yet: Upload entity first
+                    if(entity.getState() != BOSyncEntity.SyncState.UPLOADING && !entity.hasRemoteId()) {
+                        success = entity.updateOnServerSync();
+                    }
+
                     switch(entity.getState()) {
                         case UPLOADING:
                             success = entity.uploadToServerSync();

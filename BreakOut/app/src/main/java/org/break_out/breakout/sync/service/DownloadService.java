@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.Pair;
 
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -12,7 +13,6 @@ import com.orm.query.Select;
 import org.break_out.breakout.sync.BOEntityDownloader;
 import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.BOSyncReceiver;
-import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.sync.model.BOSyncEntity;
 
 import java.util.ArrayList;
@@ -57,19 +57,30 @@ public class DownloadService extends Service {
         }).start();
     }
 
-    private <T extends BOSyncEntity> List<Long> getIDsToDownload(Class<T> type) {
+    /**
+     * Returns a list of ID pairs of items that should be downloaded.<br />
+     * The first ID will be the local ID of the entry, the second ID the remote ID.
+     *
+     * @param type The entity type
+     * @param <T> The class of the entity
+     * @return A list of pairs of IDs (local ID, remote ID)
+     */
+    private <T extends BOSyncEntity> List<Pair<Long, Long>> getIDsToDownload(Class<T> type) {
         // Try to get all prioritized entries
-        List<Long> candidateIds = new ArrayList<Long>();
 
-        List<Posting> candidatesPrioritized =
-                Select.from(Posting.class)
-                        .where(Condition.prop(BOSyncEntity.IS_DOWNLOADING_COLUMN).eq(1),
-                                Condition.prop(BOSyncEntity.DOWNLOAD_PRIORITY_COLUMN).eq(BOSyncEntity.PRIORITY_HIGH))
+        // First ID: local ID
+        // Second ID: remote
+        List<Pair<Long, Long>> candidateIds = new ArrayList<Pair<Long, Long>>();
+
+        List<T> candidatesPrioritized =
+                Select.from(type)
+                        .where(Condition.prop(BOSyncEntity.COLUMN_IS_DOWNLOADING).eq(1),
+                                Condition.prop(BOSyncEntity.COLUMN_DOWNLOAD_PRIORITY).eq(BOSyncEntity.PRIORITY_HIGH))
                         .list();
 
         // Get candidates with priority
-        for(Posting candidate : candidatesPrioritized) {
-            candidateIds.add(candidate.getId());
+        for(T candidate : candidatesPrioritized) {
+            candidateIds.add(new Pair<Long, Long>(candidate.getId(), candidate.getRemoteId()));
         }
 
         if(!candidateIds.isEmpty()) {
@@ -100,13 +111,30 @@ public class DownloadService extends Service {
 
             for(Class<? extends BOSyncEntity> type : controller.getEntityClasses()) {
                 BOEntityDownloader<? extends BOSyncEntity> downloader = controller.getDownloader(type);
-                List<? extends BOSyncEntity> items = downloader.downloadSync(getIDsToDownload(type));
+
+                List<Pair<Long, Long>> idsToDownload = getIDsToDownload(type);
+
+                List<Long> localIds = new ArrayList<Long>();
+                List<Long> remoteIds = new ArrayList<Long>();
+
+                for(Pair<Long, Long> idPair : idsToDownload) {
+                    localIds.add(idPair.first);
+                    remoteIds.add(idPair.second);
+                }
+
+                List<? extends BOSyncEntity> items = downloader.downloadSync(remoteIds);
 
                 boolean downloadedSomething = false;
 
                 for(BOSyncEntity item : items) {
+                    if(!item.hasRemoteId()) {
+                        Log.e(TAG, "Downloaded item has no remote ID! Does " + downloader.getClass().getSimpleName() + " set the remote ID correctly in downloadSync(...)?");
+                        continue;
+                    }
+
                     downloadedSomething = true;
 
+                    item.setId(localIds.get(remoteIds.indexOf(item.getRemoteId())));
                     item.setState(BOSyncEntity.SyncState.NORMAL);
                     item.save();
 

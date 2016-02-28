@@ -65,7 +65,7 @@ public class UpdateService extends Service {
             controller = BOSyncController.getInstance(UpdateService.this);
 
             for(Class<? extends BOSyncEntity> type : controller.getEntityClasses()) {
-                downloadAndSaverIDs(type);
+                downloadAndSaveNewIDs(type);
             }
 
             stopSelf();
@@ -73,11 +73,19 @@ public class UpdateService extends Service {
             Log.d(TAG, "--- STOPPED SERVICE ---");
         }
 
-        private <T extends BOSyncEntity> void downloadAndSaverIDs(Class<T> type) {
+        private <T extends BOSyncEntity> void downloadAndSaveNewIDs(Class<T> type) {
             BOEntityDownloader<? extends BOSyncEntity> downloader = controller.getDownloader(type);
 
-            T lastEntity = T.last(type);
-            List<Long> newIds = downloader.downloadNewIDsSync(lastEntity != null ? lastEntity.getId() : -1);
+            long lastKnownId = -1;
+            List<T> lastEntityList = T.findWithQuery(type, "SELECT * FROM " + type.getSimpleName() + " ORDER BY " + BOSyncEntity.COLUMN_REMOTE_ID + " DESC LIMIT 1", null);
+            if(lastEntityList != null && !lastEntityList.isEmpty()) {
+                T lastEntity = lastEntityList.get(0);
+                if(lastEntity != null && lastEntity.hasRemoteId()) {
+                    lastKnownId = lastEntity.getRemoteId();
+                }
+            }
+
+            List<Long> newIds = downloader.downloadNewIDsSync(lastKnownId);
 
             boolean somethingChanged = false;
 
@@ -92,7 +100,7 @@ public class UpdateService extends Service {
                 }
 
                 if(emptyEntity != null) {
-                    emptyEntity.setId(id);
+                    emptyEntity.setRemoteId(id);
                     emptyEntity.setState(BOSyncEntity.SyncState.DOWNLOADING);
                     emptyEntity.save();
 

@@ -14,7 +14,7 @@
             android:id="@+id/textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hello World!"/>
+            android:text="Loading..."/>
 
     </ScrollView>
 
@@ -23,19 +23,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/add_button"
+        <EditText
+            android:id="@+id/et_from_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Upload"/>
+            android:hint="from ID"
+            android:inputType="number"/>
+
+        <EditText
+            android:id="@+id/et_to_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="to ID"
+            android:inputType="number"/>
 
         <Button
-            android:id="@+id/clear_button"
+            android:id="@+id/bt_request"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Delete"/>
+            android:text="Request"/>
 
     </LinearLayout>
 

@@ -152,7 +152,7 @@ public class BOSyncController {
      * <b>local database</b>.
      *
      * @param type The type of entity you want to receive
-     * @param <T> The tpye of entity you want to receive
+     * @param <T> The type of entity you want to receive
      * @return A list of all items of that entity type from the local database
      */
     public <T extends BOSyncEntity> List<T> getAll(Class<T> type) {
@@ -172,12 +172,13 @@ public class BOSyncController {
             toId = tempId;
         }
 
-        String[] idsToGet = new String[new Long(toId-fromId+1).intValue()];
-        for(int i = 0; i < idsToGet.length; i++) {
-            idsToGet[i] = "" + (fromId + i);
+        String idsToGet = "(";
+        for(int i = 0; i <= (toId - fromId); i++) {
+            idsToGet += idsToGet.equals("(") ? ("" + (fromId+i)) : ("," + (fromId+i));
         }
+        idsToGet += ")";
 
-        List<T> localItems = T.findById(type, idsToGet);
+        List<T> localItems = T.findWithQuery(type, "SELECT * FROM " + type.getSimpleName() + " WHERE " + BOSyncEntity.COLUMN_REMOTE_ID + " in " + idsToGet, null);
 
         boolean needToStartDownload = false;
 

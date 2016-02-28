@@ -3,6 +3,9 @@ package org.break_out.breakout;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.break_out.breakout.sync.BOSyncController;
@@ -32,73 +35,47 @@ public class MainActivity extends AppCompatActivity implements BOSyncController.
 
         _tv = (TextView) findViewById(R.id.textview);
 
-        // For testing the downloadSync:
-
-        // First add test data
-        //addTestDataMissingPostings();
-
-        // Then start downloadSync service
-        //Intent intent = new Intent(this, DownloadService.class);
-        //startService(intent);
-
         updateView();
 
         _syncController.checkForNewEntities();
-        _syncController.get(Posting.class, 1, 10);
 
-        /*
-        Button addButton = (Button) findViewById(R.id.add_button);
+        final EditText etFromId = (EditText) findViewById(R.id.et_from_id);
+        final EditText etToId = (EditText) findViewById(R.id.et_to_id);
+
+        Button addButton = (Button) findViewById(R.id.bt_request);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Posting p = new Posting();
-                p.setText(_messages[(int) (Math.random() * _messages.length)]);
-                _syncController.upload(p);
+                int from = Integer.parseInt(etFromId.getText().toString());
+                int to = Integer.parseInt(etToId.getText().toString());
+
+                _syncController.get(Posting.class, from, to);
             }
         });
-
-        Button deleteButton = (Button) findViewById(R.id.clear_button);
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(_entities.size() > 0) {
-                    _syncController.delete(_entities.get(0));
-                }
-            }
-        });
-        */
-    }
-
-    private void addTestDataMissingPostings() {
-        Posting p1 = new Posting();
-        p1.setId(0L);
-        p1.setState(BOSyncEntity.SyncState.DOWNLOADING);
-        p1.setDownloadPriority(BOSyncEntity.PRIORITY_HIGH);
-        p1.save();
-
-        Posting p2 = new Posting();
-        p2.setId(1L);
-        p2.setState(BOSyncEntity.SyncState.DOWNLOADING);
-        p2.setDownloadPriority(BOSyncEntity.PRIORITY_HIGH);
-        p2.save();
-
-        Posting p3 = new Posting();
-        p3.setId(2L);
-        p3.setState(BOSyncEntity.SyncState.DOWNLOADING);
-        p3.setDownloadPriority(BOSyncEntity.PRIORITY_HIGH);
-        p3.save();
     }
 
     private void updateView() {
-        _entities = _syncController.getAll(Posting.class);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                _entities = _syncController.getAll(Posting.class);
 
-        String text = "";
+                String text = "";
 
-        for(Posting p : _entities) {
-            text += p.toString() + "\n";
-        }
+                for(Posting p : _entities) {
+                    text += p.toString() + "\n";
+                }
 
-        _tv.setText(text);
+                final String finalText = text;
+
+                _tv.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        _tv.setText(finalText);
+                    }
+                });
+            }
+        }).start();
     }
 
     @Override
