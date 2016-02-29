@@ -52,6 +52,26 @@ public class MainActivity extends AppCompatActivity implements BOSyncController.
                 _syncController.get(Posting.class, from, to);
             }
         });
+
+        Button delButton = (Button) findViewById(R.id.bt_delete_from_id);
+        delButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int from = Integer.parseInt(etFromId.getText().toString());
+
+                _syncController.delete(getEntity(from));
+            }
+        });
+    }
+
+    private BOSyncEntity getEntity(long remoteId) {
+        for(BOSyncEntity e : _entities) {
+            if(e.hasRemoteId() && e.getRemoteId() == remoteId) {
+                return e;
+            }
+        }
+
+        return null;
     }
 
     private void updateView() {

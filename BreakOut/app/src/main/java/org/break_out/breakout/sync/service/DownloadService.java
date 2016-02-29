@@ -22,9 +22,7 @@ import java.util.List;
  * This Service will iterate over all entities returned by {@link BOSyncController#getEntityClasses()}
  * and download items that are still missing in the local database based on the internet connection and
  * priorities.
- * <p/>
  * <br /><br />
- * <p/>
  * Created by Tino on 18.12.2015.
  */
 public class DownloadService extends Service {
@@ -84,7 +82,6 @@ public class DownloadService extends Service {
         }
 
         if(!candidateIds.isEmpty()) {
-            Log.d(TAG, "Found " + type.getSimpleName() + " IDs to download: " + candidateIds);
             return candidateIds;
         }
 

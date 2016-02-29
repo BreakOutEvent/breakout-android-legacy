@@ -30,6 +30,7 @@ public class InternetReceiver extends BroadcastReceiver {
 
         if(connected) {
             BOSyncController.getInstance(context).startUploadService();
+            BOSyncController.getInstance(context).startDownloadService();
         }
     }
 }

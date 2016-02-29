@@ -44,10 +44,9 @@ public abstract class BOSyncEntity extends SugarRecord {
     private boolean _isDeleting = false;
     private boolean _isDownloading = false;
     private boolean _isInvalid = false;
+    private boolean _isDeleted = false;
 
     private int _downloadPriority = PRIORITY_NONE;
-
-    private boolean _isDeleted = false;
 
     @Ignore
     public enum SyncState {
@@ -56,6 +55,7 @@ public abstract class BOSyncEntity extends SugarRecord {
         DELETING,
         DOWNLOADING,
         INVALID,
+        DELETED,
         NORMAL
     }
 
@@ -91,6 +91,7 @@ public abstract class BOSyncEntity extends SugarRecord {
                 _isDeleting = false;
                 _isDownloading = false;
                 _isInvalid = false;
+                _isDeleted = false;
                 break;
             case UPDATING:
                 _isUploading = false;
@@ -98,6 +99,7 @@ public abstract class BOSyncEntity extends SugarRecord {
                 _isDeleting = false;
                 _isDownloading = false;
                 _isInvalid = false;
+                _isDeleted = false;
                 break;
             case DELETING:
                 _isUploading = false;
@@ -105,6 +107,7 @@ public abstract class BOSyncEntity extends SugarRecord {
                 _isDeleting = true;
                 _isDownloading = false;
                 _isInvalid = false;
+                _isDeleted = false;
                 break;
             case DOWNLOADING:
                 _isUploading = false;
@@ -112,6 +115,7 @@ public abstract class BOSyncEntity extends SugarRecord {
                 _isDeleting = false;
                 _isDownloading = true;
                 _isInvalid = false;
+                _isDeleted = false;
                 break;
             case INVALID:
                 _isUploading = false;
@@ -119,6 +123,15 @@ public abstract class BOSyncEntity extends SugarRecord {
                 _isDeleting = false;
                 _isDownloading = false;
                 _isInvalid = true;
+                _isDeleted = false;
+                break;
+            case DELETED:
+                _isUploading = false;
+                _isUpdating = false;
+                _isDeleting = false;
+                _isDownloading = false;
+                _isInvalid = false;
+                _isDeleted = true;
                 break;
             case NORMAL:
             default:
@@ -142,6 +155,8 @@ public abstract class BOSyncEntity extends SugarRecord {
             return SyncState.DOWNLOADING;
         } else if(_isInvalid) {
             return SyncState.INVALID;
+        } else if(_isDeleted) {
+            return SyncState.DELETED;
         } else {
             return SyncState.NORMAL;
         }
@@ -167,6 +182,10 @@ public abstract class BOSyncEntity extends SugarRecord {
         return _isInvalid;
     }
 
+    public boolean isDeleted() {
+        return _isDeleted;
+    }
+
     public abstract boolean uploadToServerSync();
 
     public abstract boolean updateOnServerSync();
@@ -183,14 +202,6 @@ public abstract class BOSyncEntity extends SugarRecord {
 
     public int getDownloadPriority() {
         return _downloadPriority;
-    }
-
-    public void markAsDeleted() {
-        _isDeleted = true;
-    }
-
-    public boolean isDeleted() {
-        return _isDeleted;
     }
 
     @Override

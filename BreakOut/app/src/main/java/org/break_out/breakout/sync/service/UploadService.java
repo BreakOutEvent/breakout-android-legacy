@@ -103,13 +103,18 @@ public class UploadService extends Service {
 
                     // Upload, update or delete entity
                     boolean success = false;
+                    BOSyncEntity.SyncState state = entity.getState();
 
                     // If the entity is supposed to be changed but has not been uploaded yet: Upload entity first
-                    if(entity.getState() != BOSyncEntity.SyncState.UPLOADING && !entity.hasRemoteId()) {
+                    if(state != BOSyncEntity.SyncState.UPLOADING && !entity.hasRemoteId()) {
                         success = entity.updateOnServerSync();
+
+                        if(!success) {
+                            continue;
+                        }
                     }
 
-                    switch(entity.getState()) {
+                    switch(state) {
                         case UPLOADING:
                             success = entity.uploadToServerSync();
                             break;
@@ -121,15 +126,22 @@ public class UploadService extends Service {
                             break;
                     }
 
-                    if(success) {
-                        Log.d(TAG, entity.getState().toString() + " operation on server successful");
+                    if(!entity.hasRemoteId()) {
+                        Log.e(TAG, "Entity did not get a remote ID. Is the remote ID set correctly in " + entity.getClass().getSimpleName() + "'s download(...) method?");
+                        continue;
+                    }
 
-                        // Update local DB with NORMAL state (and set deleted flat if operation was a deletion)
-                        if(entity.getState() == BOSyncEntity.SyncState.DELETING) {
-                            entity.markAsDeleted();
+                    if(success) {
+                        Log.d(TAG, state.toString() + " operation on server successful");
+
+                        // Update local DB with new status
+                        if(state == BOSyncEntity.SyncState.DELETING) {
+                            entity.setState(BOSyncEntity.SyncState.DELETED);
+                        } else {
+                            entity.setState(BOSyncEntity.SyncState.NORMAL);
                         }
 
-                        entity.setState(BOSyncEntity.SyncState.NORMAL);
+                        entity.save();
 
                         // Send broadcast indicating the change of the data
                         notifyDataChanged(entity.getClass());
