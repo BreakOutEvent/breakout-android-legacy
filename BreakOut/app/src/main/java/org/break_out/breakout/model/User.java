@@ -1,7 +1,5 @@
 package org.break_out.breakout.model;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -11,6 +9,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import okhttp3.Credentials;
+import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,6 +25,7 @@ public class User implements Serializable {
     private static final String TAG = "User";
 
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
 
     private Role _role = Role.VISITOR;
 
@@ -322,6 +322,7 @@ public class User implements Serializable {
 
             if(!response.isSuccessful()) {
                 Log.e(TAG, "Registering user failed (response code " + response.code() + ")! Possible reasons: Email format, email already existing, password too short.");
+                Log.e(TAG, "Response: " + response.body().string());
 
                 // TODO: Handle errors according to response code?
             } else {
@@ -356,27 +357,30 @@ public class User implements Serializable {
                 .host("breakout-development.herokuapp.com")
                 .addPathSegment("oauth")
                 .addPathSegment("token")
-                .addQueryParameter("password", _password)
-                .addQueryParameter("username", _email)
-                .addQueryParameter("scope", "read write")
-                .addQueryParameter("client_secret", "123456789")
-                .addQueryParameter("client_id", "breakout_app")
-                .addQueryParameter("grant_type", "password")
                 .build();
 
-        // A body is mandatory for every POST request -> use empty String as body
-        RequestBody emptyBody = RequestBody.create(JSON, "");
+        // Build x-www-form-urlencoded body
+        RequestBody body = new FormBody.Builder()
+                .add("password", _password)
+                .add("username", _email)
+                .add("scope", "read write")
+                .add("client_secret", "123456789")
+                .add("client_id", "breakout_app")
+                .add("grant_type", "password")
+                .build();
 
         Request loginRequest = new Request.Builder()
                 .url(loginUrl)
-                .post(emptyBody)
+                .post(body)
                 .addHeader("Authorization", Credentials.basic("breakout_app", "123456789"))
+                .addHeader("Content-Type", FORM_URL_ENCODED)
                 .build();
 
         try {
             Response loginResponse = client.newCall(loginRequest).execute();
 
             if(!loginResponse.isSuccessful()) {
+                Log.e(TAG, loginResponse.body().string());
                 return false;
             }
 

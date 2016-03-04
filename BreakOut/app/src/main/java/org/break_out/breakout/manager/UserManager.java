@@ -9,13 +9,13 @@ import org.break_out.breakout.ui.activities.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.activities.BOActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Tino on 16.01.2016.
  */
 public class UserManager {
-
-    public static final int REQUEST_CODE_LOGIN = 0;
-    public static final int REQUEST_CODE_BECOME_MEMBER = 1;
 
     public static final String PREF_KEY = "pref_key_user";
 
@@ -33,19 +33,42 @@ public class UserManager {
     private static final String KEY_PHONE_NUMBER = "key_phone_number";
     private static final String KEY_T_SHIRT_SIZE = "key_t_shirt_size";
 
-    public static final String KEY_USER = "key_user";
-
     private static UserManager _instance;
 
     private Context _context;
 
     private User _currUser = new User();
 
-    private LoginRegisterListener _listener = null;
+    private LoginRegisterListener _loginRegisterListener = null;
+    private List<UserDataChangedListener> _dataChangedListeners = new ArrayList<UserDataChangedListener>();
+
+    public interface UserDataChangedListener {
+        public void userDataChanged();
+    }
 
     public interface LoginRegisterListener {
         public void loginRegisterSuccessful();
         public void loginRegisterFailed();
+    }
+
+    public void registerListener(UserDataChangedListener listener) {
+        if(listener != null && !_dataChangedListeners.contains(listener)) {
+            _dataChangedListeners.add(listener);
+        }
+    }
+
+    public void unregisterListener(UserDataChangedListener listener) {
+        if(listener != null && _dataChangedListeners.contains(listener)) {
+            _dataChangedListeners.remove(listener);
+        }
+    }
+
+    private void notifyDataChangedListeners() {
+        for(UserDataChangedListener l : _dataChangedListeners) {
+            if(l != null) {
+                l.userDataChanged();
+            }
+        }
     }
 
     private UserManager(Context context) {
@@ -78,6 +101,8 @@ public class UserManager {
     public void setCurrentUser(User user) {
         _currUser = user;
         saveCurrUserToPrefs();
+
+        notifyDataChangedListeners();
     }
 
     /**
@@ -88,7 +113,7 @@ public class UserManager {
      * @param listener The listener for the login/register process
      */
     public void loginOrRegisterUser(LoginRegisterListener listener) {
-        _listener = listener;
+        _loginRegisterListener = listener;
 
         Intent intent = new Intent(_context, LoginRegisterActivity.class);
         _context.startActivity(intent);
@@ -102,8 +127,7 @@ public class UserManager {
      * user.
      */
     public void logOutCurrentUser() {
-        _currUser = new User();
-        saveCurrUserToPrefs();
+        setCurrentUser(new User());
     }
 
     /**
@@ -136,17 +160,17 @@ public class UserManager {
      * @param loginRegistrationSuccessful If the login/registration was successful or not
      */
     private void callLoginRegisterListener(boolean loginRegistrationSuccessful) {
-        if(_listener == null) {
+        if(_loginRegisterListener == null) {
             return;
         }
 
         if(loginRegistrationSuccessful) {
-            _listener.loginRegisterSuccessful();
+            _loginRegisterListener.loginRegisterSuccessful();
         } else {
-            _listener.loginRegisterFailed();
+            _loginRegisterListener.loginRegisterFailed();
         }
 
-        _listener = null;
+        _loginRegisterListener = null;
     }
 
     /**

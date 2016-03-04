@@ -16,7 +16,7 @@ import org.break_out.breakout.util.NotificationUtils;
 
 public class LoginRegisterActivity extends BackgroundImageActivity {
 
-    private static final String TAG = "LoginRegiserActivity";
+    private static final String TAG = "LoginRegisterActivity";
 
     /**
      * Global state of success in the login/registration
