@@ -19,6 +19,8 @@
     <string name="hint_repeat_password">Repeat password</string>
     <string name="hint_t_shirt_size">T-shirt size</string>
     <string name="login_failed">The login on the server failed.</string>
+    <string name="registration_successful_title">Account created</string>
+    <string name="registration_successful_text">Your account has successfully been created!\nPlease check your emails to activate your account.</string>
     <string name="popup_usernamePassword">Please enter an email and a password.</string>
     <string name="textview_about">What is BreakOut?</string>
     <string name="button_login">Login</string>

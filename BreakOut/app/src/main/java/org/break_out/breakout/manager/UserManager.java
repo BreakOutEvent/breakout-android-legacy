@@ -3,6 +3,8 @@ package org.break_out.breakout.manager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.util.Log;
 
 import org.break_out.breakout.ui.activities.BecomeParticipantActivity;
 import org.break_out.breakout.ui.activities.LoginRegisterActivity;
@@ -17,7 +19,9 @@ import java.util.List;
  */
 public class UserManager {
 
-    public static final String PREF_KEY = "pref_key_user";
+    private static final String TAG = "UserManager";
+
+    private static final String PREF_KEY = "pref_key_user";
 
     private static final String KEY_REMOTE_ID = "key_id";
     private static final String KEY_ROLE = "key_role";
@@ -39,36 +43,10 @@ public class UserManager {
 
     private User _currUser = new User();
 
-    private LoginRegisterListener _loginRegisterListener = null;
     private List<UserDataChangedListener> _dataChangedListeners = new ArrayList<UserDataChangedListener>();
 
     public interface UserDataChangedListener {
         public void userDataChanged();
-    }
-
-    public interface LoginRegisterListener {
-        public void loginRegisterSuccessful();
-        public void loginRegisterFailed();
-    }
-
-    public void registerListener(UserDataChangedListener listener) {
-        if(listener != null && !_dataChangedListeners.contains(listener)) {
-            _dataChangedListeners.add(listener);
-        }
-    }
-
-    public void unregisterListener(UserDataChangedListener listener) {
-        if(listener != null && _dataChangedListeners.contains(listener)) {
-            _dataChangedListeners.remove(listener);
-        }
-    }
-
-    private void notifyDataChangedListeners() {
-        for(UserDataChangedListener l : _dataChangedListeners) {
-            if(l != null) {
-                l.userDataChanged();
-            }
-        }
     }
 
     private UserManager(Context context) {
@@ -90,6 +68,37 @@ public class UserManager {
         return _instance;
     }
 
+    public void registerListener(UserDataChangedListener listener) {
+        if(listener != null && !_dataChangedListeners.contains(listener)) {
+            _dataChangedListeners.add(listener);
+        }
+    }
+
+    public void unregisterListener(UserDataChangedListener listener) {
+        if(listener != null && _dataChangedListeners.contains(listener)) {
+            _dataChangedListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Calls all user data changed listeners
+     * <b>on the UI Thread</b>.
+     */
+    private void notifyDataChangedListeners() {
+        Handler mainHandler = new Handler(_context.getMainLooper());
+
+        for(final UserDataChangedListener l : _dataChangedListeners) {
+            if(l != null) {
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        l.userDataChanged();
+                    }
+                });
+            }
+        }
+    }
+
     /**
      * Set the currently logged in user.
      * Notice: You should never need to call this method! It will
@@ -107,15 +116,27 @@ public class UserManager {
 
     /**
      * Opens the {@link LoginRegisterActivity} and lets the user either
-     * login or create an account. The listener will be called, when the
-     * process is finished.
-     *
-     * @param listener The listener for the login/register process
+     * login or create an account. To stay updated about the status of
+     * the user, register a listener by calling {@link #registerListener(UserDataChangedListener)}.
      */
-    public void loginOrRegisterUser(LoginRegisterListener listener) {
-        _loginRegisterListener = listener;
-
+    public void loginOrRegisterUser() {
         Intent intent = new Intent(_context, LoginRegisterActivity.class);
+        _context.startActivity(intent);
+    }
+
+    /**
+     * Opens the {@link BecomeParticipantActivity} and lets the user either
+     * become a participant. The user can only become a participant if he/she is
+     * already a user (and only a user). To stay updated about the status of
+     * the user, register a listener by calling {@link #registerListener(UserDataChangedListener)}.
+     */
+    public void makeUserParticipant() {
+        if(_currUser.getRole() != User.Role.USER) {
+            Log.e(TAG, "Only USERs can become participants (current user is " + _currUser.getRole().toString() + ")");
+            return;
+        }
+
+        Intent intent = new Intent(_context, BecomeParticipantActivity.class);
         _context.startActivity(intent);
     }
 
@@ -150,37 +171,6 @@ public class UserManager {
      */
     public User.Role getCurrentUsersRole() {
         return _currUser.getRole();
-    }
-
-    /**
-     * This method will call the upgrade listener, if it is not null.
-     * Depending on the boolean passed as a parameter, the corresponding
-     * method of the listener will be called.
-     *
-     * @param loginRegistrationSuccessful If the login/registration was successful or not
-     */
-    private void callLoginRegisterListener(boolean loginRegistrationSuccessful) {
-        if(_loginRegisterListener == null) {
-            return;
-        }
-
-        if(loginRegistrationSuccessful) {
-            _loginRegisterListener.loginRegisterSuccessful();
-        } else {
-            _loginRegisterListener.loginRegisterFailed();
-        }
-
-        _loginRegisterListener = null;
-    }
-
-    /**
-     * This method will be called by the {@link BOActivity}, when
-     * the login/register Activity is done.
-     *
-     * @param success If the login/register process was successful
-     */
-    public void loginRegisterDone(boolean success) {
-        callLoginRegisterListener(success);
     }
 
     /**

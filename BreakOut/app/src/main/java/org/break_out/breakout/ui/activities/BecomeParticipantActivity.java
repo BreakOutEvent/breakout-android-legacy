@@ -67,10 +67,6 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        restoreStates(savedInstanceState);
-    }
-
-    private void restoreStates(Bundle savedInstanceState) {
         if(savedInstanceState == null) {
             return;
         }
@@ -83,7 +79,6 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
         _etPhoneNumber.setState(savedInstanceState.getSerializable(KEY_PHONE_NUMBER));
         _etEmergencyNumber.setState(savedInstanceState.getSerializable(KEY_EMERGENCY_NUMBER));
         _dpBirthday.setState(savedInstanceState.getSerializable(KEY_BIRTHDAY));
-
     }
 
     @Override

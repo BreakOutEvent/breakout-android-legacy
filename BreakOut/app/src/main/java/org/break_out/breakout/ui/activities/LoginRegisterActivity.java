@@ -2,6 +2,8 @@ package org.break_out.breakout.ui.activities;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,11 +20,10 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
     private static final String TAG = "LoginRegisterActivity";
 
-    /**
-     * Global state of success in the login/registration
-     * process for this Activity.
-     */
-    private boolean _loginRegisterSuccessful = false;
+    private static final String KEY_EMAIL = "key_email";
+    private static final String KEY_PASSWORD = "key_password";
+    private static final String KEY_LOGIN = "key_login";
+    private static final String KEY_REGISTER = "key_register";
 
     private UserManager _userManager = null;
 
@@ -62,6 +63,24 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
                 register();
             }
         });
+
+        // Restore instance state
+        if(savedInstanceState != null) {
+            _etEmail.setState(savedInstanceState.getSerializable(KEY_EMAIL));
+            _etPassword.setState(savedInstanceState.getSerializable(KEY_PASSWORD));
+            _btLogin.setState(savedInstanceState.getSerializable(KEY_LOGIN));
+            _btRegister.setState(savedInstanceState.getSerializable(KEY_REGISTER));
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable(KEY_EMAIL, _etEmail.getState());
+        outState.putSerializable(KEY_PASSWORD, _etPassword.getState());
+        outState.putSerializable(KEY_LOGIN, _btLogin.getState());
+        outState.putSerializable(KEY_REGISTER, _btRegister.getState());
     }
 
     /**
@@ -75,7 +94,7 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             showHint();
         } else {
             // Start registration
-            new LoginRegisterTask(true).execute(email, password);
+            new RegisterTask().execute(email, password);
         }
     }
 
@@ -91,7 +110,7 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             showHint();
         } else {
             // Start login
-            new LoginRegisterTask(false).execute(email, password);
+            new LoginTask().execute(email, password);
         }
     }
 
@@ -138,32 +157,18 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
      * This task expects two Strings as parameters when executing:
      * the user's email and the desired password.
      */
-    private class LoginRegisterTask extends AsyncTask<String, Void, Void> {
-
-        /**
-         * Set to true to register the user before logging in
-         */
-        boolean register = false;
-
-        public LoginRegisterTask(boolean registerBeforeLogin) {
-            register = registerBeforeLogin;
-        }
+    private class LoginTask extends AsyncTask<String, Void, Boolean> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
-            if(register) {
-                _btRegister.setShowLoadingIndicator(true);
-                _btLogin.setEnabled(false);
-            } else {
-                _btLogin.setShowLoadingIndicator(true);
-                _btRegister.setEnabled(false);
-            }
+            _btLogin.setShowLoadingIndicator(true);
+            _btRegister.setEnabled(false);
         }
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected Boolean doInBackground(String... params) {
 
             // Get email and password
             if(params.length != 2) {
@@ -182,71 +187,92 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             // Create user with email and password
             User user = new User(email, password);
 
-            if(register) {
-                // Register user to the server
-                boolean registerSuccess = user.registerOnServerSync();
-
-                if(!registerSuccess) {
-                    Log.e(TAG, "Account could not be created on the server.");
-
-                    // TODO: Handle registration error (and retry login?)
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
-                        }
-                    });
-
-                    return null;
-                }
-            }
-
             // Log user in via OAuth
-            boolean loginSuccess = user.loginOnServerSync();
+            boolean loginSuccessful = user.loginOnServerSync();
 
-            if(!loginSuccess) {
-                Log.e(TAG, "Login via OAuth failed.");
-
-                // TODO: Handle login error (and retry login?)
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
-                    }
-                });
-
-                return null;
+            if(!loginSuccessful) {
+                return false;
             }
 
-            // TODO: Set remote ID of the user before saving in the UserManager
+            Log.d(TAG, "User remote ID: " + user.getRemoteId());
 
             // Everything went well -> set user as current user in UserManager
             _userManager.setCurrentUser(user);
 
-            _loginRegisterSuccessful = true;
-
-            return null;
+            return true;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
 
-            if(_loginRegisterSuccessful) {
+            if(success) {
                 finish();
             } else {
                 _btLogin.setEnabled(true);
                 _btRegister.setEnabled(true);
                 _btLogin.setShowLoadingIndicator(false);
-                _btRegister.setShowLoadingIndicator(false);
+
+                Log.e(TAG, "Login via OAuth failed.");
+
+                // TODO: Handle login error (and retry login?)
+                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
             }
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    private class RegisterTask extends AsyncTask<String, Void, Boolean> {
 
-        _userManager.loginRegisterDone(_loginRegisterSuccessful);
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            _btRegister.setShowLoadingIndicator(true);
+            _btLogin.setEnabled(false);
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+
+            // Get email and password
+            if(params.length != 2) {
+                Log.e(TAG, "The LoginRegisterTask needs 2 arguments (email and password). Given: " + params.length + ".");
+                return null;
+            }
+
+            String email = params[0];
+            String password = params[1];
+
+            if(email == null || password == null) {
+                Log.e(TAG, "Email or password are null.");
+                return null;
+            }
+
+            // Create user with email and password
+            User user = new User(email, password);
+
+            // Register user to the server
+            boolean registerSuccessful = user.registerOnServerSync();
+
+            return registerSuccessful;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+
+            _btLogin.setEnabled(true);
+            _btRegister.setEnabled(true);
+            _btRegister.setShowLoadingIndicator(false);
+
+            if(success) {
+                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.registration_successful_title), getString(R.string.registration_successful_text));
+            } else {
+                // TODO: Handle registration error (and retry login?)
+
+                Log.e(TAG, "Account could not be created on the server.");
+                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
+            }
+        }
     }
 }

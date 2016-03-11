@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -14,6 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import org.break_out.breakout.R;
+
+import java.io.Serializable;
 
 /**
  * Created by Tino on 12.02.2016.
@@ -28,6 +31,14 @@ public class BOFlatButton extends FrameLayout implements View.OnClickListener {
     private ProgressBar _pbLoadingIndicator = null;
 
     private OnClickListener _listener = null;
+
+    public static class BOFlatButtontState implements Serializable {
+
+        public boolean enabled = true;
+
+        public boolean showingLoadingIndicator = false;
+
+    }
 
     public BOFlatButton(Context context) {
         this(context, null);
@@ -108,6 +119,26 @@ public class BOFlatButton extends FrameLayout implements View.OnClickListener {
         } finally {
             ta.recycle();
         }
+    }
+
+    public Serializable getState() {
+        BOFlatButtontState state = new BOFlatButtontState();
+        state.enabled = isEnabled();
+        state.showingLoadingIndicator = isShowingLoadingIndicator();
+
+        return state;
+    }
+
+    public void setState(Serializable serializedState) {
+        if(serializedState == null || !(serializedState instanceof BOFlatButtontState)) {
+            Log.e(TAG, "Could not load state from serializable (null or wrong state type).");
+            return;
+        }
+
+        BOFlatButtontState state = (BOFlatButtontState) serializedState;
+
+        setEnabled(state.enabled);
+        setShowLoadingIndicator(state.showingLoadingIndicator);
     }
 
     @Override

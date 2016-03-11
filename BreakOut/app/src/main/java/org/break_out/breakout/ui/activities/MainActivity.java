@@ -21,17 +21,7 @@ public class MainActivity extends BOActivity {
         final TextView tvUserStatus = (TextView) findViewById(R.id.tv_user_status);
         tvUserStatus.setText(um.getCurrentUsersRole().toString());
 
-        um.loginOrRegisterUser(new UserManager.LoginRegisterListener() {
-            @Override
-            public void loginRegisterSuccessful() {
-                Log.d("MainActivity", "Success");
-            }
-
-            @Override
-            public void loginRegisterFailed() {
-                Log.d("MainActivity", "Failure");
-            }
-        });
+        um.loginOrRegisterUser();
 
         um.registerListener(new UserManager.UserDataChangedListener() {
             @Override

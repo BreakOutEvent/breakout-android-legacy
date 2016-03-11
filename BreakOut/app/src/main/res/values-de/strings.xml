@@ -44,5 +44,7 @@
         <item>L</item>
         <item>XL</item>
     </string-array>
+    <string name="registration_successful_text">Dein Account wurde erfolgreich erstellt!\nChecke nun Deine Emails, um deinen Account zu aktivieren.</string>
+    <string name="registration_successful_title">Account erstellt</string>
 
 </resources>

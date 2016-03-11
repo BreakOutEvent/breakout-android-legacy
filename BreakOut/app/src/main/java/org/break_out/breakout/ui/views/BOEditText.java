@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
 import org.break_out.breakout.R;
-import org.break_out.breakout.model.BOEditTextState;
 
 import java.io.Serializable;
 
@@ -21,6 +20,15 @@ import java.io.Serializable;
 public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeListener {
 
     public static final String TAG = "BOEditText";
+
+    public static class BOEditTextState implements Serializable {
+
+        /**
+         * The text entered by the user.
+         */
+        public String text = "";
+
+    }
 
     public BOEditText(Context context) {
         super(context);

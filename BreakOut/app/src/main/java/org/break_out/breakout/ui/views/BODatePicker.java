@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.break_out.breakout.R;
-import org.break_out.breakout.model.BODatePickerState;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -28,6 +27,15 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
     private static final String TAG_DIALOG = "BODatePickerDialog";
 
     private Calendar _date = null;
+
+    public static class BODatePickerState implements Serializable {
+
+        /**
+         * The selected date.
+         */
+        public Calendar date = null;
+
+    }
 
     public BODatePicker(Context context) {
         super(context);

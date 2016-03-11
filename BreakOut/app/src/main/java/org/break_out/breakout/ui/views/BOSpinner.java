@@ -14,7 +14,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
-import org.break_out.breakout.model.BOSpinnerState;
 
 import java.io.Serializable;
 
@@ -27,8 +26,15 @@ public class BOSpinner extends BOUnderlinedView {
 
     private boolean _selected = false;
 
-    private class State implements Serializable {
-        public Integer selectedIndex = null;
+    public static class BOSpinnerState implements Serializable {
+
+        /**
+         * The selected index on the spinner.
+         * This value is -1 if no item has been selected
+         * yet.
+         */
+        public int selectedIndex = -1;
+
     }
 
     public BOSpinner(Context context) {
