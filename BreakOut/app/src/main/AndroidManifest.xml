@@ -14,10 +14,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service
-            android:name=".util.BackgroundRunner$BackgroundService"
-            android:exported="false"/>
-
         <activity
             android:name=".ui.activities.MainActivity">
             <intent-filter>
