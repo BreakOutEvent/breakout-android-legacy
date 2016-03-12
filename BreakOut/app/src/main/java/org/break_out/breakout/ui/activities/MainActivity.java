@@ -1,15 +1,17 @@
 package org.break_out.breakout.ui.activities;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.User;
 
 public class MainActivity extends BOActivity {
+
+    private Button _btLogout = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,21 +23,30 @@ public class MainActivity extends BOActivity {
         final TextView tvUserStatus = (TextView) findViewById(R.id.tv_user_status);
         tvUserStatus.setText(um.getCurrentUsersRole().toString());
 
-        um.loginOrRegisterUser();
-
         um.registerListener(new UserManager.UserDataChangedListener() {
             @Override
             public void userDataChanged() {
                 tvUserStatus.setText(um.getCurrentUsersRole().toString());
+                refreshButtonText();
             }
         });
 
-        Button btLogout = (Button) findViewById(R.id.bt_logout);
-        btLogout.setOnClickListener(new View.OnClickListener() {
+        _btLogout = (Button) findViewById(R.id.bt_logout);
+        _btLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserManager.getInstance(MainActivity.this).logOutCurrentUser();
+                if(um.getCurrentUser().isAtLeast(User.Role.USER)) {
+                    um.logOutCurrentUser();
+                } else {
+                    um.loginOrRegisterUser();
+                }
             }
         });
+
+        refreshButtonText();
+    }
+
+    private void refreshButtonText() {
+        _btLogout.setText(UserManager.getInstance(this).getCurrentUsersRole() == User.Role.VISITOR ? "Login" : "Logout");
     }
 }

@@ -1,7 +1,7 @@
 package org.break_out.breakout.ui.activities;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -12,11 +12,15 @@ import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOFlatButton;
+import org.break_out.breakout.util.BackgroundRunner;
 import org.break_out.breakout.util.NotificationUtils;
 
 public class LoginRegisterActivity extends BackgroundImageActivity {
 
     private static final String TAG = "LoginRegisterActivity";
+
+    private static final String RUNNER_LOGIN = "runner_login";
+    private static final String RUNNER_REGISTER = "runner_registration";
 
     private static final String KEY_EMAIL = "key_email";
     private static final String KEY_PASSWORD = "key_password";
@@ -81,18 +85,37 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
         outState.putSerializable(KEY_REGISTER, _btRegister.getState());
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BackgroundRunner.getRunner(RUNNER_LOGIN).removeListener();
+        BackgroundRunner.getRunner(RUNNER_REGISTER).removeListener();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BackgroundRunner.getRunner(RUNNER_LOGIN).setListener(new LoginListener());
+        BackgroundRunner.getRunner(RUNNER_REGISTER).setListener(new RegisterListener());
+    }
+
     /**
      * Call code to register on the server.
      */
     private void register() {
-        String email = _etEmail.getText().toString();
-        String password = _etPassword.getText().toString();
+        String email = _etEmail.getText();
+        String password = _etPassword.getText();
 
         if(email.isEmpty() || password.isEmpty()) {
             showHint();
         } else {
             // Start registration
-            new RegisterTask().execute(email, password);
+            _btRegister.setShowLoadingIndicator(true);
+            _btLogin.setEnabled(false);
+
+            BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_REGISTER);
+            runner.setRunnable(new RegisterRunnable());
+            runner.execute(email, password);
         }
     }
 
@@ -101,20 +124,25 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
      */
     private void login() {
         // Check if both fields are populated, show error otherwise
-        String email = _etEmail.getText().toString();
-        String password = _etPassword.getText().toString();
+        String email = _etEmail.getText();
+        String password = _etPassword.getText();
 
         if(email.isEmpty() || password.isEmpty()) {
             showHint();
         } else {
             // Start login
-            new LoginTask().execute(email, password);
+            _btLogin.setShowLoadingIndicator(true);
+            _btRegister.setEnabled(false);
+
+            BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_LOGIN);
+            runner.setRunnable(new LoginRunnable());
+            runner.execute(email, password);
         }
     }
 
     private void checkIfEnoughInput() {
-        String email = _etEmail.getText().toString();
-        String password = _etPassword.getText().toString();
+        String email = _etEmail.getText();
+        String password = _etPassword.getText();
 
         if(!email.isEmpty() && !password.isEmpty()) {
             hideHint();
@@ -147,39 +175,22 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
         }
     }
 
-    /**
-     * This AsyncTask will register a user on the server and set it
-     * as the current user in the {@link UserManager}, if {@code registerBeforeLogin}
-     * is set to {@code true}. Otherwise it will skip the registration and
-     * directly log in the user.<br />
-     * This task expects two Strings as parameters when executing:
-     * the user's email and the desired password.
-     */
-    private class LoginTask extends AsyncTask<String, Void, Boolean> {
+    private class LoginRunnable implements BackgroundRunner.BackgroundRunnable {
 
+        @Nullable
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            _btLogin.setShowLoadingIndicator(true);
-            _btRegister.setEnabled(false);
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            // Get email and password
-            if(params.length != 2) {
-                Log.e(TAG, "The LoginRegisterTask needs 2 arguments (email and password). Given: " + params.length + ".");
-                return null;
+        public Object run(@Nullable Object... params) {
+            if(params == null || params.length != 2) {
+                Log.e(TAG, "Could not get the correct params");
+                return false;
             }
 
-            String email = params[0];
-            String password = params[1];
+            String email = (String) params[0];
+            String password = (String) params[1];
 
             if(email == null || password == null) {
                 Log.e(TAG, "Email or password are null.");
-                return null;
+                return false;
             }
 
             // Create user with email and password
@@ -199,47 +210,45 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
             return true;
         }
+    }
+
+    private class LoginListener implements BackgroundRunner.BackgroundListener {
 
         @Override
-        protected void onPostExecute(Boolean success) {
-            super.onPostExecute(success);
+        public void onResult(@Nullable Object result) {
+            try {
+                Boolean success = (Boolean) result;
 
-            if(success) {
-                finish();
-            } else {
-                _btLogin.setEnabled(true);
-                _btRegister.setEnabled(true);
-                _btLogin.setShowLoadingIndicator(false);
-
-                Log.e(TAG, "Login via OAuth failed.");
-
-                // TODO: Handle login error (and retry login?)
-                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
+                if(success != null && success) {
+                    finish();
+                    return;
+                } else {
+                    Log.e(TAG, "Login via OAuth failed.");
+                    NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
+                }
+            } catch(ClassCastException e) {
+                e.printStackTrace();
             }
+
+            _btLogin.setEnabled(true);
+            _btRegister.setEnabled(true);
+            _btLogin.setShowLoadingIndicator(false);
         }
     }
 
-    private class RegisterTask extends AsyncTask<String, Void, Boolean> {
+    private class RegisterRunnable implements BackgroundRunner.BackgroundRunnable {
 
+        @Nullable
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            _btRegister.setShowLoadingIndicator(true);
-            _btLogin.setEnabled(false);
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
+        public Object run(@Nullable Object... params) {
             // Get email and password
-            if(params.length != 2) {
-                Log.e(TAG, "The LoginRegisterTask needs 2 arguments (email and password). Given: " + params.length + ".");
-                return null;
+            if(params == null || params.length != 2) {
+                Log.e(TAG, "Could not get the correct params");
+                return false;
             }
 
-            String email = params[0];
-            String password = params[1];
+            String email = (String) params[0];
+            String password = (String) params[1];
 
             if(email == null || password == null) {
                 Log.e(TAG, "Email or password are null.");
@@ -249,28 +258,31 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             // Create user with email and password
             User user = new User(email, password);
 
-            // Register user to the server
-            boolean registerSuccessful = user.registerOnServerSync();
-
-            return registerSuccessful;
+            // Register user to the server and return result
+            return user.registerOnServerSync();
         }
+    }
+
+    private class RegisterListener implements BackgroundRunner.BackgroundListener {
 
         @Override
-        protected void onPostExecute(Boolean success) {
-            super.onPostExecute(success);
+        public void onResult(@Nullable Object result) {
+            try {
+                Boolean success = (Boolean) result;
+
+                if(success != null && success) {
+                    NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.registration_successful_title), getString(R.string.registration_successful_text));
+                } else {
+                    Log.e(TAG, "Account could not be created on the server.");
+                    NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
+                }
+            } catch(ClassCastException e) {
+                e.printStackTrace();
+            }
 
             _btLogin.setEnabled(true);
             _btRegister.setEnabled(true);
             _btRegister.setShowLoadingIndicator(false);
-
-            if(success) {
-                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.registration_successful_title), getString(R.string.registration_successful_text));
-            } else {
-                // TODO: Handle registration error (and retry login?)
-
-                Log.e(TAG, "Account could not be created on the server.");
-                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
-            }
         }
     }
 }
