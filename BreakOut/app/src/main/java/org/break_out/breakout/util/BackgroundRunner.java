@@ -1,6 +1,7 @@
 package org.break_out.breakout.util;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -17,15 +18,16 @@ import java.util.Map;
  * <p>The background task will continue to run when the Activity, which started it,
  * is pause. However, it will stop as soon as the Activity is destroyed!</p>
  *
- * <p>Here is some pseudo code giving you an idea of how to use this class:</p>
+ * <p>Here is some code giving you an idea of how to use this class:</p>
  *
  * <pre>
  * {@code
- *     class YourActivity extends Activity {
+ *     public class YourActivity extends Activity {
  *
- *         String ID = "your_id";
+ *         private String ID = "your_id";
+ *         private String KEY_RESULT = "key_result";
  *
- *         void startTask() {
+ *         private void startTask() {
  *             BackgroundRunner runner = BackgroundRunner.getRunner(ID);
  *             runner.setRunnable(new YourRunnable());
  *
@@ -47,19 +49,26 @@ import java.util.Map;
  *             BackgroundRunner.getRunner(ID).setListener(new YourListener());
  *         }
  *
- *         class YourRunnable implements BackgroundRunner.BackgroundRunnable {
+ *         private class YourRunnable implements BackgroundRunner.BackgroundRunnable {
  *              @Nullable
  *              @Override
- *              public Object run(@Nullable Object... params) {
+ *              public Bundle run(@Nullable Bundle params) {
  *                  // This will run in the background
- *                  return "result";
+ *
+ *                  Bundle result = new Bundle();
+ *                  result.putString(KEY_RESULT, "result");
+ *                  return result;
  *              }
  *         }
  *
- *         class YourListener implements BackgroundRunner.BackgroundListener {
+ *         private class YourListener implements BackgroundRunner.BackgroundListener {
  *              @Override
- *              public void onResult(@Nullable Object result) {
- *                  String resultString = (String) result;
+ *              public void onResult(@Nullable Bundle result) {
+ *                  if(result == null) {
+ *                      return;
+ *                  }
+ *
+ *                  String resultString = result.getString(KEY_RESULT);
  *                  // Do something with the result
  *              }
  *         }
@@ -72,18 +81,40 @@ public class BackgroundRunner {
 
     private static final String TAG = "BackgroundRunner";
 
-    // Static values
+    /**
+     * Static map of all runners mapped by id.
+     */
     private static Map<String, BackgroundRunner> _runners = new HashMap<>();
 
-    // Object-specific values
+    /**
+     * If the runner is currently running or not.
+     */
     private boolean _isRunning = false;
+
+    /**
+     * Will be true if the runner finished but the
+     * result has not been returned to a listener yet.
+     */
     private boolean _isDone = false;
-    private Object _result = null;
 
+    /**
+     * The result from the runnable of this runner.
+     * This value might even be null after the runnable
+     * finished, as it is allowed to return null from runnables.
+     * To find out if the runnable already finished, see {@link #_isDone}.
+     */
+    private Bundle _result = null;
+
+    /**
+     * The runnable to be run in the background by this runner.
+     * This runnable must not be null in order to execute the runner.
+     */
     private BackgroundRunnable _runnable = null;
-    private BackgroundListener _listener = null;
 
-    // Interfaces
+    /**
+     * The listener for this runner. Can always be null.
+     */
+    private BackgroundListener _listener = null;
 
     /**
      * Implement this interface to provide a runnable task
@@ -97,20 +128,21 @@ public class BackgroundRunner {
          * run in a separate thread in an AsyncTask. <b>You don't have
          * to open a new thread in this method.</b></p>
          *
-         * <p>This methods takes an array of Objects as a parameter.
-         * These are the parameters you pass to {@link #execute(Object...)} when
-         * executing a runner. They can be null if no parameters were specified.</p>
+         * <p>This methods takes a {@link Bundle} as a parameter.
+         * This is the same bundle as passed to {@link #execute(Bundle)} when
+         * executing the runner. It can be null if no parameters were passed.</p>
          *
          * <p>When implementing this method and running a task in the background,
          * you might often want to return a result. This method allows you to return
-         * any Object. You will have to cast it to the correct return type in your implementation of the
-         * {@link org.break_out.breakout.util.BackgroundRunner.BackgroundListener#onResult(Object)}
-         * method. If your runnable should not return any result, simply return null.</p>
+         * any Bundle containing your result values. It will be delivered to the
+         * {@link org.break_out.breakout.util.BackgroundRunner.BackgroundListener#onResult(Bundle)}
+         * method. If your runnable should not return any result, simply return null or an empty
+         * Bundle.</p>
          *
          * @param params The parameters provided when executing the runner
-         * @return The result object or null
+         * @return The result Bundle or null
          */
-        public @Nullable Object run(@Nullable Object... params);
+        public @Nullable Bundle run(@Nullable Bundle params);
     }
 
     /**
@@ -123,21 +155,18 @@ public class BackgroundRunner {
          * <p>This method will be called as soon as the runner's
          * runnable finished. It will deliver the result of the runnable,
          * which may be null (depending on your implementation of
-         * {@link org.break_out.breakout.util.BackgroundRunner.BackgroundRunnable#run(Object...)}).
-         * You might want to cast this object to the appropriate type.</p>
+         * {@link org.break_out.breakout.util.BackgroundRunner.BackgroundRunnable#run(Bundle)}).</p>
          *
          * <p>If there was no listener registered at the time when the runnable finished,
          * the result will be stored and sent as soon as there is a listener registered to the
          * runnable again.</p>
          *
-         * <p>This callback will only be called once for ever run of the runnable.</p>
+         * <p>This callback will only be called once for every run of the runnable.</p>
          *
-         * @param result The result of the runnable or null
+         * @param result The result Bundle of the runnable or null
          */
-        public void onResult(@Nullable Object result);
+        public void onResult(@Nullable Bundle result);
     }
-
-    // Static methods
 
     /**
      * Returns a runner with the given string ID.
@@ -156,12 +185,9 @@ public class BackgroundRunner {
         return _runners.get(id);
     }
 
-    // Constructor
     public BackgroundRunner(String id) {
         _runners.put(id, this);
     }
-
-    // Methods
 
     /**
      * <p>Sets the runnable to be executed by this runner. You have
@@ -175,6 +201,7 @@ public class BackgroundRunner {
      */
     public void setRunnable(BackgroundRunnable runnable) {
         if(_runnable != null) {
+            Log.e(TAG, "Cannot overwrite an already set runnable of a runner");
             return;
         }
 
@@ -210,21 +237,24 @@ public class BackgroundRunner {
     }
 
     /**
-     * Execute this runnable in a separate AsyncTask.
+     * <p>Executes this runnable in a separate AsyncTask with the given parameters.
      * If the runner is already running, this method will
      * do nothing. <b>You cannot execute the same runner multiple
-     * times im parallel.</b>
+     * times in parallel.</b></p>
      *
-     * @param params The parameters to be considered by the executed runnable
+     * <p>When executing a runner again without a listener receiving the previous result
+     * before, this result will be lost.</p>
+     *
+     * @param params The parameter Bundle to be considered by the executed runnable or null
      */
-    public void execute(Object ... params) {
+    public void execute(@Nullable Bundle params) {
         if(_runnable == null) {
             Log.e(TAG, "Cannot run without a BackgroundRunnable");
             return;
         }
 
         if(_isRunning) {
-            Log.e(TAG, "Is already running");
+            Log.e(TAG, "Runner is already running");
             return;
         }
 
@@ -239,8 +269,19 @@ public class BackgroundRunner {
     }
 
     /**
+     * Executes this runnable in a separate AsyncTask without any parameters.
+     * To pass parameters to the runnable, see {@link #execute(Bundle)}.
+     * If the runner is already running, this method will
+     * do nothing. <b>You cannot execute the same runner multiple
+     * times in parallel.</b>
+     */
+    public void execute() {
+        execute(null);
+    }
+
+    /**
      * Checks if this runner is currently running.
-     * If so, you cannot execute it again in this time.
+     * If so, you cannot execute it again during this time.
      *
      * @return True if the runner is currently running, false otherwise
      */
@@ -252,13 +293,13 @@ public class BackgroundRunner {
      * Store the result of the runnable for this runner.
      * The running state will be set to <i>not running</i> and this
      * method will try to call the listener. If there is no listener
-     * currently registered to this runner, the result will be stored
+     * currently registered to the runner, the result will be stored
      * so that the listener can be called once re-registered to this
      * runner.
      *
-     * @param result The result of the runnable
+     * @param result The result of the runnable or null
      */
-    private void setResult(Object result) {
+    private void setResult(@Nullable Bundle result) {
         _result = result;
         _isRunning = false;
         _isDone = true;
@@ -277,20 +318,24 @@ public class BackgroundRunner {
         }
     }
 
-    // AsyncTask
-
     /**
      * The AsyncTask running the runnable in the background.
+     * When the runnable finished its work, {@link #setResult(Bundle)}
+     * will be called with the result returned by the runnable.
      */
-    private class RunnerTask extends AsyncTask<Object, Void, Object> {
+    private class RunnerTask extends AsyncTask<Bundle, Void, Bundle> {
 
         @Override
-        protected Object doInBackground(Object... params) {
-            return _runnable.run(params);
+        protected Bundle doInBackground(Bundle... params) {
+            if(params == null || params.length != 1) {
+                return _runnable.run(null);
+            } else {
+                return _runnable.run(params[0]);
+            }
         }
 
         @Override
-        protected void onPostExecute(Object result) {
+        protected void onPostExecute(Bundle result) {
             super.onPostExecute(result);
             setResult(result);
         }

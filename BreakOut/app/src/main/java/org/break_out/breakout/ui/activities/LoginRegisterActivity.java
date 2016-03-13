@@ -26,6 +26,7 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
     private static final String KEY_PASSWORD = "key_password";
     private static final String KEY_LOGIN = "key_login";
     private static final String KEY_REGISTER = "key_register";
+    private static final String KEY_SUCCESS = "key_success";
 
     private UserManager _userManager = null;
 
@@ -115,7 +116,12 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
             BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_REGISTER);
             runner.setRunnable(new RegisterRunnable());
-            runner.execute(email, password);
+
+            Bundle params = new Bundle();
+            params.putString(KEY_EMAIL, email);
+            params.putString(KEY_PASSWORD, password);
+
+            runner.execute(params);
         }
     }
 
@@ -136,7 +142,12 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
             BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_LOGIN);
             runner.setRunnable(new LoginRunnable());
-            runner.execute(email, password);
+
+            Bundle params = new Bundle();
+            params.putString(KEY_EMAIL, email);
+            params.putString(KEY_PASSWORD, password);
+
+            runner.execute(params);
         }
     }
 
@@ -179,18 +190,23 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
         @Nullable
         @Override
-        public Object run(@Nullable Object... params) {
-            if(params == null || params.length != 2) {
-                Log.e(TAG, "Could not get the correct params");
-                return false;
+        public Bundle run(@Nullable Bundle params) {
+            Bundle result = new Bundle();
+
+            if(params == null) {
+                Log.e(TAG, "Could not get params in LoginRunnable");
+                result.putBoolean(KEY_SUCCESS, false);
+                return result;
             }
 
-            String email = (String) params[0];
-            String password = (String) params[1];
+            // Get email and password
+            String email = params.getString(KEY_EMAIL);
+            String password = params.getString(KEY_PASSWORD);
 
             if(email == null || password == null) {
-                Log.e(TAG, "Email or password are null.");
-                return false;
+                Log.e(TAG, "Email or password are null");
+                result.putBoolean(KEY_SUCCESS, false);
+                return result;
             }
 
             // Create user with email and password
@@ -200,7 +216,8 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             boolean loginSuccessful = user.loginOnServerSync();
 
             if(!loginSuccessful) {
-                return false;
+                result.putBoolean(KEY_SUCCESS, false);
+                return result;
             }
 
             Log.d(TAG, "User remote ID: " + user.getRemoteId());
@@ -208,26 +225,25 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             // Everything went well -> set user as current user in UserManager
             _userManager.setCurrentUser(user);
 
-            return true;
+            result.putBoolean(KEY_SUCCESS, true);
+            return result;
         }
     }
 
     private class LoginListener implements BackgroundRunner.BackgroundListener {
 
         @Override
-        public void onResult(@Nullable Object result) {
-            try {
-                Boolean success = (Boolean) result;
+        public void onResult(@Nullable Bundle result) {
+            if(result != null) {
+                Boolean success = result.getBoolean(KEY_SUCCESS, false);
 
-                if(success != null && success) {
+                if(success) {
                     finish();
                     return;
                 } else {
                     Log.e(TAG, "Login via OAuth failed.");
                     NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
                 }
-            } catch(ClassCastException e) {
-                e.printStackTrace();
             }
 
             _btLogin.setEnabled(true);
@@ -240,44 +256,47 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
         @Nullable
         @Override
-        public Object run(@Nullable Object... params) {
-            // Get email and password
-            if(params == null || params.length != 2) {
-                Log.e(TAG, "Could not get the correct params");
-                return false;
+        public Bundle run(@Nullable Bundle params) {
+            Bundle result = new Bundle();
+
+            if(params == null) {
+                Log.e(TAG, "Could not get params in RegisterRunnable");
+                result.putBoolean(KEY_SUCCESS, false);
+                return result;
             }
 
-            String email = (String) params[0];
-            String password = (String) params[1];
+            // Get email and password
+            String email = params.getString(KEY_EMAIL);
+            String password = params.getString(KEY_PASSWORD);
 
             if(email == null || password == null) {
-                Log.e(TAG, "Email or password are null.");
-                return null;
+                Log.e(TAG, "Email or password are null");
+                result.putBoolean(KEY_SUCCESS, false);
+                return result;
             }
 
             // Create user with email and password
             User user = new User(email, password);
 
             // Register user to the server and return result
-            return user.registerOnServerSync();
+            result.putBoolean(KEY_SUCCESS, user.registerOnServerSync());
+            return result;
         }
     }
 
     private class RegisterListener implements BackgroundRunner.BackgroundListener {
 
         @Override
-        public void onResult(@Nullable Object result) {
-            try {
-                Boolean success = (Boolean) result;
+        public void onResult(@Nullable Bundle result) {
+            if(result != null) {
+                Boolean success = result.getBoolean(KEY_SUCCESS, false);
 
-                if(success != null && success) {
+                if(success) {
                     NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.registration_successful_title), getString(R.string.registration_successful_text));
                 } else {
                     Log.e(TAG, "Account could not be created on the server.");
                     NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
                 }
-            } catch(ClassCastException e) {
-                e.printStackTrace();
             }
 
             _btLogin.setEnabled(true);
