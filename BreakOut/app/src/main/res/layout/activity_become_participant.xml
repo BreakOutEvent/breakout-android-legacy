@@ -44,14 +44,6 @@
 
         </LinearLayout>
 
-        <org.break_out.breakout.ui.views.BOEditText
-            android:id="@+id/et_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/hint_email"
-            android:inputType="textEmailAddress"
-            app:drawableLeft="@drawable/ic_mail_outline_white_24dp"/>
-
         <org.break_out.breakout.ui.views.BOSpinner
             android:id="@+id/sp_gender"
             android:layout_width="match_parent"

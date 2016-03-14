@@ -13,6 +13,12 @@
         android:id="@+id/bt_logout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="logout"/>
+        android:text="Logout"/>
+
+    <Button
+        android:id="@+id/bt_participate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Participate"/>
 
 </LinearLayout>

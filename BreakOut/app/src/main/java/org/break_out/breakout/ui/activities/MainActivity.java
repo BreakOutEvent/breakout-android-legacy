@@ -43,10 +43,18 @@ public class MainActivity extends BOActivity {
             }
         });
 
+        Button btParticipate = (Button) findViewById(R.id.bt_participate);
+        btParticipate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                um.makeUserParticipant();
+            }
+        });
+
         refreshButtonText();
     }
 
     private void refreshButtonText() {
-        _btLogout.setText(UserManager.getInstance(this).getCurrentUsersRole() == User.Role.VISITOR ? "Login" : "Logout");
+        _btLogout.setText(UserManager.getInstance(this).getCurrentUser().isAtLeast(User.Role.USER) ? "Logout" : "Login");
     }
 }

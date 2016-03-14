@@ -234,16 +234,18 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
         @Override
         public void onResult(@Nullable Bundle result) {
-            if(result != null) {
-                Boolean success = result.getBoolean(KEY_SUCCESS, false);
+            Boolean success = false;
 
-                if(success) {
-                    finish();
-                    return;
-                } else {
-                    Log.e(TAG, "Login via OAuth failed.");
-                    NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
-                }
+            if(result != null) {
+                success = result.getBoolean(KEY_SUCCESS, false);
+            }
+
+            if(success) {
+                finish();
+                return;
+            } else {
+                Log.e(TAG, "Login via OAuth failed");
+                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.login_failed));
             }
 
             _btLogin.setEnabled(true);
@@ -288,15 +290,17 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
         @Override
         public void onResult(@Nullable Bundle result) {
-            if(result != null) {
-                Boolean success = result.getBoolean(KEY_SUCCESS, false);
+            Boolean success = false;
 
-                if(success) {
-                    NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.registration_successful_title), getString(R.string.registration_successful_text));
-                } else {
-                    Log.e(TAG, "Account could not be created on the server.");
-                    NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
-                }
+            if(result != null) {
+                success = result.getBoolean(KEY_SUCCESS, false);
+            }
+
+            if(success) {
+                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.registration_successful_title), getString(R.string.registration_successful_text));
+            } else {
+                Log.e(TAG, "Account could not be created on the server");
+                NotificationUtils.showInfoDialog(LoginRegisterActivity.this, getString(R.string.error), getString(R.string.account_not_created));
             }
 
             _btLogin.setEnabled(true);

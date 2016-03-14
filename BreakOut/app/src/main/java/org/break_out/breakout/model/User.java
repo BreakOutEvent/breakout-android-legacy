@@ -1,5 +1,6 @@
 package org.break_out.breakout.model;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -7,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Calendar;
 
 import okhttp3.Credentials;
 import okhttp3.FormBody;
@@ -45,6 +47,7 @@ public class User implements Serializable {
     private String _hometown = "";
     private String _phoneNumber = "";
     private String _tShirtSize = "";
+    private Calendar _birthday = null;
 
     /**
      * Represents the role of a user.
@@ -78,6 +81,21 @@ public class User implements Serializable {
         _password = (password != null ? password : "");
     }
 
+    public User(User original) {
+        setEmail(original.getEmail());
+        setPassword(original.getPassword());
+        setFirstName(original.getFirstName());
+        setLastName(original.getLastName());
+        setRemoteId(original.getRemoteId());
+        setRole(original.getRole());
+        setHometown(original.getHometown());
+        setAccessToken(original.getAccessToken());
+        setPhoneNumber(original.getPhoneNumber());
+        setEmergencyNumber(original.getEmergencyNumber());
+        setGender(original.getGender());
+        setTShirtSize(original.getTShirtSize());
+    }
+
     /**
      * Set the ID assigned by the server.
      *
@@ -103,11 +121,7 @@ public class User implements Serializable {
      * @param email The new email
      */
     public void setEmail(String email) {
-        if(email == null) {
-            return;
-        }
-
-        _email = email;
+        _email = email != null ? email : "";
     }
 
     /**
@@ -127,11 +141,7 @@ public class User implements Serializable {
      * @param password The new password
      */
     public void setPassword(String password) {
-        if(password == null) {
-            return;
-        }
-
-        _password = password;
+        _password = password != null ? password : "";
     }
 
     /**
@@ -151,11 +161,7 @@ public class User implements Serializable {
      * @param accessToken The new access token
      */
     public void setAccessToken(String accessToken) {
-        if(accessToken == null) {
-            return;
-        }
-
-        _accessToken = accessToken;
+        _accessToken = accessToken != null ? accessToken : "";
     }
 
     /**
@@ -175,11 +181,7 @@ public class User implements Serializable {
      * @param role The new role of the user
      */
     public void setRole(Role role) {
-        if(role == null) {
-            return;
-        }
-
-        _role = role;
+        _role = role != null ? role : Role.VISITOR;
     }
 
     /**
@@ -211,88 +213,68 @@ public class User implements Serializable {
         }
     }
 
-    public void setGender(String gender) {
-        if(gender == null) {
-            return;
-        }
-
-        _gender = gender;
+    public void setGender(@Nullable String gender) {
+        _gender = gender != null ? gender : "";
     }
 
     public String getGender() {
         return _gender;
     }
 
-    public void setFirstName(String firstName) {
-        if(firstName == null) {
-            return;
-        }
-
-        _firstName = firstName;
+    public void setFirstName(@Nullable String firstName) {
+        _firstName = firstName != null ? firstName : "";
     }
 
     public String getFirstName() {
         return _firstName;
     }
 
-    public void setLastName(String lastName) {
-        if(lastName == null) {
-            return;
-        }
-
-        _lastName = lastName;
+    public void setLastName(@Nullable String lastName) {
+        _lastName = lastName != null ? lastName : "";
     }
 
     public String getLastName() {
         return _lastName;
     }
 
-    public void setEmergencyNumber(String emergencyNumber) {
-        if(emergencyNumber == null) {
-            return;
-        }
-
-        _emergencyNumber = emergencyNumber;
+    public void setEmergencyNumber(@Nullable String emergencyNumber) {
+        _emergencyNumber = emergencyNumber != null ? emergencyNumber : "";
     }
 
     public String getEmergencyNumber() {
         return _emergencyNumber;
     }
 
-    public void setHometown(String hometown) {
-        if(hometown == null) {
-            return;
-        }
-
-        _hometown = hometown;
+    public void setHometown(@Nullable String hometown) {
+        _hometown = hometown != null ? hometown : "";
     }
 
     public String getHometown() {
         return _hometown;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        if(phoneNumber == null) {
-            return;
-        }
-
-        _phoneNumber = phoneNumber;
+    public void setPhoneNumber(@Nullable String phoneNumber) {
+        _phoneNumber = phoneNumber != null ? phoneNumber : "";
     }
 
     public String getPhoneNumber() {
         return _phoneNumber;
     }
 
-    public void setTShirtSize(String tShirtSize) {
-        if(tShirtSize == null) {
-            return;
-        }
-
-        _tShirtSize = tShirtSize;
+    public void setTShirtSize(@Nullable String tShirtSize) {
+        _tShirtSize = tShirtSize != null ? tShirtSize : "";
     }
 
     public String getTShirtSize() {
         return _tShirtSize;
+    }
+
+    public void setBirthday(@Nullable Calendar birthday) {
+        _birthday = birthday;
+    }
+
+    public @Nullable Calendar getBirthday() {
+        return _birthday;
     }
 
     /**
@@ -331,9 +313,7 @@ public class User implements Serializable {
 
                 return true;
             }
-        } catch(IOException e) {
-            e.printStackTrace();
-        } catch(JSONException e) {
+        } catch(IOException | JSONException e) {
             e.printStackTrace();
         }
 
@@ -419,7 +399,7 @@ public class User implements Serializable {
      */
     public boolean updateFromServerSync() {
         if(_role == Role.VISITOR) {
-            Log.e(TAG, "Could not update user because it does not have an account.");
+            Log.e(TAG, "Could not update user because it does not have an account");
             return false;
         }
 
@@ -438,7 +418,7 @@ public class User implements Serializable {
             Response updateResponse = client.newCall(updateRequest).execute();
 
             if(!updateResponse.isSuccessful()) {
-                Log.e(TAG, "Could not update the user from the server (" + updateResponse.code() + ").");
+                Log.e(TAG, "Could not update the user from the server (" + updateResponse.code() + ")");
                 return false;
             }
 
@@ -486,9 +466,7 @@ public class User implements Serializable {
             _hometown = (hometown != null ? hometown : "");
 
             return true;
-        } catch(IOException e) {
-            e.printStackTrace();
-        } catch(JSONException e) {
+        } catch(IOException | JSONException e) {
             e.printStackTrace();
         }
 
@@ -503,7 +481,7 @@ public class User implements Serializable {
      */
     public boolean updateOnServerSync() {
         if(_role == Role.VISITOR) {
-            Log.e(TAG, "Could not update user because it does not have an account.");
+            Log.e(TAG, "Could not update user because it is a " + Role.VISITOR.toString());
             return false;
         }
 
@@ -516,13 +494,11 @@ public class User implements Serializable {
         JSONObject userJSON = toJSON();
 
         if(userJSON == null) {
-            Log.e(TAG, "Could not create a valid JSON object for this user. The update has been cancelled.");
+            Log.e(TAG, "Could not create a valid JSON object for this user. The update has been cancelled");
             return false;
         }
 
         RequestBody updateBody = RequestBody.create(JSON, userJSON.toString());
-
-        Log.d(TAG, toJSON().toString());
 
         Request updateRequest = new Request.Builder()
                 .url(updateUrl)
@@ -534,15 +510,21 @@ public class User implements Serializable {
             Response updateResponse = client.newCall(updateRequest).execute();
 
             if(!updateResponse.isSuccessful()) {
-                Log.e(TAG, "The network call for updating the user was not successful (" + updateResponse.code() + ").");
+                Log.e(TAG, "The network call for updating the user was not successful (" + updateResponse.code() + ")");
                 return false;
             }
 
-            Log.d(TAG, "User has been updated.");
+            JSONObject responseJson = new JSONObject(updateResponse.body().string());
+            if(responseJson.get("participant") != null) {
+                _role = Role.PARTICIPANT;
+            } else {
+                _role = Role.USER;
+            }
+
+            Log.d(TAG, "User has been updated");
 
             return true;
-
-        } catch(IOException e) {
+        } catch(IOException | JSONException e) {
             e.printStackTrace();
         }
 
@@ -552,26 +534,26 @@ public class User implements Serializable {
     /**
      * This method will return a JSON object representation of this user.
      *
-     * @return JSON representation of this user or null if an error occured
+     * @return JSON representation of this user or null if an error occurred
      */
     private JSONObject toJSON() {
         JSONObject userObj = new JSONObject();
 
         try {
             userObj.put("email", _email);
-            userObj.put("firstname", _firstName);
-            userObj.put("lastname", _lastName);
-            userObj.put("gender", _gender);
+            userObj.put("firstname", _firstName != null ? _firstName : "");
+            userObj.put("lastname", _lastName != null ? _lastName : "");
+            userObj.put("gender", _gender != null ? _gender : "");
 
             // Note: The password cannot be changed!
 
-            if(_role == Role.PARTICIPANT) {
+            if(!_emergencyNumber.equals("") || !_hometown.equals("") || !_phoneNumber.equals("") || !_tShirtSize.equals("")) {
                 JSONObject participantObject = new JSONObject();
 
-                participantObject.put("emergencynumber", _emergencyNumber);
-                participantObject.put("hometown", _hometown);
-                participantObject.put("phonenumber", _phoneNumber);
-                participantObject.put("tshirtsize", _tShirtSize);
+                participantObject.put("emergencynumber", _emergencyNumber != null ? _emergencyNumber : "");
+                participantObject.put("hometown", _hometown != null ? _hometown : "");
+                participantObject.put("phonenumber", _phoneNumber != null ? _phoneNumber : "");
+                participantObject.put("tshirtsize", _tShirtSize != null ? _tShirtSize : "");
 
                 // Add participant object to user object
                 userObj.put("participant", participantObject);

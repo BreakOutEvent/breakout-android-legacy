@@ -185,7 +185,7 @@ public class BackgroundRunner {
         return _runners.get(id);
     }
 
-    public BackgroundRunner(String id) {
+    private BackgroundRunner(String id) {
         _runners.put(id, this);
     }
 
@@ -201,7 +201,6 @@ public class BackgroundRunner {
      */
     public void setRunnable(BackgroundRunnable runnable) {
         if(_runnable != null) {
-            Log.e(TAG, "Cannot overwrite an already set runnable of a runner");
             return;
         }
 
