@@ -62,6 +62,7 @@ public abstract class BOUnderlinedView extends FrameLayout {
         initFromAttrs(attrs);
         initContent();
         processCustomAttrs(attrs);
+        unhighlight();
         initFocus();
     }
 

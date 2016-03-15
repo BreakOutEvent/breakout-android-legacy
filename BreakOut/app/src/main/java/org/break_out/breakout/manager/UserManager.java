@@ -152,14 +152,14 @@ public class UserManager {
     }
 
     /**
-     * Returns the currently logged in user.
+     * Returns a copy of the currently logged in user.
      * If there is no user logged in, this method will return
      * an empty instance of {@link User} with the role {@code VISITOR}.
      *
      * @return The current user
      */
     public User getCurrentUser() {
-        return _currUser;
+        return new User(_currUser);
     }
 
     /**

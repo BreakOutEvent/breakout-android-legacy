@@ -14,6 +14,7 @@ import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOFlatButton;
 import org.break_out.breakout.ui.views.BOSpinner;
 import org.break_out.breakout.util.BackgroundRunner;
+import org.break_out.breakout.util.NotificationUtils;
 
 import java.util.Calendar;
 
@@ -175,7 +176,7 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
                 return result;
             }
 
-            User currUserCopy = new User(userManager.getCurrentUser());
+            User currUserCopy = userManager.getCurrentUser();
 
             currUserCopy.setFirstName(params.getString(KEY_FIRST_NAME));
             currUserCopy.setLastName(params.getString(KEY_LAST_NAME));
@@ -218,6 +219,7 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
                 return;
             } else {
                 Log.e(TAG, "Could not make user a participant");
+                NotificationUtils.showInfoDialog(BecomeParticipantActivity.this, getString(R.string.error), getString(R.string.participate_failed));
             }
 
             _btParticipate.setShowLoadingIndicator(false);

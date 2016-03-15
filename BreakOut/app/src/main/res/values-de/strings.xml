@@ -28,7 +28,7 @@
     <string name="explanation_participate">Durch Klicken des Registrieren-Buttons registriere ich mich verbindlich und zahle den Event-Beitrag von 30,00€ sobald ich ein Team erstellt habe.</string>
 
     <string name="textview_about">Was ist Breakout?</string>
-    <string name="popup_usernamePassword">Bitte gib deine E-Mail und ein Password ein.</string>
+    <string name="popup_usernamePassword">Bitte gib deine E-Mail und ein Passwort ein.</string>
 
     <string name="early_bird_welcome_text">Wir arbeiten gerade daran die App perfekt zu machen für deinen Trip um die Welt. Damit es auch für dich am 3./4. Juni losgehen kann musst du dich noch für das Event registrieren und zusammen mit einem Partner ein Team bilden.</string>
     <string name="early_bird_welcome_title">Bald geht es los!</string>
@@ -46,5 +46,6 @@
     </string-array>
     <string name="registration_successful_text">Dein Account wurde erfolgreich erstellt!\nChecke nun deine Emails, um deinen Account zu aktivieren.</string>
     <string name="registration_successful_title">Account erstellt</string>
+    <string name="participate_failed">Das Teilnehmen schlug fehl.</string>
 
 </resources>
