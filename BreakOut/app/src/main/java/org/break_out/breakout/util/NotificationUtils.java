@@ -1,17 +1,20 @@
 package org.break_out.breakout.util;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.view.View;
 import android.widget.Toast;
 
 import org.break_out.breakout.R;
 
+import it.sephiroth.android.library.tooltip.Tooltip;
+
 /**
+ * <p>
  * This utility class provides methods for
  * simply notifying the user. There are e.g. methods
- * for showing a {@link Toast} message or dialogs.
- * <br /><br />
+ * for showing a {@link Toast} message, dialogs and tooltips.
+ * </p>
  * Created by Tino on 16.02.2016.
  */
 public class NotificationUtils {
@@ -41,6 +44,47 @@ public class NotificationUtils {
                 .setMessage(text)
                 .setPositiveButton(android.R.string.yes, null)
                 .show();
+    }
+
+    public static void showInfoDialog(Context context, int titleResourceId, int textResourceId) {
+        showInfoDialog(context, context.getString(titleResourceId), context.getString(textResourceId));
+    }
+
+    /**
+     * Displays a simple white tooltip above the given anchor view with the
+     * text specified text.
+     *
+     * @param context The context
+     * @param anchorView The tooltip will be shown above this view
+     * @param text The text to be displayed as a tooltip
+     */
+    public static void showTooltip(Context context, View anchorView, String text) {
+        Tooltip.make(context,
+                new Tooltip.Builder((int)(Math.random()*100))
+                        .anchor(anchorView, Tooltip.Gravity.TOP)
+                        .closePolicy(new Tooltip.ClosePolicy()
+                                .insidePolicy(true, false)
+                                .outsidePolicy(true, false), 0)
+                        .text(text)
+                        .maxWidth(800)
+                        .withArrow(true)
+                        .floatingAnimation(Tooltip.AnimationBuilder.DEFAULT)
+                        .withStyleId(R.style.AppTheme_Tooltip)
+                        .withOverlay(false)
+                        .build()
+        ).show();
+    }
+
+    /**
+     * Displays a simple white tooltip above the given anchor view with the
+     * text specified by the given string resource ID.
+     *
+     * @param context The context
+     * @param anchorView The tooltip will be shown above this view
+     * @param textId The resource ID of the string to be displayed
+     */
+    public static void showTooltip(Context context, View anchorView, int textId) {
+        showTooltip(context, anchorView, context.getString(textId));
     }
 
 }

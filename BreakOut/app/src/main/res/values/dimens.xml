@@ -1,16 +1,16 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="default_screen_padding">16dp</dimen>
+    <!-- General paddings and margins -->
+    <dimen name="default_padding">16dp</dimen>
+    <dimen name="default_activity_margin_left">30dp</dimen>
+    <dimen name="default_activity_margin_top">25dp</dimen>
+    <dimen name="default_activity_margin_right">@dimen/default_activity_margin_left</dimen>
+    <dimen name="default_activity_margin_bottom">@dimen/default_activity_margin_top</dimen>
 
     <!-- These items can be used to express match_parent and wrap_content in dimension resources -->
     <item name="match_parent" type="dimen">-1</item>
     <item name="wrap_content" type="dimen">-2</item>
 
-    <dimen name="popup_margin_top">16dp</dimen>
-    <dimen name="popup_margin_bottom">28dp</dimen>
-    <dimen name="popup_horizontal_margin">28dp</dimen>
-
     <dimen name="linearLayout_vertical_margin_elements">10dp</dimen>
-
-    <dimen name="background_activity_width">@dimen/match_parent</dimen>
+    <dimen name="content_width">@dimen/match_parent</dimen>
+    <dimen name="tool_bar_top_padding">24dp</dimen>
 </resources>

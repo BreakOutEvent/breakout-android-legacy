@@ -19,4 +19,10 @@
     <style name="AppTheme.AlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
+    <style name="AppTheme.Tooltip" parent="ToolTipLayoutDefaultStyle">
+        <item name="ttlm_backgroundColor">@color/white</item>
+        <item name="ttlm_cornerRadius">3dp</item>
+        <item name="ttlm_arrowRatio">1.0</item>
+    </style>
 </resources>

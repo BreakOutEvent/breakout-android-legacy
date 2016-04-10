@@ -32,6 +32,11 @@
             android:name=".ui.activities.BecomeParticipantActivity"
             android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
+
+        <activity
+            android:name=".ui.activities.WebViewActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden">
+        </activity>
     </application>
 
 </manifest>

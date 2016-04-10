@@ -4,9 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:layout_gravity="center">
 
     <ImageView
         android:id="@+id/background_image"
@@ -16,11 +14,14 @@
         android:src="@drawable/bg_welcome_600dp"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/v_content"
+        android:layout_width="@dimen/content_width"
         android:layout_height="match_parent"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:gravity="center_horizontal"
+        android:paddingLeft="@dimen/default_activity_margin_left"
+        android:paddingRight="@dimen/default_activity_margin_right"
+        android:paddingTop="?attr/actionBarSize"
+        android:paddingBottom="@dimen/default_activity_margin_bottom"
+        android:layout_gravity="center"
         android:orientation="vertical">
 
         <TextView
@@ -28,23 +29,26 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/early_bird_welcome_title"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="24sp"/>
+            android:textColor="@color/text_dark"
+            android:textSize="25sp"
+            android:fontFamily="sans-serif-medium"/>
 
         <TextView
-            android:layout_width="@dimen/background_activity_width"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="15dp"
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:text="@string/early_bird_welcome_text"
-            android:textColor="@color/colorPrimaryDark"/>
+            android:textSize="15sp"
+            android:textColor="@color/text_dark"/>
 
         <org.break_out.breakout.ui.views.BOFlatButton
+            android:id="@+id/bt_participate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
-            android:text="@string/button_participate"
+            android:text="@string/button_register"
             app:buttonColor="orange"/>
 
     </LinearLayout>

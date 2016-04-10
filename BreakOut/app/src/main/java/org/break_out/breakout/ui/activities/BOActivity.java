@@ -1,21 +1,18 @@
 package org.break_out.breakout.ui.activities;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Intent;
+import android.app.ActivityManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import org.break_out.breakout.R;
-import org.break_out.breakout.manager.UserManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +47,17 @@ public abstract class BOActivity extends AppCompatActivity {
          * The requested permission has been denied.
          */
         public void permissionDenied();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Set the color for the recent apps view to be slightly darker than the primary color to ensure a white title text
+        if(Build.VERSION.SDK_INT >= 21) {
+            ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(getTitle().toString(), null, ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            setTaskDescription(taskDescription);
+        }
     }
 
     /**

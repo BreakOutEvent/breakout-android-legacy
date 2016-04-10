@@ -29,6 +29,9 @@ public class User implements Serializable {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
 
+    private static final String NULL = "null";
+
+    // FIXME: Handle participants without a team correctly!
     private Role _role = Role.VISITOR;
 
     // User information
@@ -55,6 +58,7 @@ public class User implements Serializable {
     public enum Role {
         VISITOR,
         USER,
+        PARTICIPANT_WITHOUT_TEAM,
         PARTICIPANT;
 
         public static Role fromString(String enumString) {
@@ -205,7 +209,7 @@ public class User implements Serializable {
             case VISITOR:
                 return true;
             case USER:
-                return (_role == Role.USER || _role == Role.PARTICIPANT);
+                return (_role == Role.USER || _role == Role.PARTICIPANT_WITHOUT_TEAM || _role == Role.PARTICIPANT);
             case PARTICIPANT:
                 return (_role == Role.PARTICIPANT);
             default:
@@ -447,6 +451,7 @@ public class User implements Serializable {
                 tShirtSize = (participantObj.has("tshirtsize") ? participantObj.getString("tshirtsize") : null);
                 hometown = (participantObj.has("hometown") ? participantObj.getString("hometown") : null);
 
+                // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;
             } else {
                 _role  = Role.USER;
@@ -494,7 +499,7 @@ public class User implements Serializable {
         JSONObject userJSON = toJSON();
 
         if(userJSON == null) {
-            Log.e(TAG, "Could not create a valid JSON object for this user. The update has been cancelled");
+            Log.e(TAG, "Could not create a valid JSON object for this user. The update has been cancelled.");
             return false;
         }
 
@@ -516,6 +521,7 @@ public class User implements Serializable {
 
             JSONObject responseJson = new JSONObject(updateResponse.body().string());
             if(responseJson.get("participant") != null) {
+                // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;
             } else {
                 _role = Role.USER;
@@ -541,19 +547,19 @@ public class User implements Serializable {
 
         try {
             userObj.put("email", _email);
-            userObj.put("firstname", _firstName != null ? _firstName : "");
-            userObj.put("lastname", _lastName != null ? _lastName : "");
-            userObj.put("gender", _gender != null ? _gender : "");
+            userObj.put("firstname", notNull(_firstName) ? _firstName : "");
+            userObj.put("lastname", notNull(_lastName) ? _lastName : "");
+            userObj.put("gender", notNull(_gender) ? _gender : "");
 
             // Note: The password cannot be changed!
 
-            if(!_emergencyNumber.equals("") || !_hometown.equals("") || !_phoneNumber.equals("") || !_tShirtSize.equals("")) {
+            if(notNull(_emergencyNumber) || notNull(_hometown) || notNull(_phoneNumber) || notNull(_tShirtSize)) {
                 JSONObject participantObject = new JSONObject();
 
-                participantObject.put("emergencynumber", _emergencyNumber != null ? _emergencyNumber : "");
-                participantObject.put("hometown", _hometown != null ? _hometown : "");
-                participantObject.put("phonenumber", _phoneNumber != null ? _phoneNumber : "");
-                participantObject.put("tshirtsize", _tShirtSize != null ? _tShirtSize : "");
+                participantObject.put("emergencynumber", notNull(_emergencyNumber) ? _emergencyNumber : "");
+                participantObject.put("hometown", notNull(_hometown) ? _hometown : "");
+                participantObject.put("phonenumber", notNull(_phoneNumber) ? _phoneNumber : "");
+                participantObject.put("tshirtsize", notNull(_tShirtSize) ? _tShirtSize : "");
 
                 // Add participant object to user object
                 userObj.put("participant", participantObject);
@@ -565,6 +571,10 @@ public class User implements Serializable {
         }
 
         return null;
+    }
+
+    private boolean notNull(String text) {
+        return (text != null && !text.equals(NULL));
     }
 
     @Override

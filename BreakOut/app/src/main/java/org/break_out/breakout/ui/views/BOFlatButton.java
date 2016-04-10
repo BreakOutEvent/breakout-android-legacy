@@ -169,6 +169,10 @@ public class BOFlatButton extends FrameLayout implements View.OnClickListener {
         }
     }
 
+    public void setText(String text) {
+        _btButton.setText(text);
+    }
+
     public boolean isShowingLoadingIndicator() {
         return (_pbLoadingIndicator != null && _pbLoadingIndicator.getVisibility() == View.VISIBLE);
     }

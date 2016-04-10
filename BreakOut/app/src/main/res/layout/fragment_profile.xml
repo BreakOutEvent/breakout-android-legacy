@@ -3,18 +3,18 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout_marginBottom="@dimen/default_screen_padding"
-              android:layout_marginTop="@dimen/default_screen_padding"
+              android:layout_marginBottom="@dimen/default_padding"
+              android:layout_marginTop="@dimen/default_padding"
               android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="@dimen/default_screen_padding"
-        android:paddingRight="@dimen/default_screen_padding">
+        android:paddingLeft="@dimen/default_padding"
+        android:paddingRight="@dimen/default_padding">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:scaleType="centerCrop"
@@ -48,7 +48,7 @@
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/default_screen_padding"
+        android:layout_marginLeft="@dimen/default_padding"
         android:text="Bild ändern"
         android:textColor="@color/colorPrimary"/>
 
@@ -61,7 +61,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/default_screen_padding">
+        android:padding="@dimen/default_padding">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -114,7 +114,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/default_screen_padding">
+        android:padding="@dimen/default_padding">
 
         <TextView
             android:layout_width="match_parent"

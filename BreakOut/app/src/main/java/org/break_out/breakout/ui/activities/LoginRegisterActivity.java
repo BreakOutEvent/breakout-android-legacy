@@ -1,5 +1,6 @@
 package org.break_out.breakout.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
@@ -14,6 +15,8 @@ import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOFlatButton;
 import org.break_out.breakout.util.BackgroundRunner;
 import org.break_out.breakout.util.NotificationUtils;
+
+import it.sephiroth.android.library.tooltip.Tooltip;
 
 public class LoginRegisterActivity extends BackgroundImageActivity {
 
@@ -30,7 +33,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
     private UserManager _userManager = null;
 
-    private View _rlHintWrapper = null;
     private BOEditText _etEmail = null;
     private BOEditText _etPassword = null;
     private BOFlatButton _btLogin = null;
@@ -43,13 +45,8 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
 
         _userManager = UserManager.getInstance(this);
 
-        _rlHintWrapper = findViewById(R.id.popup_wrapper);
-
         _etEmail = (BOEditText) findViewById(R.id.start_editText_email);
-        _etEmail.addTextChangedListener(new LoginRegisterTextWatcher());
-
         _etPassword = (BOEditText) findViewById(R.id.start_editText_password);
-        _etPassword.addTextChangedListener(new LoginRegisterTextWatcher());
 
         _btLogin = (BOFlatButton) findViewById(R.id.start_button_logIn);
         _btLogin.setOnClickListener(new View.OnClickListener() {
@@ -64,6 +61,17 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             @Override
             public void onClick(View v) {
                 register();
+            }
+        });
+
+        View vWhatIsBreakout = findViewById(R.id.tv_what_is_breakout);
+        vWhatIsBreakout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(LoginRegisterActivity.this, WebViewActivity.class);
+                i.putExtra(WebViewActivity.KEY_URL, "http://www.break-out.org/worum-gehts/");
+                i.putExtra(WebViewActivity.KEY_TITLE, getString(R.string.title_what_is_breakout));
+                startActivity(i);
             }
         });
 
@@ -151,39 +159,8 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
         }
     }
 
-    private void checkIfEnoughInput() {
-        String email = _etEmail.getText();
-        String password = _etPassword.getText();
-
-        if(!email.isEmpty() && !password.isEmpty()) {
-            hideHint();
-        }
-    }
-
     private void showHint() {
-        _rlHintWrapper.setVisibility(View.VISIBLE);
-    }
-
-    private void hideHint() {
-        _rlHintWrapper.setVisibility(View.GONE);
-    }
-
-    private class LoginRegisterTextWatcher implements TextWatcher {
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            checkIfEnoughInput();
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
+        NotificationUtils.showTooltip(this, _etEmail, R.string.tooltip_username_password);
     }
 
     private class LoginRunnable implements BackgroundRunner.BackgroundRunnable {

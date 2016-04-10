@@ -2,6 +2,7 @@ package org.break_out.breakout.ui.views;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -86,7 +87,7 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
         refreshTextView(getCustomContentView(TextView.class));
     }
 
-    public Calendar getSelectedDate() {
+    public @Nullable Calendar getSelectedDate() {
         return _date;
     }
 

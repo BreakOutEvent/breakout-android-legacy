@@ -28,7 +28,7 @@
     <string name="explanation_participate">Durch Klicken des Registrieren-Buttons registriere ich mich verbindlich und zahle den Event-Beitrag von 30,00€ sobald ich ein Team erstellt habe.</string>
 
     <string name="textview_about">Was ist Breakout?</string>
-    <string name="popup_usernamePassword">Bitte gib deine E-Mail und ein Passwort ein.</string>
+    <string name="tooltip_username_password">Bitte gib deine E-Mail und ein Passwort ein.</string>
 
     <string name="early_bird_welcome_text">Wir arbeiten gerade daran die App perfekt zu machen für deinen Trip um die Welt. Damit es auch für dich am 3./4. Juni losgehen kann musst du dich noch für das Event registrieren und zusammen mit einem Partner ein Team bilden.</string>
     <string name="early_bird_welcome_title">Bald geht es los!</string>
@@ -44,8 +44,31 @@
         <item>L</item>
         <item>XL</item>
     </string-array>
+
+    <string-array name="event_city_array">
+        <item>Berlin</item>
+        <item>München</item>
+    </string-array>
+
     <string name="registration_successful_text">Dein Account wurde erfolgreich erstellt!\nChecke nun deine Emails, um deinen Account zu aktivieren.</string>
     <string name="registration_successful_title">Account erstellt</string>
     <string name="participate_failed">Das Teilnehmen schlug fehl.</string>
+    <string name="hint_team_name">Euer Team-Name</string>
+    <string name="hint_email_partner">E-Mail deines Partners</string>
+    <string name="button_create_team">Team erstellen</string>
+    <string name="explanation_create_team">Um auch am Event teilzunehmen, musst du noch ein Team erstellen. Lade deinen Teampartner per Mail ein und lade jetzt oder später ein Bild hoch.</string>
+    <string name="almost_done">Fast geschafft!</string>
+    <string name="tooltip_mandatory_field">Dies ist ein Pflichtfeld.</string>
+    <string name="tooltip_no_valid_phone_number">Dies ist keine gültige Telefonnummer.</string>
+    <string name="hint_event_city">Event Stadt</string>
+    <string name="explanation_gender">Wir müssen dein Geschlecht wissen, um das passende T-Shirt für dich zu finden.</string>
+    <string name="explanation_t_shirt_size">Wir müssen deine T-Shirt Größe wissen, um für dich das passende T-Shirt zu finden.</string>
+    <string name="explanation_phone_number">Wir müssen deine Telefonnummer wissen, um dich direkt kontaktieren zu können.</string>
+    <string name="explanation_emergency_number">Bitte gib hier eine Telefonnummer an, die wir im Falle eines Notfalls kontaktieren sollen.</string>
+    <string name="explanation_birthday">Du musst mindestens 18 Jahre alt sein, um bei BreakOut teilzunehmen.</string>
+    <string name="explanation_event_city">In welcher Stadt möchtet ihr euer BreakOut Abenteuer beginnen?</string>
+    <string name="tooltip_no_valid_email">Das ist keine gültige E-Mail Adresse.</string>
+    <string name="not_registered_yet">Noch nicht registriert</string>
+    <string name="title_what_is_breakout">Was ist BreakOut?</string>
 
 </resources>

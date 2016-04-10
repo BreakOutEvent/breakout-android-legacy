@@ -2,6 +2,7 @@ package org.break_out.breakout.ui.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -49,13 +50,19 @@ public class BOSpinner extends BOUnderlinedView {
         super(context, attrs, defStyleAttr);
     }
 
-    public String getSelectedValue() {
+    public @NonNull String getSelectedValue() {
         if(!_selected) {
-            return null;
+            return "";
         }
 
         Spinner spinner = getCustomContentView(Spinner.class);
-        return spinner.getSelectedItem().toString();
+        Object selectedItem = spinner.getSelectedItem();
+
+        if(selectedItem == null) {
+            return "";
+        }
+
+        return selectedItem.toString();
     }
 
     @Override

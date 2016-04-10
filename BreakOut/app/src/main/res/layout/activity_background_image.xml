@@ -1,83 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    android:id="@+id/outer_layout"
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/background_image"
+    <FrameLayout
+        android:id="@+id/outer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/bg_login_600dp"/>
+        android:layout_height="match_parent">
 
-    <View
-        android:id="@+id/background_black"
-        android:layout_width="match_parent"
-        android:layout_height="2000dp"
-        android:background="@color/black_transparent"
-        android:orientation="vertical"/>
-
-    <ScrollView
-        android:id="@+id/scrollview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:fillViewport="true"
-        android:scrollbars="none">
-
-        <RelativeLayout
+        <!-- Background image -->
+        <ImageView
+            android:id="@+id/background_image"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bg_login_600dp"/>
 
-            <ImageView
-                android:id="@+id/close"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_margin="16dp"
-                android:alpha="0.5"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_close_black_24dp"/>
+        <!-- Black background (will automatically be scrolled) -->
+        <View
+            android:id="@+id/background_black"
+            android:layout_width="match_parent"
+            android:layout_height="2000dp"
+            android:background="@color/black_transparent_25"
+            android:orientation="vertical"/>
 
-            <LinearLayout
-                android:id="@+id/wrapper_placeholders"
-                android:layout_width="@dimen/background_activity_width"
-                android:layout_height="match_parent"
-                android:layout_below="@id/close"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:orientation="vertical">
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/scrollview_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fitsSystemWindows="true"
+            android:scrollbars="none">
 
-                <ImageView
-                    android:id="@+id/placeholder_header"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="32dp"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="30dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="@integer/background_activity_logo_weight"
-                    android:clickable="true"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/logo_login"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                <FrameLayout
-                    android:id="@+id/placeholder_content"
-                    android:layout_width="@dimen/background_activity_width"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="30dp"/>
+                <LinearLayout
+                    android:id="@+id/wrapper_placeholders"
+                    android:layout_width="@dimen/content_width"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-            </LinearLayout>
+                    <!-- Top space -->
+                    <View
+                        android:id="@+id/v_top_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"/>
 
-        </RelativeLayout>
+                    <!-- Leave the height of this view set to WRAP_CONTENT! -->
+                    <ImageView
+                        android:id="@+id/placeholder_header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="32dp"
+                        android:layout_marginLeft="30dp"
+                        android:layout_marginRight="30dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="@integer/background_activity_logo_weight"
+                        android:clickable="true"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/logo_login"/>
 
-    </ScrollView>
+                    <!-- Content -->
+                    <FrameLayout
+                        android:id="@+id/placeholder_content"
+                        android:layout_width="@dimen/content_width"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/default_activity_margin_left"
+                        android:layout_marginRight="@dimen/default_activity_margin_right"/>
 
-</FrameLayout>
+                    <!-- Bottom space -->
+                    <View
+                        android:id="@+id/v_bottom_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </android.support.v4.widget.NestedScrollView>
+
+        <!-- Close button (will automatically be scrolled) -->
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:layout_gravity="start"
+            android:alpha="0.5"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="center"
+            android:src="@drawable/ic_close_black_24dp"/>
+
+    </FrameLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:clipToPadding="true"
+        android:visibility="gone"
+        app:layout_behavior="org.break_out.breakout.ui.behaviors.CollapsedBottomSheetBehavior">
+
+        <FrameLayout
+            android:id="@+id/placeholder_bottom_sheet"
+            android:layout_width="@dimen/content_width"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"/>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.design.widget.CoordinatorLayout>
