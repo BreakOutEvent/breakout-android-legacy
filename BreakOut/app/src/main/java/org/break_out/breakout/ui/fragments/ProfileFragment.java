@@ -17,13 +17,22 @@ import org.break_out.breakout.ui.views.BOFlatButton;
 /**
  * Created by Tino on 13.04.2016.
  */
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements UserManager.UserDataChangedListener {
 
     public static final String TAG = "ProfileFragment";
+
+    private UserManager _userManager = null;
 
     private TextView _tvFirstName = null;
     private TextView _tvLastName = null;
     private TextView _tvEmail = null;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        _userManager = UserManager.getInstance(getContext());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,11 +58,27 @@ public class ProfileFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        UserManager um = UserManager.getInstance(getContext());
-        User user = um.getCurrentUser();
+        updateUserData();
+        _userManager.registerListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        _userManager.unregisterListener(this);
+    }
+
+    private void updateUserData() {
+        User user = _userManager.getCurrentUser();
 
         _tvFirstName.setText(user.getFirstName());
         _tvLastName.setText(user.getLastName());
         _tvEmail.setText(user.getEmail());
+    }
+
+    @Override
+    public void userDataChanged() {
+        updateUserData();
     }
 }

@@ -23,7 +23,7 @@ import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
 import org.break_out.breakout.ui.fragments.ProfileFragment;
 
-public class MainActivity extends BOActivity {
+public class MainActivity extends BOActivity implements UserManager.UserDataChangedListener {
 
     private UserManager _userManager = null;
 
@@ -83,6 +83,14 @@ public class MainActivity extends BOActivity {
         super.onStart();
 
         updateDrawer();
+        _userManager.registerListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        _userManager.unregisterListener(this);
     }
 
     public void setCurrentFragment(@Nullable Fragment fragment) {
@@ -150,5 +158,10 @@ public class MainActivity extends BOActivity {
                 break;
         }
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
+    public void userDataChanged() {
+        updateDrawer();
     }
 }

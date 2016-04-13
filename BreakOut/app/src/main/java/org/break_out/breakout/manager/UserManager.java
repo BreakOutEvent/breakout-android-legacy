@@ -68,6 +68,20 @@ public class UserManager {
         return _instance;
     }
 
+    /**
+     * <p>
+     * Register a listener to get notified whenever the user data
+     * changes.
+     * </p>
+     *
+     * <p>
+     * It is a good practice to register such a listener in an activity's {@code onStart(...)}
+     * method and unregister it in the {@code onPause(...)} method by calling
+     * {@link #unregisterListener(UserDataChangedListener)}.
+     * </p>
+     *
+     * @param listener The listener to be called
+     */
     public void registerListener(UserDataChangedListener listener) {
         if(listener != null && !_dataChangedListeners.contains(listener)) {
             _dataChangedListeners.add(listener);
