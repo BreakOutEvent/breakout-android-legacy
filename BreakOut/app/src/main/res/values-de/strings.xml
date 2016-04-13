@@ -70,5 +70,7 @@
     <string name="tooltip_no_valid_email">Das ist keine gültige E-Mail Adresse.</string>
     <string name="not_registered_yet">Noch nicht registriert</string>
     <string name="title_what_is_breakout">Was ist BreakOut?</string>
+    <string name="button_choose_profile_picture">Profilbild wählen</string>
+    <string name="event_information">Event Information</string>
 
 </resources>

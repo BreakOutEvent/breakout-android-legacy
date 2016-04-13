@@ -13,7 +13,7 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar_orange_scrolling_empty"/>
+            layout="@layout/toolbar_webview"/>
 
     </android.support.design.widget.AppBarLayout>
 

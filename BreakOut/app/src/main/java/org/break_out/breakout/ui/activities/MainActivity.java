@@ -1,26 +1,36 @@
 package org.break_out.breakout.ui.activities;
 
-import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.ui.views.BOFlatButton;
+import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
+import org.break_out.breakout.ui.fragments.ProfileFragment;
 
 public class MainActivity extends BOActivity {
 
     private UserManager _userManager = null;
 
+    private Toolbar _toolbar = null;
+    private ActionBar _actionbar = null;
     private DrawerLayout _drawerLayout = null;
+
     private TextView _tvDrawerTitle = null;
     private TextView _tvDrawerSubtitle = null;
 
@@ -31,18 +41,13 @@ public class MainActivity extends BOActivity {
 
         _userManager = UserManager.getInstance(this);
 
-        // Set up action bar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        // Set up actionbar
+        _toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(_toolbar);
 
-        toolbar.setNavigationIcon(R.drawable.ic_menu_black_24dp);
+        _actionbar = getSupportActionBar();
 
-        ActionBar actionBar = getSupportActionBar();
-
-        if(actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayShowHomeEnabled(true);
-        }
+        setToolbarTransparent(true);
 
         // Set up drawer
         _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -57,23 +62,20 @@ public class MainActivity extends BOActivity {
                     }
                 });
 
-        // Set up header
+        // Set navigation drawer up header
         View headerView = navView.getHeaderView(0);
         _tvDrawerTitle = (TextView) headerView.findViewById(R.id.tv_title);
         _tvDrawerSubtitle = (TextView) headerView.findViewById(R.id.tv_subtitle);
-
-        // Participate button
-        BOFlatButton btParticipate = (BOFlatButton) findViewById(R.id.bt_participate);
-        btParticipate.setOnClickListener(new View.OnClickListener() {
+        headerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(UserManager.getInstance(MainActivity.this).getCurrentUser().isAtLeast(User.Role.USER)) {
-                    UserManager.getInstance(MainActivity.this).makeUserParticipant();
-                } else {
-                    UserManager.getInstance(MainActivity.this).loginOrRegisterUser();
-                }
+                setCurrentFragment(new ProfileFragment());
+                setToolbarTransparent(false);
+                _drawerLayout.closeDrawers();
             }
         });
+
+        setCurrentFragment(new EarlyBirdWelcomeFragment());
     }
 
     @Override
@@ -81,6 +83,43 @@ public class MainActivity extends BOActivity {
         super.onStart();
 
         updateDrawer();
+    }
+
+    public void setCurrentFragment(@Nullable Fragment fragment) {
+        if(fragment != null) {
+            final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_placeholder, fragment, "NewFragmentTag");
+            ft.addToBackStack("NewFragmentTag");
+            ft.commit();
+            return;
+        }
+
+        Fragment currFragment = getSupportFragmentManager().findFragmentByTag("NewFragmentTag");
+        if(currFragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(currFragment).commit();
+        }
+    }
+
+    private void setToolbarTransparent(boolean transparent) {
+        // Enable/disable title and home icon
+        if(_actionbar != null) {
+            _actionbar.setDisplayShowTitleEnabled(!transparent);
+            _actionbar.setDisplayShowHomeEnabled(true);
+        }
+
+        // Burger icon
+        _toolbar.setNavigationIcon(transparent ? R.drawable.ic_menu_black_24dp : R.drawable.ic_menu_white_24dp);
+
+        // Background color
+        _actionbar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, transparent ? android.R.color.transparent : R.color.colorPrimary)));
+
+        // Transparency
+        _toolbar.setAlpha(transparent ? 0.5f : 1.0f);
+
+        // Set fragment below or behind toolbar
+        RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        p.addRule(RelativeLayout.BELOW, transparent ? 0 : R.id.toolbar);
+        findViewById(R.id.fragment_placeholder).setLayoutParams(p);
     }
 
     private void updateDrawer() {
@@ -101,8 +140,14 @@ public class MainActivity extends BOActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
-        if(menuItem.getItemId() == android.R.id.home) {
-            _drawerLayout.openDrawer(GravityCompat.START);
+        switch(menuItem.getItemId()) {
+            case android.R.id.home:
+                _drawerLayout.openDrawer(GravityCompat.START);
+                break;
+            case R.id.action_ok:
+                setCurrentFragment(new EarlyBirdWelcomeFragment());
+                setToolbarTransparent(true);
+                break;
         }
         return super.onOptionsItemSelected(menuItem);
     }

@@ -65,5 +65,7 @@
     <string name="tooltip_no_valid_email">This is not a valid email.</string>
     <string name="not_registered_yet">Not registered yet</string>
     <string name="title_what_is_breakout">What is BreakOut?</string>
+    <string name="button_choose_profile_picture">Choose profile picture</string>
+    <string name="event_information">Event information</string>
 
 </resources>

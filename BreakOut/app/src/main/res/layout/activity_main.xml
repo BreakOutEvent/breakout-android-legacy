@@ -6,22 +6,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <fragment
-            android:id="@+id/fragment_early_bird_main"
-            android:name="org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment"
+        <FrameLayout
+            android:id="@+id/fragment_placeholder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar_early_bird">
+            layout="@layout/toolbar_early_bird"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
         </include>
 
-    </FrameLayout>
+    </RelativeLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/navigation_view"
