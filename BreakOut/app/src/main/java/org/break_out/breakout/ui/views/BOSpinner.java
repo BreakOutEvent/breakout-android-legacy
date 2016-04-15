@@ -2,6 +2,7 @@ package org.break_out.breakout.ui.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -66,9 +67,14 @@ public class BOSpinner extends BOUnderlinedView {
     }
 
     @Override
-    public View initCustomContentView() {
+    public View initCustomContentView(boolean isInDarkMode) {
         Spinner spinner = new Spinner(getContext());
-        spinner.setBackgroundResource(R.drawable.ic_arrow_drop_down_white_24dp);
+        spinner.setBackgroundResource(isInDarkMode ? R.drawable.ic_arrow_drop_down_white_24dp : R.drawable.ic_arrow_drop_down_black_24dp);
+
+        // Black drop down arrow should be slightly transparent
+        if(!isInDarkMode) {
+            spinner.getBackground().setAlpha(125);
+        }
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -154,9 +160,10 @@ public class BOSpinner extends BOUnderlinedView {
 
             if(position == getCount()) {
                 textView.setText(hint);
-                textView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
+                textView.setTextColor(ContextCompat.getColor(getContext(), isInDarkMode() ? R.color.white_transparent_50 : R.color.black_transparent_25));
             } else {
-                textView.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_80));
+                // The black text should not have varying transparencies
+                textView.setTextColor(ContextCompat.getColor(getContext(), isInDarkMode() ? R.color.white_transparent_80 : R.color.black_transparent_50));
                 textView.setText(items[position]);
             }
 

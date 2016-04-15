@@ -10,6 +10,7 @@
 
     <color name="black_transparent_25">#4000</color>
     <color name="black_transparent_50">#8000</color>
+    <color name="black_transparent_80">#C000</color>
 
     <color name="text_dark">#333</color>
 </resources>

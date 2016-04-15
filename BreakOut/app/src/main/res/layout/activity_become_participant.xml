@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/black_transparent_50">
 
     <LinearLayout
         android:id="@+id/ll_enter_data"
@@ -11,7 +12,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="@dimen/default_padding"
-        android:paddingTop="@dimen/default_padding">
+        android:paddingTop="@dimen/default_padding"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -34,6 +36,7 @@
                     android:layout_weight="5"
                     android:hint="@string/hint_last_name"
                     android:inputType="textCapWords"
+                    app:darkMode="true"
                     app:drawableLeft="@drawable/ic_person_white_24dp"/>
 
                 <org.break_out.breakout.ui.views.BOEditText
@@ -44,7 +47,8 @@
                     android:layout_marginStart="15dp"
                     android:layout_weight="4"
                     android:hint="@string/hint_first_name"
-                    android:inputType="textCapWords"/>
+                    android:inputType="textCapWords"
+                    app:darkMode="true"/>
 
             </LinearLayout>
 
@@ -54,6 +58,7 @@
                 android:layout_height="wrap_content"
                 android:entries="@array/gender_array"
                 android:hint="@string/hint_gender"
+                app:darkMode="true"
                 app:drawableLeft="@drawable/ic_wc_white_24dp"
                 app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
@@ -63,6 +68,7 @@
                 android:layout_height="wrap_content"
                 android:entries="@array/t_shirt_size_array"
                 android:hint="@string/hint_t_shirt_size"
+                app:darkMode="true"
                 app:drawableLeft="@drawable/ic_tshirt_white_24dp"
                 app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
@@ -72,6 +78,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_phone_number"
                 android:inputType="phone"
+                app:darkMode="true"
                 app:drawableLeft="@drawable/ic_phone_white_24dp"
                 app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
@@ -81,6 +88,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_emergency_number"
                 android:inputType="phone"
+                app:darkMode="true"
                 app:drawableLeft="@drawable/ic_sos_white_24dp"
                 app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
@@ -89,6 +97,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_birthday"
+                app:darkMode="true"
                 app:drawableLeft="@drawable/ic_cake_white_24dp"
                 app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 
@@ -119,7 +128,7 @@
         android:orientation="vertical"
         android:paddingBottom="@dimen/default_padding"
         android:paddingTop="@dimen/default_padding"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -143,6 +152,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:hint="@string/hint_team_name"
+            app:darkMode="true"
             android:inputType="textCapWords"
             app:drawableLeft="@drawable/ic_group_white_24dp"/>
 
@@ -152,6 +162,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/hint_email_partner"
             android:inputType="textEmailAddress"
+            app:darkMode="true"
             app:drawableLeft="@drawable/ic_mail_outline_white_24dp"/>
 
         <org.break_out.breakout.ui.views.BOSpinner
@@ -160,6 +171,7 @@
             android:layout_height="wrap_content"
             android:entries="@array/event_city_array"
             android:hint="@string/hint_event_city"
+            app:darkMode="true"
             app:drawableLeft="@drawable/ic_location_city_white_24dp"
             app:drawableRight="@drawable/ic_help_outline_white_24dp"/>
 

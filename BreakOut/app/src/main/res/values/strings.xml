@@ -67,5 +67,7 @@
     <string name="title_what_is_breakout">What is BreakOut?</string>
     <string name="button_choose_profile_picture">Choose profile picture</string>
     <string name="event_information">Event information</string>
+    <string name="hint_change_password">Change password</string>
+    <string name="hint_start_city">Start city</string>
 
 </resources>

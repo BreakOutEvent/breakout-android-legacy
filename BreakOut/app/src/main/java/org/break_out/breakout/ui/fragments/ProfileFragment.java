@@ -12,7 +12,7 @@ import android.widget.TextView;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.ui.views.BOFlatButton;
+import org.break_out.breakout.ui.views.BOEditText;
 
 /**
  * Created by Tino on 13.04.2016.
@@ -23,9 +23,9 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
 
     private UserManager _userManager = null;
 
-    private TextView _tvFirstName = null;
-    private TextView _tvLastName = null;
-    private TextView _tvEmail = null;
+    private BOEditText _etFirstName = null;
+    private BOEditText _etLastName = null;
+    private BOEditText _etEmail = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,9 +41,9 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
 
         // Init views
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
-        _tvFirstName = (TextView) v.findViewById(R.id.tv_first_name);
-        _tvLastName = (TextView) v.findViewById(R.id.tv_last_name);
-        _tvEmail = (TextView) v.findViewById(R.id.tv_email);
+        _etFirstName = (BOEditText) v.findViewById(R.id.et_first_name);
+        _etLastName = (BOEditText) v.findViewById(R.id.et_last_name);
+        _etEmail = (BOEditText) v.findViewById(R.id.et_email);
 
         return v;
     }
@@ -72,13 +72,17 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
     private void updateUserData() {
         User user = _userManager.getCurrentUser();
 
-        _tvFirstName.setText(user.getFirstName());
-        _tvLastName.setText(user.getLastName());
-        _tvEmail.setText(user.getEmail());
+        _etFirstName.setText(user.getFirstName());
+        _etLastName.setText(user.getLastName());
+        _etEmail.setText(user.getEmail());
     }
 
     @Override
     public void userDataChanged() {
         updateUserData();
+    }
+
+    public void startUpdatingUserOnServer() {
+
     }
 }

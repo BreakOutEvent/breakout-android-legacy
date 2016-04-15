@@ -9,4 +9,15 @@
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
+    <!--
+    <ProgressBar
+        android:id="@+id/progress_spinner"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginRight="10dp"
+        android:layout_gravity="end"
+        android:indeterminate="true"
+        android:visibility="visible" />
+        -->
+
 </android.support.v7.widget.Toolbar>

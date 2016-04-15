@@ -2,6 +2,7 @@ package org.break_out.breakout.ui.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -43,10 +44,10 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
     }
 
     @Override
-    public View initCustomContentView() {
+    public View initCustomContentView(boolean isInDarkMode) {
         EditText editText = new EditText(getContext());
-        editText.setTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_80));
-        editText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.white_transparent_50));
+        editText.setTextColor(ContextCompat.getColor(getContext(), isInDarkMode ? R.color.white_transparent_80 : R.color.black_transparent_50));
+        editText.setHintTextColor(ContextCompat.getColor(getContext(), isInDarkMode ? R.color.white_transparent_50 : R.color.black_transparent_25));
         editText.setBackgroundResource(0);
         editText.setHint(getHint());
         editText.setPadding(0, 0, 0, 0);
@@ -117,5 +118,9 @@ public class BOEditText extends BOUnderlinedView implements View.OnFocusChangeLi
 
     public String getText() {
         return getCustomContentView(EditText.class).getText().toString();
+    }
+
+    public void setText(@Nullable String text) {
+        getCustomContentView(EditText.class).setText(text != null ? text : "");
     }
 }

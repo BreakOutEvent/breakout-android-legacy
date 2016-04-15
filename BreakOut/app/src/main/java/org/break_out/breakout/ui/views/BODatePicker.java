@@ -51,7 +51,7 @@ public class BODatePicker extends BOUnderlinedView implements View.OnClickListen
     }
 
     @Override
-    public View initCustomContentView() {
+    public View initCustomContentView(boolean isInDarkMode) {
         TextView dateView = new TextView(getContext());
         dateView.setOnClickListener(this);
         dateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);

@@ -38,6 +38,7 @@ public abstract class BOUnderlinedView extends FrameLayout {
     private String _hint = "";
 
     private boolean _isUnderlined = true;
+    private boolean _isInDarkMode = false;
 
     private float _touchStartX, _touchStartY;
 
@@ -114,6 +115,9 @@ public abstract class BOUnderlinedView extends FrameLayout {
             _isUnderlined = ta.getBoolean(R.styleable.BOUnderlinedView_underlined, true);
             _vUnderlineNormal.setVisibility(_isUnderlined ? View.VISIBLE : View.GONE);
             _vUnderlineHighlight.setVisibility(_isUnderlined ? View.VISIBLE : View.GONE);
+
+            // Dark mode or not
+            _isInDarkMode = ta.getBoolean(R.styleable.BOUnderlinedView_darkMode, false);
         } finally {
             ta.recycle();
         }
@@ -137,12 +141,12 @@ public abstract class BOUnderlinedView extends FrameLayout {
 
     /**
      * Set the content view (above the bottom line)
-     * to be the custom view returned by {@link #initCustomContentView()}.
+     * to be the custom view returned by {@link #initCustomContentView(boolean)} )}.
      */
     private void initContent() {
         FrameLayout placeholder = (FrameLayout) findViewById(R.id.placeholder);
         placeholder.removeAllViews();
-        _vContent = initCustomContentView();
+        _vContent = initCustomContentView(_isInDarkMode);
         placeholder.addView(_vContent);
     }
 
@@ -155,7 +159,7 @@ public abstract class BOUnderlinedView extends FrameLayout {
      *
      * @return The view to be displayed above the bottom line
      */
-    public abstract View initCustomContentView();
+    public abstract View initCustomContentView(boolean isInDarkMode);
 
     /**
      * Call this method to get a reference to the custom view
@@ -272,6 +276,10 @@ public abstract class BOUnderlinedView extends FrameLayout {
      */
     public void setRightDrawableOnClickListener(OnClickListener listener) {
         _ivDrawableRight.setOnClickListener(listener);
+    }
+
+    public boolean isInDarkMode() {
+        return _isInDarkMode;
     }
 
 }

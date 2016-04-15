@@ -7,6 +7,7 @@
         <attr name="drawableRightAlpha" format="float"/>
         <attr name="android:hint"/>
         <attr name="underlined" format="boolean"/>
+        <attr name="darkMode" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="BOSpinner">
