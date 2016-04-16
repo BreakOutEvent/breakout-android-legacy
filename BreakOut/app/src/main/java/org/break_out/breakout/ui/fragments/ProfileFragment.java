@@ -17,6 +17,8 @@ import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.views.BOEditText;
+import org.break_out.breakout.ui.views.BOSpinner;
+import org.break_out.breakout.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,12 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
     private BOEditText _etFirstName = null;
     private BOEditText _etLastName = null;
     private BOEditText _etEmail = null;
+    private BOEditText _etPhoneNumber = null;
+    private BOEditText _etEmergencyNumber = null;
+
+    private BOSpinner _spGender = null;
+    private BOSpinner _spTShirtSize = null;
+    private BOSpinner _spEventCity = null;
 
     private List<ProfileFragmentListener> _listeners = new ArrayList<ProfileFragmentListener>();
 
@@ -58,6 +66,11 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         _etFirstName = (BOEditText) v.findViewById(R.id.et_first_name);
         _etLastName = (BOEditText) v.findViewById(R.id.et_last_name);
         _etEmail = (BOEditText) v.findViewById(R.id.et_email);
+        _etPhoneNumber = (BOEditText) v.findViewById(R.id.et_phone_number);
+        _etEmergencyNumber = (BOEditText) v.findViewById(R.id.et_emergency_number);
+        _spGender = (BOSpinner) v.findViewById(R.id.sp_gender);
+        _spTShirtSize = (BOSpinner) v.findViewById(R.id.sp_t_shirt_size);
+        _spEventCity = (BOSpinner) v.findViewById(R.id.sp_event_city);
 
         // Init toolbar
         Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
@@ -80,12 +93,22 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(ProfileFragmentListener l : _listeners) {
-                    if(l != null) {
-                        l.onSaved();
+                Toast.makeText(getContext(), "Starting update...", Toast.LENGTH_SHORT).show();
+                _userManager.updateUserOnServer(getUserFromData(), new UserManager.UserUpdateOnServerListener() {
+                    @Override
+                    public void userUpdated() {
+                        for(ProfileFragmentListener l : _listeners) {
+                            if(l != null) {
+                                l.onSaved();
+                            }
+                        }
                     }
-                }
-                Toast.makeText(getContext(), "Clicked", Toast.LENGTH_SHORT).show();
+
+                    @Override
+                    public void updateFailed() {
+                        Toast.makeText(getContext(), "Update failed.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
@@ -125,20 +148,38 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         }
     }
 
+    private User getUserFromData() {
+        User user = new User();
+
+        user.setFirstName(_etFirstName.getText());
+        user.setLastName(_etLastName.getText());
+        user.setEmail(_etEmail.getText());
+        user.setPhoneNumber(_etPhoneNumber.getText());
+        user.setEmergencyNumber(_etEmergencyNumber.getText());
+
+        user.setGender(_spGender.getSelectedValue());
+
+        // TODO: some data still missing
+
+        return user;
+    }
+
     private void updateUserData() {
         User user = _userManager.getCurrentUser();
 
         _etFirstName.setText(user.getFirstName());
         _etLastName.setText(user.getLastName());
         _etEmail.setText(user.getEmail());
+        _etPhoneNumber.setText(user.getPhoneNumber());
+        _etEmergencyNumber.setText(user.getEmergencyNumber());
+
+        _spGender.setSelectedPosition(ArrayUtils.getPositionOfString(getContext(), R.array.gender_array, user.getGender()));
+
+        // TODO: some data still missing
     }
 
     @Override
     public void userDataChanged() {
         updateUserData();
-    }
-
-    public void startUpdatingUserOnServer() {
-
     }
 }

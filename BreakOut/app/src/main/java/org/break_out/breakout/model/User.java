@@ -218,7 +218,7 @@ public class User implements Serializable {
     }
 
     public void setGender(@Nullable String gender) {
-        _gender = gender != null ? gender : "";
+        _gender = (gender != null ? gender : "");
     }
 
     public String getGender() {
@@ -515,6 +515,7 @@ public class User implements Serializable {
             Response updateResponse = client.newCall(updateRequest).execute();
 
             if(!updateResponse.isSuccessful()) {
+                Log.e(TAG, updateResponse.body().string());
                 Log.e(TAG, "The network call for updating the user was not successful (" + updateResponse.code() + ")");
                 return false;
             }

@@ -11,7 +11,7 @@
     <string name="hint_email">Email</string>
     <string name="hint_emergency_number">Emergency number</string>
     <string name="hint_first_name">First name</string>
-    <string name="hint_gender">Last name</string>
+    <string name="hint_gender">Gender</string>
     <string name="hint_hometown">Hometown</string>
     <string name="hint_last_name">Last name</string>
     <string name="hint_password">Password</string>

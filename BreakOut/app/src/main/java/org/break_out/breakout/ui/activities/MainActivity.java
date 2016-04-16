@@ -159,6 +159,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         @Override
         public void onSaved() {
             setCurrentFragment(new EarlyBirdWelcomeFragment());
+            closeKeyboard();
         }
     }
 }

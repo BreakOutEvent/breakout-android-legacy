@@ -28,6 +28,8 @@ public class BOSpinner extends BOUnderlinedView {
 
     private boolean _selected = false;
 
+    private String[] _entries = new String[0];
+
     public static class BOSpinnerState implements Serializable {
 
         /**
@@ -66,6 +68,24 @@ public class BOSpinner extends BOUnderlinedView {
         return selectedItem.toString();
     }
 
+    public int getSelectedPosition() {
+        if(!_selected) {
+            return -1;
+        }
+
+        Spinner spinner = getCustomContentView(Spinner.class);
+        return spinner.getSelectedItemPosition();
+    }
+
+    public void setSelectedPosition(int position) {
+        if(position < 0 || position >= _entries.length) {
+            return;
+        }
+
+        Spinner spinner = getCustomContentView(Spinner.class);
+        spinner.setSelection(position);
+    }
+
     @Override
     public View initCustomContentView(boolean isInDarkMode) {
         Spinner spinner = new Spinner(getContext());
@@ -98,11 +118,11 @@ public class BOSpinner extends BOUnderlinedView {
             // Entries
             CharSequence[] entries = ta.getTextArray(R.styleable.BOSpinner_android_entries);
             if(entries != null) {
-                String[] entryStrings = new String[entries.length];
+                _entries = new String[entries.length];
                 for(int i = 0; i < entries.length; i++) {
-                    entryStrings[i] = entries[i].toString();
+                    _entries[i] = entries[i].toString();
                 }
-                ArrayAdapter<String> adapter = new BOSpinnerAdapter(getContext(), entryStrings);
+                ArrayAdapter<String> adapter = new BOSpinnerAdapter(getContext(), _entries);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
                 Spinner spinner = getCustomContentView(Spinner.class);

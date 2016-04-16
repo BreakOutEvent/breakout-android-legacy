@@ -168,6 +168,7 @@
                     android:textStyle="bold"/>
 
                 <org.break_out.breakout.ui.views.BOSpinner
+                    android:id="@+id/sp_gender"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -179,6 +180,7 @@
                     app:underlined="false"/>
 
                 <org.break_out.breakout.ui.views.BOSpinner
+                    android:id="@+id/sp_t_shirt_size"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -190,6 +192,7 @@
                     app:underlined="false"/>
 
                 <org.break_out.breakout.ui.views.BOSpinner
+                    android:id="@+id/sp_event_city"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -201,6 +204,7 @@
                     app:underlined="false"/>
 
                 <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_phone_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -212,6 +216,7 @@
                     app:underlined="false"/>
 
                 <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_emergency_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"

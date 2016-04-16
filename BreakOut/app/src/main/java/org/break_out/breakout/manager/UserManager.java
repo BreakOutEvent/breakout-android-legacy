@@ -3,13 +3,16 @@ package org.break_out.breakout.manager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.break_out.breakout.ui.activities.BecomeParticipantActivity;
 import org.break_out.breakout.ui.activities.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.activities.BOActivity;
+import org.break_out.breakout.util.BackgroundRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,9 @@ public class UserManager {
     private static final String KEY_HOMETOWN = "key_hometown";
     private static final String KEY_PHONE_NUMBER = "key_phone_number";
     private static final String KEY_T_SHIRT_SIZE = "key_t_shirt_size";
+    private static final String KEY_GENDER = "key_gender";
+
+    private static final String KEY_UPDATE_SUCCESS = "key_update_success";
 
     private static UserManager _instance;
 
@@ -47,6 +53,11 @@ public class UserManager {
 
     public interface UserDataChangedListener {
         public void userDataChanged();
+    }
+
+    public interface UserUpdateOnServerListener {
+        public void userUpdated();
+        public void updateFailed();
     }
 
     private UserManager(Context context) {
@@ -126,6 +137,67 @@ public class UserManager {
         saveCurrUserToPrefs();
 
         notifyDataChangedListeners();
+    }
+
+    /**
+     * <p>
+     * Calling this method will result in updating the current user on the server.
+     * If this could be done successfully, the current user in the UserManager will also
+     * be updated. Set a listener in the parameters to get notified about the result of
+     * the update process.
+     * </p>
+     * <p>
+     * Note that you can <b>not</b> update a user's role using this method. If you want to do so,
+     * you should e.g. consider calling {@link #loginOrRegisterUser()}.
+     * </p>
+     *
+     * @param newUserData A user object filled with the new data (access token, role and remote id etc. will be set automatically)
+     * @param listener The listener for the update process
+     */
+    public void updateUserOnServer(final User newUserData, final UserUpdateOnServerListener listener) {
+        if(newUserData == null || listener == null) {
+            Log.e(TAG, "Neither the new user data nor the listener shall be null. Stopped update process.");
+            return;
+        }
+
+        // Setup new user
+        final User newUser = new User(newUserData);
+        User currentUser = getCurrentUser();
+        newUser.setAccessToken(currentUser.getAccessToken());
+        newUser.setRole(currentUser.getRole());
+        newUser.setRemoteId(currentUser.getRemoteId());
+
+        // Set up runner
+        BackgroundRunner runner = BackgroundRunner.getRunner("update_user_runner");
+        runner.setListener(new BackgroundRunner.BackgroundListener() {
+            @Override
+            public void onResult(@Nullable Bundle result) {
+                if(result != null) {
+                    boolean success = result.getBoolean(KEY_UPDATE_SUCCESS, false);
+
+                    if(success) {
+                        listener.userUpdated();
+                        setCurrentUser(newUser);
+
+                        return;
+                    }
+                }
+
+                listener.updateFailed();
+            }
+        });
+        runner.setRunnable(new BackgroundRunner.BackgroundRunnable() {
+            @Nullable
+            @Override
+            public Bundle run(@Nullable Bundle params) {
+                Bundle result = new Bundle();
+
+                result.putBoolean(KEY_UPDATE_SUCCESS, newUser.updateOnServerSync());
+
+                return result;
+            }
+        });
+        runner.execute();
     }
 
     /**
@@ -209,6 +281,7 @@ public class UserManager {
         editor.putString(KEY_HOMETOWN, _currUser.getHometown());
         editor.putString(KEY_PHONE_NUMBER, _currUser.getPhoneNumber());
         editor.putString(KEY_T_SHIRT_SIZE, _currUser.getTShirtSize());
+        editor.putString(KEY_GENDER, _currUser.getGender());
 
         editor.commit();
     }
@@ -237,6 +310,7 @@ public class UserManager {
         String hometown = sharedPref.getString(KEY_HOMETOWN, "");
         String phoneNumber = sharedPref.getString(KEY_PHONE_NUMBER, "");
         String tShirtSize = sharedPref.getString(KEY_T_SHIRT_SIZE, "");
+        String gender = sharedPref.getString(KEY_GENDER, "");
 
         // Create user
         User user = new User();
@@ -266,6 +340,7 @@ public class UserManager {
         user.setHometown(hometown);
         user.setPhoneNumber(phoneNumber);
         user.setTShirtSize(tShirtSize);
+        user.setGender(gender);
 
         _currUser = user;
     }
