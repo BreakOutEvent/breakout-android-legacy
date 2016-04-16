@@ -11,9 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <include
+        <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
-            layout="@layout/toolbar_webview"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:layout_scrollFlags="scroll|enterAlways"/>
 
     </android.support.design.widget.AppBarLayout>
 

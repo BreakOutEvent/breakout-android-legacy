@@ -1,7 +1,10 @@
 package org.break_out.breakout.ui.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.view.ViewGroup;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.views.BOFlatButton;
 
 /**
@@ -35,6 +39,23 @@ public class EarlyBirdWelcomeFragment extends Fragment {
                 } else {
                     UserManager.getInstance(getContext()).loginOrRegisterUser();
                 }
+            }
+        });
+
+        // Init toolbar
+        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Activity activity = getActivity();
+
+                if(!(activity instanceof MainActivity)) {
+                    Log.e(TAG, "Parent activity must be MainActivity.");
+                    return;
+                }
+
+                MainActivity mainActivity = (MainActivity) activity;
+                mainActivity.openDrawer();
             }
         });
 

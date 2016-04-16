@@ -1,6 +1,7 @@
 package org.break_out.breakout.ui.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 
 import org.break_out.breakout.R;
 
@@ -212,5 +214,15 @@ public abstract class BOActivity extends AppCompatActivity {
      */
     public boolean isLandscape() {
         return (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+    }
+
+    /**
+     * Calling this method will force closing the soft keyboard.
+     */
+    public void closeKeyboard() {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if(getCurrentFocus() != null) {
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
     }
 }
