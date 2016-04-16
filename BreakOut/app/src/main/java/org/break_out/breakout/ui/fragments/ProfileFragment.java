@@ -35,6 +35,7 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
     private BOEditText _etFirstName = null;
     private BOEditText _etLastName = null;
     private BOEditText _etEmail = null;
+    private BOEditText _etPassword = null;
     private BOEditText _etPhoneNumber = null;
     private BOEditText _etEmergencyNumber = null;
 
@@ -66,6 +67,7 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         _etFirstName = (BOEditText) v.findViewById(R.id.et_first_name);
         _etLastName = (BOEditText) v.findViewById(R.id.et_last_name);
         _etEmail = (BOEditText) v.findViewById(R.id.et_email);
+        _etPassword = (BOEditText) v.findViewById(R.id.et_password);
         _etPhoneNumber = (BOEditText) v.findViewById(R.id.et_phone_number);
         _etEmergencyNumber = (BOEditText) v.findViewById(R.id.et_emergency_number);
         _spGender = (BOSpinner) v.findViewById(R.id.sp_gender);
@@ -158,8 +160,10 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         user.setEmergencyNumber(_etEmergencyNumber.getText());
 
         user.setGender(_spGender.getSelectedValue());
+        user.setTShirtSize(_spTShirtSize.getSelectedValue());
+        user.setEventCity(_spEventCity.getSelectedValue());
 
-        // TODO: some data still missing
+        // TODO: Is password changeable?
 
         return user;
     }
@@ -174,8 +178,10 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         _etEmergencyNumber.setText(user.getEmergencyNumber());
 
         _spGender.setSelectedPosition(ArrayUtils.getPositionOfString(getContext(), R.array.gender_array, user.getGender()));
+        _spTShirtSize.setSelectedPosition(ArrayUtils.getPositionOfString(getContext(), R.array.t_shirt_size_array, user.getTShirtSize()));
+        _spEventCity.setSelectedPosition(ArrayUtils.getPositionOfString(getContext(), R.array.event_city_array, user.getEventCity()));
 
-        // TODO: some data still missing
+        // TODO: Is password changeable?
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.break_out.breakout.model;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -51,6 +52,7 @@ public class User implements Serializable {
     private String _phoneNumber = "";
     private String _tShirtSize = "";
     private Calendar _birthday = null;
+    private String _eventCity = "";
 
     /**
      * Represents the role of a user.
@@ -98,6 +100,7 @@ public class User implements Serializable {
         setEmergencyNumber(original.getEmergencyNumber());
         setGender(original.getGender());
         setTShirtSize(original.getTShirtSize());
+        setEventCity(original.getEventCity());
     }
 
     /**
@@ -135,7 +138,7 @@ public class User implements Serializable {
      *
      * @return The email of the user or empty string if the user is {@code VISITOR}
      */
-    public String getEmail() {
+    public @NonNull String getEmail() {
         return _email;
     }
 
@@ -155,7 +158,7 @@ public class User implements Serializable {
      *
      * @return The password of the user or empty string if the user is {@code VISITOR}
      */
-    public String getPassword() {
+    public @NonNull String getPassword() {
         return _password;
     }
 
@@ -175,7 +178,7 @@ public class User implements Serializable {
      *
      * @return The OAuth access token of the user or empty string if the user is {@code VISITOR}
      */
-    public String getAccessToken() {
+    public @NonNull String getAccessToken() {
         return _accessToken;
     }
 
@@ -221,7 +224,7 @@ public class User implements Serializable {
         _gender = (gender != null ? gender : "");
     }
 
-    public String getGender() {
+    public @NonNull String getGender() {
         return _gender;
     }
 
@@ -229,7 +232,7 @@ public class User implements Serializable {
         _firstName = firstName != null ? firstName : "";
     }
 
-    public String getFirstName() {
+    public @NonNull String getFirstName() {
         return _firstName;
     }
 
@@ -237,7 +240,7 @@ public class User implements Serializable {
         _lastName = lastName != null ? lastName : "";
     }
 
-    public String getLastName() {
+    public @NonNull String getLastName() {
         return _lastName;
     }
 
@@ -245,7 +248,7 @@ public class User implements Serializable {
         _emergencyNumber = emergencyNumber != null ? emergencyNumber : "";
     }
 
-    public String getEmergencyNumber() {
+    public@NonNull  String getEmergencyNumber() {
         return _emergencyNumber;
     }
 
@@ -253,7 +256,7 @@ public class User implements Serializable {
         _hometown = hometown != null ? hometown : "";
     }
 
-    public String getHometown() {
+    public @NonNull String getHometown() {
         return _hometown;
     }
 
@@ -261,7 +264,7 @@ public class User implements Serializable {
         _phoneNumber = phoneNumber != null ? phoneNumber : "";
     }
 
-    public String getPhoneNumber() {
+    public @NonNull String getPhoneNumber() {
         return _phoneNumber;
     }
 
@@ -269,7 +272,7 @@ public class User implements Serializable {
         _tShirtSize = tShirtSize != null ? tShirtSize : "";
     }
 
-    public String getTShirtSize() {
+    public @NonNull String getTShirtSize() {
         return _tShirtSize;
     }
 
@@ -279,6 +282,14 @@ public class User implements Serializable {
 
     public @Nullable Calendar getBirthday() {
         return _birthday;
+    }
+
+    public void setEventCity(@Nullable String eventCity) {
+        _eventCity = eventCity != null ? eventCity : "";
+    }
+
+    public @NonNull String getEventCity() {
+        return _eventCity;
     }
 
     /**

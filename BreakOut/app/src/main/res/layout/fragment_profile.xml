@@ -123,6 +123,7 @@
                     app:underlined="false"/>
 
                 <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -130,18 +131,6 @@
                     android:hint="@string/hint_change_password"
                     android:inputType="textPassword"
                     app:drawableLeft="@drawable/ic_lock_outline_black_24dp"
-                    app:drawableLeftAlpha="0.54"
-                    app:underlined="false"/>
-
-                <org.break_out.breakout.ui.views.BOEditText
-                    android:id="@+id/et_hometown"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
-                    android:hint="@string/hint_hometown"
-                    android:inputType="textCapWords"
-                    app:drawableLeft="@drawable/ic_location_city_black_24dp"
                     app:drawableLeftAlpha="0.54"
                     app:underlined="false"/>
 
@@ -199,6 +188,18 @@
                     android:layout_marginTop="10dp"
                     android:entries="@array/event_city_array"
                     android:hint="@string/hint_event_city"
+                    app:drawableLeft="@drawable/ic_location_city_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+                <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_hometown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/hint_hometown"
+                    android:inputType="textCapWords"
                     app:drawableLeft="@drawable/ic_location_city_black_24dp"
                     app:drawableLeftAlpha="0.54"
                     app:underlined="false"/>

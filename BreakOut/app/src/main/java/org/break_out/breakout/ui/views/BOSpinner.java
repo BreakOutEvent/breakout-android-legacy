@@ -28,7 +28,8 @@ public class BOSpinner extends BOUnderlinedView {
 
     private boolean _selected = false;
 
-    private String[] _entries = new String[0];
+    // Do NOT initialize entries here (it won't work then)!
+    private String[] _entries;
 
     public static class BOSpinnerState implements Serializable {
 
@@ -78,7 +79,7 @@ public class BOSpinner extends BOUnderlinedView {
     }
 
     public void setSelectedPosition(int position) {
-        if(position < 0 || position >= _entries.length) {
+        if(position < 0 || _entries == null || position >= _entries.length) {
             return;
         }
 

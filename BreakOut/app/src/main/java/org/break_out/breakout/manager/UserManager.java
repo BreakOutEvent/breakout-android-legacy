@@ -14,6 +14,7 @@ import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.activities.BOActivity;
 import org.break_out.breakout.util.BackgroundRunner;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,8 +41,12 @@ public class UserManager {
     private static final String KEY_PHONE_NUMBER = "key_phone_number";
     private static final String KEY_T_SHIRT_SIZE = "key_t_shirt_size";
     private static final String KEY_GENDER = "key_gender";
+    private static final String KEY_EVENT_CITY = "key_event_city";
 
+    private static final String KEY_NEW_USER = "key_new_user";
     private static final String KEY_UPDATE_SUCCESS = "key_update_success";
+
+    private static final String RUNNER_UPDATE_USER = "runner_update_user";
 
     private static UserManager _instance;
 
@@ -161,21 +166,47 @@ public class UserManager {
         }
 
         // Setup new user
-        final User newUser = new User(newUserData);
+        User newUser = new User(newUserData);
         User currentUser = getCurrentUser();
         newUser.setAccessToken(currentUser.getAccessToken());
         newUser.setRole(currentUser.getRole());
         newUser.setRemoteId(currentUser.getRemoteId());
 
         // Set up runner
-        BackgroundRunner runner = BackgroundRunner.getRunner("update_user_runner");
+        BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_UPDATE_USER);
+
+        runner.setRunnable(new BackgroundRunner.BackgroundRunnable() {
+            @Nullable
+            @Override
+            public Bundle run(@Nullable Bundle params) {
+                Bundle result = new Bundle();
+
+                if(params == null) {
+                    result.putBoolean(KEY_UPDATE_SUCCESS, false);
+                    return result;
+                }
+
+                User newUser = (User) params.getSerializable(KEY_NEW_USER);
+                if(newUser == null) {
+                    result.putBoolean(KEY_UPDATE_SUCCESS, false);
+                    return result;
+                }
+
+                result.putSerializable(KEY_NEW_USER, newUser);
+                result.putBoolean(KEY_UPDATE_SUCCESS, newUser.updateOnServerSync());
+
+                return result;
+            }
+        });
+
         runner.setListener(new BackgroundRunner.BackgroundListener() {
             @Override
             public void onResult(@Nullable Bundle result) {
                 if(result != null) {
                     boolean success = result.getBoolean(KEY_UPDATE_SUCCESS, false);
+                    User newUser = (User) result.getSerializable(KEY_NEW_USER);
 
-                    if(success) {
+                    if(success && newUser != null) {
                         listener.userUpdated();
                         setCurrentUser(newUser);
 
@@ -186,18 +217,10 @@ public class UserManager {
                 listener.updateFailed();
             }
         });
-        runner.setRunnable(new BackgroundRunner.BackgroundRunnable() {
-            @Nullable
-            @Override
-            public Bundle run(@Nullable Bundle params) {
-                Bundle result = new Bundle();
 
-                result.putBoolean(KEY_UPDATE_SUCCESS, newUser.updateOnServerSync());
-
-                return result;
-            }
-        });
-        runner.execute();
+        Bundle params = new Bundle();
+        params.putSerializable(KEY_NEW_USER, newUser);
+        runner.execute(params);
     }
 
     /**
@@ -282,6 +305,7 @@ public class UserManager {
         editor.putString(KEY_PHONE_NUMBER, _currUser.getPhoneNumber());
         editor.putString(KEY_T_SHIRT_SIZE, _currUser.getTShirtSize());
         editor.putString(KEY_GENDER, _currUser.getGender());
+        editor.putString(KEY_EVENT_CITY, _currUser.getEventCity());
 
         editor.commit();
     }
@@ -311,6 +335,7 @@ public class UserManager {
         String phoneNumber = sharedPref.getString(KEY_PHONE_NUMBER, "");
         String tShirtSize = sharedPref.getString(KEY_T_SHIRT_SIZE, "");
         String gender = sharedPref.getString(KEY_GENDER, "");
+        String eventCity = sharedPref.getString(KEY_EVENT_CITY, "");
 
         // Create user
         User user = new User();
@@ -341,6 +366,7 @@ public class UserManager {
         user.setPhoneNumber(phoneNumber);
         user.setTShirtSize(tShirtSize);
         user.setGender(gender);
+        user.setEventCity(eventCity);
 
         _currUser = user;
     }
