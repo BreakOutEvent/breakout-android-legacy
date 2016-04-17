@@ -2,6 +2,8 @@ package org.break_out.breakout.util;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -161,7 +163,8 @@ public class BackgroundRunner {
          * the result will be stored and sent as soon as there is a listener registered to the
          * runnable again.</p>
          *
-         * <p>This callback will only be called once for every run of the runnable.</p>
+         * <p>This callback will only be called once for every run of the runnable.
+         * It will in any case be called on the UI thread.</p>
          *
          * @param result The result Bundle of the runnable or null
          */
@@ -307,13 +310,18 @@ public class BackgroundRunner {
 
     /**
      * If there is a listener registered to this runner, this method
-     * will call it and reset the result.
+     * will call it on the UI thread and reset the result.
      */
     private void tryCallListener() {
         if(_listener != null && _isDone) {
-            _listener.onResult(_result);
-            _result = null;
-            _isDone = false;
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    _listener.onResult(_result);
+                    _result = null;
+                    _isDone = false;
+                }
+            });
         }
     }
 
