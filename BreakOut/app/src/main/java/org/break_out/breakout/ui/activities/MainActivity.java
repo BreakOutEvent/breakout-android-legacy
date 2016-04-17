@@ -150,14 +150,14 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
     }
 
     @Override
-    public void userDataChanged() {
+    public void onUserDataChanged() {
         updateDrawer();
     }
 
     private class ProfileListener implements ProfileFragment.ProfileFragmentListener {
 
         @Override
-        public void onSaved() {
+        public void onDone() {
             setCurrentFragment(new EarlyBirdWelcomeFragment());
             closeKeyboard();
         }

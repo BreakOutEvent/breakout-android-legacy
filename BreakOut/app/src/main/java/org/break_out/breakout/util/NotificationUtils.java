@@ -1,6 +1,7 @@
 package org.break_out.breakout.util;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Toast;
@@ -18,6 +19,11 @@ import it.sephiroth.android.library.tooltip.Tooltip;
  * Created by Tino on 16.02.2016.
  */
 public class NotificationUtils {
+
+    public interface PositiveNegativeListener {
+        public void onPositiveClicked();
+        public void onNegativeClicked();
+    }
 
     /**
      * Shows a {@link Toast} message.
@@ -42,12 +48,35 @@ public class NotificationUtils {
         new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog)
                 .setTitle(title)
                 .setMessage(text)
-                .setPositiveButton(android.R.string.yes, null)
+                .setPositiveButton(android.R.string.ok, null)
                 .show();
     }
 
     public static void showInfoDialog(Context context, int titleResourceId, int textResourceId) {
         showInfoDialog(context, context.getString(titleResourceId), context.getString(textResourceId));
+    }
+
+    public static void showPositiveNegativeDialog(Context context, String title, String text, String positiveButton, String negativeButton, final PositiveNegativeListener listener) {
+        new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog)
+                .setTitle(title)
+                .setMessage(text)
+                .setPositiveButton(positiveButton, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        listener.onPositiveClicked();
+                    }
+                })
+                .setNegativeButton(negativeButton, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        listener.onNegativeClicked();
+                    }
+                })
+                .show();
+    }
+
+    public static void showPositiveNegativeDialog(Context context, int titleResourceId, int textResourceId, int negativeTextResourceId, int positiveTextResourceId, final PositiveNegativeListener listener) {
+        showPositiveNegativeDialog(context, context.getString(titleResourceId), context.getString(textResourceId), context.getString(negativeTextResourceId), context.getString(positiveTextResourceId), listener);
     }
 
     /**

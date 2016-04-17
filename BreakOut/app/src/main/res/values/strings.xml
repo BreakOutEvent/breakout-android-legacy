@@ -69,5 +69,10 @@
     <string name="event_information">Event information</string>
     <string name="hint_change_password">Change password</string>
     <string name="hint_start_city">Start city</string>
+    <string name="hint_password_not_editable">Password not editable</string>
+    <string name="save">Save</string>
+    <string name="explanation_changes_will_be_lost">Your changes will be lost. To you still want to continue?</string>
+    <string name="personal_information">Personal information</string>
+    <string name="title_profile">Profile</string>
 
 </resources>

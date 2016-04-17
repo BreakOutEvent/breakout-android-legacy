@@ -74,5 +74,10 @@
     <string name="event_information">Event Information</string>
     <string name="hint_change_password">Passwort ändern</string>
     <string name="hint_start_city">Start-Stadt</string>
+    <string name="hint_password_not_editable">Passwort nicht editierbar</string>
+    <string name="save">Speichern</string>
+    <string name="explanation_changes_will_be_lost">Deine Änderungen gehen verloren. Möchtest du trotzdem fortfahren?</string>
+    <string name="personal_information">Persönliche Informationen</string>
+    <string name="title_profile">Profil</string>
 
 </resources>

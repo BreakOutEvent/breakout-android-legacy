@@ -8,6 +8,7 @@
     <color name="white_transparent_50">#8FFF</color>
     <color name="white_transparent_80">#CFFF</color>
 
+    <color name="black_transparent_12">#1F000000</color>
     <color name="black_transparent_25">#4000</color>
     <color name="black_transparent_50">#8000</color>
     <color name="black_transparent_80">#C000</color>

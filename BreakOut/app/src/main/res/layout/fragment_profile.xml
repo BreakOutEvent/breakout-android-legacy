@@ -11,9 +11,10 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:elevation="4dp"
+        android:paddingEnd="15dp"
         android:paddingRight="15dp"
         app:layout_scrollFlags="scroll|enterAlways"
-        app:navigationIcon="@drawable/ic_menu_white_24dp"
+        app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -23,6 +24,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:src="@drawable/ic_check_white_24dp"/>
+
+        <ProgressBar
+            android:id="@+id/pb_loading_indicator"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:indeterminate="true"/>
 
     </android.support.v7.widget.Toolbar>
 
@@ -92,6 +100,7 @@
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
                     android:padding="0dp"
                     android:text="@string/button_choose_profile_picture"
@@ -103,13 +112,22 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/black_transparent_25"/>
+                android:background="@color/black_transparent_12"/>
 
             <LinearLayout
+                android:id="@+id/ll_personal_information"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="@dimen/default_padding">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/personal_information"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"/>
 
                 <!-- Non-editable (inputType="") -->
                 <org.break_out.breakout.ui.views.BOEditText
@@ -126,35 +144,12 @@
                     android:id="@+id/et_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
-                    android:hint="@string/hint_change_password"
-                    android:inputType="textPassword"
+                    android:hint="@string/hint_password_not_editable"
+                    android:inputType=""
                     app:drawableLeft="@drawable/ic_lock_outline_black_24dp"
                     app:drawableLeftAlpha="0.54"
                     app:underlined="false"/>
-
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black_transparent_25"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/default_padding">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/event_information"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"/>
 
                 <org.break_out.breakout.ui.views.BOSpinner
                     android:id="@+id/sp_gender"
@@ -167,6 +162,29 @@
                     app:drawableLeft="@drawable/ic_wc_black_24dp"
                     app:drawableLeftAlpha="0.54"
                     app:underlined="false"/>
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/v_event_information_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_transparent_12"/>
+
+            <LinearLayout
+                android:id="@+id/ll_event_information"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/default_padding">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/event_information"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"/>
 
                 <org.break_out.breakout.ui.views.BOSpinner
                     android:id="@+id/sp_t_shirt_size"

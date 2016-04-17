@@ -532,7 +532,7 @@ public class User implements Serializable {
             }
 
             JSONObject responseJson = new JSONObject(updateResponse.body().string());
-            if(responseJson.get("participant") != null) {
+            if(responseJson.get("participant") != null && notNullOrEmpty(responseJson.get("participant").toString())) {
                 // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;
             } else {
@@ -559,19 +559,19 @@ public class User implements Serializable {
 
         try {
             userObj.put("email", _email);
-            userObj.put("firstname", notNull(_firstName) ? _firstName : "");
-            userObj.put("lastname", notNull(_lastName) ? _lastName : "");
-            userObj.put("gender", notNull(_gender) ? _gender : "");
+            userObj.put("firstname", notNullOrEmpty(_firstName) ? _firstName : "");
+            userObj.put("lastname", notNullOrEmpty(_lastName) ? _lastName : "");
+            userObj.put("gender", notNullOrEmpty(_gender) ? _gender : "");
 
             // Note: The password cannot be changed!
 
-            if(notNull(_emergencyNumber) || notNull(_hometown) || notNull(_phoneNumber) || notNull(_tShirtSize)) {
+            if(notNullOrEmpty(_emergencyNumber) || notNullOrEmpty(_hometown) || notNullOrEmpty(_phoneNumber) || notNullOrEmpty(_tShirtSize)) {
                 JSONObject participantObject = new JSONObject();
 
-                participantObject.put("emergencynumber", notNull(_emergencyNumber) ? _emergencyNumber : "");
-                participantObject.put("hometown", notNull(_hometown) ? _hometown : "");
-                participantObject.put("phonenumber", notNull(_phoneNumber) ? _phoneNumber : "");
-                participantObject.put("tshirtsize", notNull(_tShirtSize) ? _tShirtSize : "");
+                participantObject.put("emergencynumber", notNullOrEmpty(_emergencyNumber) ? _emergencyNumber : "");
+                participantObject.put("hometown", notNullOrEmpty(_hometown) ? _hometown : "");
+                participantObject.put("phonenumber", notNullOrEmpty(_phoneNumber) ? _phoneNumber : "");
+                participantObject.put("tshirtsize", notNullOrEmpty(_tShirtSize) ? _tShirtSize : "");
 
                 // Add participant object to user object
                 userObj.put("participant", participantObject);
@@ -585,8 +585,8 @@ public class User implements Serializable {
         return null;
     }
 
-    private boolean notNull(String text) {
-        return (text != null && !text.equals(NULL));
+    private boolean notNullOrEmpty(String text) {
+        return (text != null && !text.equals(NULL) && !text.equals(""));
     }
 
     @Override

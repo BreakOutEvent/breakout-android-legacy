@@ -15,6 +15,7 @@ import org.break_out.breakout.ui.views.BODatePicker;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOFlatButton;
 import org.break_out.breakout.ui.views.BOSpinner;
+import org.break_out.breakout.util.ArrayUtils;
 import org.break_out.breakout.util.BackgroundRunner;
 import org.break_out.breakout.util.NotificationUtils;
 
@@ -125,6 +126,16 @@ public class BecomeParticipantActivity extends BackgroundImageActivity {
                 createTeam();
             }
         });
+
+        fillFieldsFromUser();
+    }
+
+    private void fillFieldsFromUser() {
+        User currUser = UserManager.getInstance(this).getCurrentUser();
+
+        _etFirstName.setText(currUser.getFirstName());
+        _etLastName.setText(currUser.getLastName());
+        _spGender.setSelectedPosition(ArrayUtils.getPositionOfString(this, R.array.gender_array, currUser.getGender()));
     }
 
     private void initHelpListeners() {

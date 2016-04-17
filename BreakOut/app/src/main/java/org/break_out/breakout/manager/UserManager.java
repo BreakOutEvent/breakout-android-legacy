@@ -11,10 +11,8 @@ import android.util.Log;
 import org.break_out.breakout.ui.activities.BecomeParticipantActivity;
 import org.break_out.breakout.ui.activities.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.ui.activities.BOActivity;
 import org.break_out.breakout.util.BackgroundRunner;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +55,7 @@ public class UserManager {
     private List<UserDataChangedListener> _dataChangedListeners = new ArrayList<UserDataChangedListener>();
 
     public interface UserDataChangedListener {
-        public void userDataChanged();
+        public void onUserDataChanged();
     }
 
     public interface UserUpdateOnServerListener {
@@ -122,7 +120,7 @@ public class UserManager {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        l.userDataChanged();
+                        l.onUserDataChanged();
                     }
                 });
             }

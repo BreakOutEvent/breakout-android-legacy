@@ -20,7 +20,7 @@ import org.break_out.breakout.ui.views.BOFlatButton;
  */
 public class EarlyBirdWelcomeFragment extends Fragment {
 
-    public static final String TAG = "EarlyBirdWelcomeFragment";
+    public static final String TAG = "EarlyBirdWelcomeFr";
 
     private BOFlatButton _btParticipate = null;
 
@@ -66,9 +66,16 @@ public class EarlyBirdWelcomeFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        // Set up participate/find team button
-        if(UserManager.getInstance(getActivity()).getCurrentUser().isAtLeast(User.Role.USER)) {
+        User currUser = UserManager.getInstance(getContext()).getCurrentUser();
+
+        // Set up button
+        if(currUser.getRole() == User.Role.USER) {
             _btParticipate.setText(getString(R.string.button_participate));
+            return;
+        }
+
+        if(currUser.getRole() == User.Role.PARTICIPANT) {
+            _btParticipate.setVisibility(View.GONE);
         }
     }
 }
