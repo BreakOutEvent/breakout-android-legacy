@@ -74,5 +74,6 @@
     <string name="explanation_changes_will_be_lost">Your changes will be lost. To you still want to continue?</string>
     <string name="personal_information">Personal information</string>
     <string name="title_profile">Profile</string>
+    <string name="choose_source">Choose source</string>
 
 </resources>

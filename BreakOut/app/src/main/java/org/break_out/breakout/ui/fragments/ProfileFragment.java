@@ -1,14 +1,29 @@
 package org.break_out.breakout.ui.fragments;
 
+import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Parcelable;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -18,8 +33,15 @@ import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOSpinner;
 import org.break_out.breakout.util.ArrayUtils;
+import org.break_out.breakout.util.BackgroundRunner;
 import org.break_out.breakout.util.NotificationUtils;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +51,9 @@ import java.util.List;
 public class ProfileFragment extends Fragment implements UserManager.UserDataChangedListener {
 
     public static final String TAG = "ProfileFragment";
+    private static File profileImageFile = null;
+    private static final String BUNDLETAG_URI = "seturi";
+    private static final int REQUESTCODE_IMAGE = 0;
 
     private UserManager _userManager = null;
 
@@ -43,6 +68,8 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
     private BOSpinner _spGender = null;
     private BOSpinner _spTShirtSize = null;
     private BOSpinner _spEventCity = null;
+    private de.hdodenhof.circleimageview.CircleImageView _civProfileImage = null;
+    private Button _bChangeProfileImage = null;
 
     private View _vEventInformation = null;
     private View _vEventInformationDivider = null;
@@ -84,6 +111,9 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
 
         _vEventInformation = v.findViewById(R.id.ll_event_information);
         _vEventInformationDivider = v.findViewById(R.id.v_event_information_divider);
+
+        _civProfileImage = (de.hdodenhof.circleimageview.CircleImageView) v.findViewById(R.id.civ_profile_image);
+        _bChangeProfileImage = (Button) v.findViewById(R.id.b_change_profile_image);
 
         // Init toolbar
         Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
@@ -144,6 +174,16 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
 
         setShowLoadingIndicator(false);
 
+        //make button initiate profile image change
+        _bChangeProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestNewProfileImage();
+            }
+        });
+
+        //if there is already a profile image set, load it instead of the placeholder
+        refreshProfileImage();
         return v;
     }
 
@@ -166,6 +206,34 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         super.onPause();
 
         _userManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == Activity.RESULT_OK) {
+            boolean fromCamera = data.getData() == null;
+            if(requestCode == REQUESTCODE_IMAGE) {
+                Uri imageUri = null;
+                if(!fromCamera) {
+                    imageUri = data.getData();
+                    moveFileToProfilePath(imageUri);
+                } else {
+                    imageUri = Uri.fromFile(profileImageFile);
+                }
+                _civProfileImage.setImageURI(imageUri);
+            }
+        } else {
+        }
+    }
+
+    private void refreshProfileImage() {
+        initStorage();
+        if(profileImageFile != null) {
+            if(profileImageFile.length()>0) {
+                _civProfileImage.setImageURI(Uri.fromFile(profileImageFile));
+            }
+        }
     }
 
     /**
@@ -310,5 +378,145 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
     @Override
     public void onUserDataChanged() {
         refreshUserData();
+    }
+
+    /**
+     * Request to select/take a profile picture, either
+     * by selecting one from an gallery app or by taking
+     * one with the build in camera app
+     */
+    public void requestNewProfileImage() {
+        //TODO check for permission to write external storage and use camera
+        //Make sure all folders and Files are created and available
+        initStorage();
+        //List camera apps for chooser intent
+        final List<Intent> cameraIntents = new ArrayList<>();
+        final Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        final PackageManager packageManager = getContext().getPackageManager();
+        final List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
+        for (ResolveInfo res : listCam) {
+            final String packageName = res.activityInfo.packageName;
+            final Intent intent = new Intent(captureIntent);
+            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+            intent.setPackage(packageName);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(profileImageFile));
+            cameraIntents.add(intent);
+        }
+        // list gallery app
+        Intent galleryIntent = new Intent();
+        galleryIntent.setType("image/*");
+        galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+
+        // Chooser of filesystem options
+        final Intent chooserIntent = Intent.createChooser(galleryIntent, getString(R.string.choose_source));
+
+        // Add the camera options
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[cameraIntents.size()]));
+
+        startActivityForResult(chooserIntent, REQUESTCODE_IMAGE);
+    }
+
+    /**
+     * Initialize the main folder and profile image object
+     */
+    private void initStorage() {
+        //init folder
+        File imageFolder = new File(Environment.getExternalStorageDirectory() + File.separator + "BreakOut" + File.separator);
+        imageFolder.mkdirs();
+        //init nomedia file to hide from gallery apps
+        File nomedia = new File(imageFolder,".nomedia");
+        if(!nomedia.exists()) {
+            try {
+                nomedia.createNewFile();
+            }catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        //create profile image file reference
+        profileImageFile = new File(imageFolder, "image_profile"+".jpg");
+
+    }
+
+    /**
+     * This method replaces the profile image with the given image taken from the input uri
+     * using the BackgroundRunner class
+     * @param inputUri Uri of the image that shall replace the current profile image
+     */
+    private void moveFileToProfilePath(Uri inputUri) {
+        final String booltag = "success";
+        BackgroundRunner runner = BackgroundRunner.getRunner("moveImageRunner");
+        runner.setRunnable(new UpdateImageRunnable(getContext()));
+        //React to result
+        runner.setListener(new BackgroundRunner.BackgroundListener() {
+            @Override
+            public void onResult(@Nullable Bundle result) {
+                boolean successful = false;
+                if(result != null) {
+                    successful = result.getBoolean(booltag,false);
+                }
+                //example code, will be replaced by specified operations
+                //reacting to the result later
+                if(successful) {
+                    Toast.makeText(getContext(),"Copying successful!",Toast.LENGTH_SHORT).show();
+                    refreshProfileImage();
+                } else {
+                    Toast.makeText(getContext(),"Copying failed!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        //add bundle to give the Uri to the BackgroundRunnable
+        Bundle params = new Bundle();
+        params.putParcelable(BUNDLETAG_URI,inputUri);
+        runner.execute(params);
+    }
+
+    private class UpdateImageRunnable implements BackgroundRunner.BackgroundRunnable {
+        final String boolTag = "success";
+        private Uri setUri;
+        private Context context;
+
+        public UpdateImageRunnable(Context c) {
+            context = c;
+        }
+
+        @Nullable
+        @Override
+        public Bundle run(@Nullable Bundle params) {
+            OutputStream dataOutputStream = null;
+            Bundle resultBundle = new Bundle();
+            resultBundle.putBoolean(boolTag,false);
+            setUri = null;
+            if(params != null) {
+                if(params.containsKey(BUNDLETAG_URI)) {
+                    setUri = (Uri) params.get(BUNDLETAG_URI);
+                }
+            }
+            if(setUri != null) {
+                try{
+                    //Android gives a relative URI which cannot directly be referenced to find a File, so copy the
+                    //given image into a temp Bitmap and compress that into a new File at a fixed destination
+                    //where we store the Profile Image
+                    InputStream imageInputStream = context.getContentResolver().openInputStream(setUri);
+                    Bitmap tempBitmap = BitmapFactory.decodeStream(imageInputStream);
+                    dataOutputStream = new BufferedOutputStream(new FileOutputStream(profileImageFile));
+                    profileImageFile.delete();
+                    tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dataOutputStream);
+                    //if everything worked out, set the result to true
+                    resultBundle.putBoolean(boolTag,true);
+                }catch(Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if(dataOutputStream != null){
+                        try {
+                            dataOutputStream.close();
+                        } catch(IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            return resultBundle;
+        }
     }
 }
