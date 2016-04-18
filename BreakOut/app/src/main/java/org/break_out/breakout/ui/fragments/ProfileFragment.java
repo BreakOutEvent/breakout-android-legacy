@@ -470,6 +470,11 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
         runner.execute(params);
     }
 
+    /**
+     * A runnable which is solely for the purpose of copying a given image into
+     * the set profile image file position and therefor replace the old image if
+     * any is set
+     */
     private class UpdateImageRunnable implements BackgroundRunner.BackgroundRunnable {
         final String boolTag = "success";
         private Uri setUri;
