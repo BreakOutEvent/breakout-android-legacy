@@ -1,28 +1,21 @@
-package org.break_out.breakout.ui.activities;
+package org.break_out.breakout.ui.fragments;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.inputmethod.InputMethodManager;
-
-import org.break_out.breakout.R;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Maximilian Duehr on 21.12.2015.
+ * Created by Tino on 18.04.2016.
  */
-public abstract class BOActivity extends AppCompatActivity {
+public class BOFragment extends Fragment {
 
-    private static final String TAG = "BOActivity";
+    private static final String TAG = "BOFragment";
 
     private Map<Integer, PermissionListener> _listeners = new HashMap<Integer, PermissionListener>();
     private int _nextRequestCode = 0;
@@ -111,7 +104,7 @@ public abstract class BOActivity extends AppCompatActivity {
 
             for(String p : permissions) {
                 // Check if permission has already been granted
-                if(ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_DENIED) {
+                if(ContextCompat.checkSelfPermission(getContext(), p) == PackageManager.PERMISSION_DENIED) {
                     allGranted = false;
                     break;
                 }
@@ -154,56 +147,4 @@ public abstract class BOActivity extends AppCompatActivity {
         return code;
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Set the color for the recent apps view to be slightly darker than the primary color to ensure a white title text
-        if(Build.VERSION.SDK_INT >= 21) {
-            ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(getTitle().toString(), null, ContextCompat.getColor(this, R.color.colorPrimaryDark));
-            setTaskDescription(taskDescription);
-        }
-    }
-
-    /**
-     * This method will return true if the app is running
-     * on a tablet. The check is based on qualified resource
-     * files. Every device with a smallest screen width of
-     * 600dp or devices classified as xlarge will be seen as tablets.
-     *
-     * @return True if this device is a tablet, false otherwise
-     */
-    public boolean isTablet() {
-        return getResources().getBoolean(R.bool.isTablet);
-    }
-
-    /**
-     * This method will return true if this Activity is
-     * currently running in portrait mode.
-     *
-     * @return True if this Activity is in portrait mode, false otherwise
-     */
-    public boolean isPortrait() {
-        return !isLandscape();
-    }
-
-    /**
-     * This method will return true if this Activity is
-     * currently running in landscape mode.
-     *
-     * @return True if this Activity is in landscape mode, false otherwise
-     */
-    public boolean isLandscape() {
-        return (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-    }
-
-    /**
-     * Calling this method will force closing the soft keyboard.
-     */
-    public void closeKeyboard() {
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        if(getCurrentFocus() != null) {
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        }
-    }
 }

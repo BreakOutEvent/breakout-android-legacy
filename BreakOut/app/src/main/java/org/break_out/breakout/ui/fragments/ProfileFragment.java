@@ -1,5 +1,6 @@
 package org.break_out.breakout.ui.fragments;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,10 +15,8 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +29,7 @@ import android.widget.Toast;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.ui.activities.BOActivity;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOSpinner;
 import org.break_out.breakout.util.ArrayUtils;
@@ -44,14 +44,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Tino on 13.04.2016.
  */
-public class ProfileFragment extends Fragment implements UserManager.UserDataChangedListener {
+public class ProfileFragment extends BOFragment implements UserManager.UserDataChangedListener {
 
     public static final String TAG = "ProfileFragment";
-    private static File profileImageFile = null;
+
+    private static File _profileImageFile = null;
+
     private static final String BUNDLETAG_URI = "seturi";
     private static final int REQUESTCODE_IMAGE = 0;
 
@@ -68,7 +73,7 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
     private BOSpinner _spGender = null;
     private BOSpinner _spTShirtSize = null;
     private BOSpinner _spEventCity = null;
-    private de.hdodenhof.circleimageview.CircleImageView _civProfileImage = null;
+    private CircleImageView _civProfileImage = null;
     private Button _bChangeProfileImage = null;
 
     private View _vEventInformation = null;
@@ -184,6 +189,14 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
 
         //if there is already a profile image set, load it instead of the placeholder
         refreshProfileImage();
+
+        getPermissions(new PermissionListener() {
+            @Override
+            public void onPermissionsResult(Map<String, Boolean> result) {
+
+            }
+        }, Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
         return v;
     }
 
@@ -219,7 +232,7 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
                     imageUri = data.getData();
                     moveFileToProfilePath(imageUri);
                 } else {
-                    imageUri = Uri.fromFile(profileImageFile);
+                    imageUri = Uri.fromFile(_profileImageFile);
                 }
                 _civProfileImage.setImageURI(imageUri);
             }
@@ -229,9 +242,9 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
 
     private void refreshProfileImage() {
         initStorage();
-        if(profileImageFile != null) {
-            if(profileImageFile.length()>0) {
-                _civProfileImage.setImageURI(Uri.fromFile(profileImageFile));
+        if(_profileImageFile != null) {
+            if(_profileImageFile.length()>0) {
+                _civProfileImage.setImageURI(Uri.fromFile(_profileImageFile));
             }
         }
     }
@@ -399,7 +412,7 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
             final Intent intent = new Intent(captureIntent);
             intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
             intent.setPackage(packageName);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(profileImageFile));
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(_profileImageFile));
             cameraIntents.add(intent);
         }
         // list gallery app
@@ -433,7 +446,7 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
             }
         }
         //create profile image file reference
-        profileImageFile = new File(imageFolder, "image_profile"+".jpg");
+        _profileImageFile = new File(imageFolder, "image_profile"+".jpg");
 
     }
 
@@ -499,8 +512,8 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
                     //where we store the Profile Image
                     InputStream imageInputStream = context.getContentResolver().openInputStream(setUri);
                     Bitmap tempBitmap = BitmapFactory.decodeStream(imageInputStream);
-                    profileImageFile.delete();
-                    dataOutputStream = new BufferedOutputStream(new FileOutputStream(profileImageFile));
+                    _profileImageFile.delete();
+                    dataOutputStream = new BufferedOutputStream(new FileOutputStream(_profileImageFile));
                     tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dataOutputStream);
                     //if everything worked out, set the result to true
                     resultBundle.putBoolean(boolTag,true);
