@@ -228,7 +228,6 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
     }
 
     private void refreshProfileImage() {
-        initStorage();
         if(profileImageFile != null) {
             if(profileImageFile.length()>0) {
                 _civProfileImage.setImageURI(Uri.fromFile(profileImageFile));
