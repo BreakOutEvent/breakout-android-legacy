@@ -499,8 +499,8 @@ public class ProfileFragment extends Fragment implements UserManager.UserDataCha
                     //where we store the Profile Image
                     InputStream imageInputStream = context.getContentResolver().openInputStream(setUri);
                     Bitmap tempBitmap = BitmapFactory.decodeStream(imageInputStream);
-                    dataOutputStream = new BufferedOutputStream(new FileOutputStream(profileImageFile));
                     profileImageFile.delete();
+                    dataOutputStream = new BufferedOutputStream(new FileOutputStream(profileImageFile));
                     tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dataOutputStream);
                     //if everything worked out, set the result to true
                     resultBundle.putBoolean(boolTag,true);
