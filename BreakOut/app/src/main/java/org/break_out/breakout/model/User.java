@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.break_out.breakout.constants.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -310,7 +311,7 @@ public class User implements Serializable {
 
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
-                .url("http://breakout-development.herokuapp.com/user/")
+                .url(Constants.Api.BASE_URL + "/user/")
                 .post(body)
                 .build();
 
@@ -349,7 +350,7 @@ public class User implements Serializable {
         // Build URL
         HttpUrl loginUrl = new HttpUrl.Builder()
                 .scheme("https")
-                .host("breakout-development.herokuapp.com")
+                .host(Constants.Api.BASE_URL)
                 .addPathSegment("oauth")
                 .addPathSegment("token")
                 .build();
@@ -359,8 +360,8 @@ public class User implements Serializable {
                 .add("password", _password)
                 .add("username", _email)
                 .add("scope", "read write")
-                .add("client_secret", "123456789")
-                .add("client_id", "breakout_app")
+                .add("client_secret", Constants.Api.CLIENT_SECRET)
+                .add("client_id", Constants.Api.CLIENT_ID)
                 .add("grant_type", "password")
                 .build();
 
@@ -420,7 +421,7 @@ public class User implements Serializable {
 
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl updateUrl = HttpUrl.parse("https://breakout-development.herokuapp.com/me/");
+        HttpUrl updateUrl = HttpUrl.parse(Constants.Api.BASE_URL + "/me/");
 
         // Get remote ID from server
         Request updateRequest = new Request.Builder()
@@ -504,7 +505,7 @@ public class User implements Serializable {
         OkHttpClient client = new OkHttpClient();
 
         // Build URL
-        HttpUrl updateUrl = HttpUrl.parse("https://breakout-development.herokuapp.com/user/" + _remoteId + "/");
+        HttpUrl updateUrl = HttpUrl.parse(Constants.Api.BASE_URL + "/user/" + _remoteId + "/");
 
         // Build body
         JSONObject userJSON = toJSON();

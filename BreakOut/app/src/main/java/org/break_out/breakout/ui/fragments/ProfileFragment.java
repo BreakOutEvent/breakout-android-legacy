@@ -27,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.activities.BOActivity;
@@ -54,6 +55,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProfileFragment extends BOFragment implements UserManager.UserDataChangedListener {
 
     public static final String TAG = "ProfileFragment";
+
+    private static final String RUNNER_MOVE_IMAGE = "runner_move_image";
 
     private static File _profileImageFile = null;
 
@@ -433,7 +436,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
      */
     private void initStorage() {
         //init folder
-        File imageFolder = new File(Environment.getExternalStorageDirectory() + File.separator + "BreakOut" + File.separator);
+        File imageFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Constants.Files.BREAKOUT_DIR + File.separator);
         imageFolder.mkdirs();
         //init nomedia file to hide from gallery apps
         File nomedia = new File(imageFolder,".nomedia");
@@ -445,7 +448,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
             }
         }
         //create profile image file reference
-        _profileImageFile = new File(imageFolder, "image_profile"+".jpg");
+        _profileImageFile = new File(imageFolder, Constants.Files.PROFILE_IMAGE_FILENAME);
 
     }
 
@@ -456,7 +459,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
      */
     private void moveFileToProfilePath(Uri inputUri) {
         final String booltag = "success";
-        BackgroundRunner runner = BackgroundRunner.getRunner("moveImageRunner");
+        BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_MOVE_IMAGE);
         runner.setRunnable(new UpdateImageRunnable(getContext()));
         //React to result
         runner.setListener(new BackgroundRunner.BackgroundListener() {
