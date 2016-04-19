@@ -70,8 +70,6 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
         _currentFragment = new EarlyBirdWelcomeFragment();
         setCurrentFragment(_currentFragment);
-
-        new Posting().save();
     }
 
     @Override
