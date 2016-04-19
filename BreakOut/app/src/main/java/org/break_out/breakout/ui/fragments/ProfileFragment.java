@@ -30,7 +30,6 @@ import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.ui.activities.BOActivity;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOSpinner;
 import org.break_out.breakout.util.ArrayUtils;
@@ -81,6 +80,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
     private View _vEventInformation = null;
     private View _vEventInformationDivider = null;
     private View _vSaveButton = null;
+    private View _vRefreshButton = null;
     private ProgressBar _pbLoadingIndicator = null;
 
     private List<ProfileFragmentListener> _listeners = new ArrayList<ProfileFragmentListener>();
@@ -161,7 +161,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
 
                 setShowLoadingIndicator(true);
 
-                _userManager.updateUserOnServer(getUserFromData(), new UserManager.UserUpdateOnServerListener() {
+                _userManager.updateUserOnServer(getUserFromData(), new UserManager.UserUpdateListener() {
                     @Override
                     public void userUpdated() {
                         notifyListenersDone();
@@ -172,6 +172,26 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
                     public void updateFailed() {
                         setShowLoadingIndicator(false);
                         Toast.makeText(getContext(), "Update failed.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+        _vRefreshButton = toolbar.findViewById(R.id.iv_refresh);
+        _vRefreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setShowLoadingIndicator(true);
+
+                _userManager.updateFromServer(new UserManager.UserUpdateListener() {
+                    @Override
+                    public void userUpdated() {
+                        setShowLoadingIndicator(false);
+                    }
+
+                    @Override
+                    public void updateFailed() {
+                        setShowLoadingIndicator(false);
                     }
                 });
             }
@@ -312,6 +332,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
     private void setShowLoadingIndicator(boolean show) {
         _pbLoadingIndicator.setVisibility(show ? View.VISIBLE : View.GONE);
         _vSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        _vRefreshButton.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
     public void registerListener(ProfileFragmentListener listener) {

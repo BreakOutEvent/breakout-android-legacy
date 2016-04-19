@@ -38,6 +38,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         setContentView(R.layout.activity_main);
 
         _userManager = UserManager.getInstance(this);
+        _userManager.updateFromServer(null);
 
         // Set up drawer
         _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -34,9 +34,7 @@ public class EarlyBirdWelcomeFragment extends Fragment {
         _btParticipate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(UserManager.getInstance(getContext()).getCurrentUser().isAtLeast(User.Role.USER)) {
-                    UserManager.getInstance(getContext()).makeUserParticipant();
-                } else {
+                if(UserManager.getInstance(getContext()).getCurrentUsersRole() == User.Role.VISITOR) {
                     UserManager.getInstance(getContext()).loginOrRegisterUser();
                 }
             }
@@ -70,12 +68,8 @@ public class EarlyBirdWelcomeFragment extends Fragment {
 
         // Set up button
         if(currUser.getRole() == User.Role.USER) {
-            _btParticipate.setText(getString(R.string.button_participate));
-            return;
-        }
-
-        if(currUser.getRole() == User.Role.PARTICIPANT) {
             _btParticipate.setVisibility(View.GONE);
+            return;
         }
     }
 }

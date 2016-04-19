@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.break_out.breakout.ui.activities.BecomeParticipantActivity;
 import org.break_out.breakout.ui.activities.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.util.BackgroundRunner;
@@ -44,7 +43,8 @@ public class UserManager {
     private static final String KEY_NEW_USER = "key_new_user";
     private static final String KEY_UPDATE_SUCCESS = "key_update_success";
 
-    private static final String RUNNER_UPDATE_USER = "runner_update_user";
+    private static final String RUNNER_UPDATE_ON_SERVER = "runner_update_on_server";
+    private static final String RUNNER_UPDATE_FROM_SERVER = "runner_update_from_server";
 
     private static UserManager _instance;
 
@@ -58,7 +58,7 @@ public class UserManager {
         public void onUserDataChanged();
     }
 
-    public interface UserUpdateOnServerListener {
+    public interface UserUpdateListener {
         public void userUpdated();
         public void updateFailed();
     }
@@ -130,8 +130,7 @@ public class UserManager {
     /**
      * Set the currently logged in user.
      * Notice: You should never need to call this method! It will
-     * only be called by the {@link LoginRegisterActivity} or the
-     * {@link BecomeParticipantActivity}.
+     * only be called by the {@link LoginRegisterActivity}.
      *
      * @param user The currently logged in user
      */
@@ -140,6 +139,46 @@ public class UserManager {
         saveCurrUserToPrefs();
 
         notifyDataChangedListeners();
+    }
+
+    public void updateFromServer(@Nullable final UserUpdateListener listener) {
+        // Set up runner
+        BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_UPDATE_FROM_SERVER);
+
+        runner.setRunnable(new BackgroundRunner.BackgroundRunnable() {
+            @Nullable
+            @Override
+            public Bundle run(@Nullable Bundle params) {
+                Bundle result = new Bundle();
+
+                result.putBoolean(KEY_UPDATE_SUCCESS, _currUser.updateFromServerSync());
+
+                return result;
+            }
+        });
+
+        runner.setListener(new BackgroundRunner.BackgroundListener() {
+            @Override
+            public void onResult(@Nullable Bundle result) {
+                if(result != null) {
+                    boolean success = result.getBoolean(KEY_UPDATE_SUCCESS, false);
+
+                    if(success) {
+                        if(listener != null) {
+                            listener.userUpdated();
+                        }
+                        setCurrentUser(_currUser);
+                        return;
+                    }
+                }
+
+                if(listener != null) {
+                    listener.updateFailed();
+                }
+            }
+        });
+
+        runner.execute();
     }
 
     /**
@@ -157,7 +196,7 @@ public class UserManager {
      * @param newUserData A user object filled with the new data (access token, role and remote id etc. will be set automatically)
      * @param listener The listener for the update process
      */
-    public void updateUserOnServer(final User newUserData, final UserUpdateOnServerListener listener) {
+    public void updateUserOnServer(final User newUserData, final UserUpdateListener listener) {
         if(newUserData == null || listener == null) {
             Log.e(TAG, "Neither the new user data nor the listener shall be null. Stopped update process.");
             return;
@@ -171,7 +210,7 @@ public class UserManager {
         newUser.setRemoteId(currentUser.getRemoteId());
 
         // Set up runner
-        BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_UPDATE_USER);
+        BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_UPDATE_ON_SERVER);
 
         runner.setRunnable(new BackgroundRunner.BackgroundRunnable() {
             @Nullable
@@ -228,22 +267,6 @@ public class UserManager {
      */
     public void loginOrRegisterUser() {
         Intent intent = new Intent(_context, LoginRegisterActivity.class);
-        _context.startActivity(intent);
-    }
-
-    /**
-     * Opens the {@link BecomeParticipantActivity} and lets the user either
-     * become a participant. The user can only become a participant if he/she is
-     * already a user (and only a user). To stay updated about the status of
-     * the user, register a listener by calling {@link #registerListener(UserDataChangedListener)}.
-     */
-    public void makeUserParticipant() {
-        if(_currUser.getRole() != User.Role.USER) {
-            Log.e(TAG, "Only USERs can become participants (current user is " + _currUser.getRole().toString() + ")");
-            return;
-        }
-
-        Intent intent = new Intent(_context, BecomeParticipantActivity.class);
         _context.startActivity(intent);
     }
 

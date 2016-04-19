@@ -17,7 +17,9 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".ui.activities.MainActivity">
+            android:name=".ui.activities.MainActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -27,11 +29,6 @@
 
         <activity
             android:name=".ui.activities.LoginRegisterActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden">
-        </activity>
-
-        <activity
-            android:name=".ui.activities.BecomeParticipantActivity"
             android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
 
