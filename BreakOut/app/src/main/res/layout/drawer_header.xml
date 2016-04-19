@@ -35,7 +35,7 @@
             android:layout_alignStart="@+id/profile_image"
             android:gravity="left"
             android:paddingBottom="4dp"
-            android:text="Akash Bangad"
+            android:text="Test person"
             android:textColor="#FFF"
             android:textSize="14sp"
             android:textStyle="bold"/>
@@ -49,7 +49,7 @@
             android:layout_alignStart="@+id/tv_title"
             android:layout_marginBottom="8dp"
             android:gravity="left"
-            android:text="Akash.bangad93@gmail.com"
+            android:text="your.email@here.com"
             android:textColor="#fff"
             android:textSize="14sp"/>
 
