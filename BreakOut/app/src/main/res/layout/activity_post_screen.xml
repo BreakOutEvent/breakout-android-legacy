@@ -107,6 +107,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/post_tv_messageTitle"
                         app:darkMode="false"
+                        android:inputType="textCapSentences|textAutoCorrect"
                         app:underlined="true"
                         android:hint="@string/hint_postComment"/>
                 </RelativeLayout>
