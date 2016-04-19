@@ -458,10 +458,10 @@ public class User implements Serializable {
                 JSONObject participantObj = responseObj.getJSONObject("participant");
 
                 // The user is a participant
-                emergencyNumber = ((participantObj.has("emergencynumber") && !responseObj.isNull("emergencynumber")) ? participantObj.getString("emergencynumber") : null);
-                phoneNumber = ((participantObj.has("phonenumber") && !responseObj.isNull("phonenumber")) ? participantObj.getString("phonenumber") : null);
-                tShirtSize = ((participantObj.has("tshirtsize") && !responseObj.isNull("tshirtsize")) ? participantObj.getString("tshirtsize") : null);
-                hometown = ((participantObj.has("hometown") && !responseObj.isNull("hometown")) ? participantObj.getString("hometown") : null);
+                emergencyNumber = ((participantObj.has("emergencynumber") && !participantObj.isNull("emergencynumber")) ? participantObj.getString("emergencynumber") : null);
+                phoneNumber = ((participantObj.has("phonenumber") && !participantObj.isNull("phonenumber")) ? participantObj.getString("phonenumber") : null);
+                tShirtSize = ((participantObj.has("tshirtsize") && !participantObj.isNull("tshirtsize")) ? participantObj.getString("tshirtsize") : null);
+                hometown = ((participantObj.has("hometown") && !participantObj.isNull("hometown")) ? participantObj.getString("hometown") : null);
 
                 // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;
