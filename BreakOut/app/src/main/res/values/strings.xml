@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">BreakOut</string>
 
-    <string name="button_checkPermission_location">Check for location permission</string>
+    <string name="intentaction_locationservice">breakout.intent.action.locationService</string>
+    <string name="intentaction_updatelist">breakout.intent.action.updateLocation</string>
+    <string name="PREFERENCES_GLOBAL">BreakOutPreferences</string>
+    <string name="PREFERENCE_CURRENTLY_LOCATING">IsCurrentlyLocating</string>
 </resources>
