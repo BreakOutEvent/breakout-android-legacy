@@ -18,6 +18,7 @@ import org.break_out.breakout.LocationService;
 import org.break_out.breakout.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Maximilian Dühr on 01.03.2016.
@@ -267,5 +268,22 @@ public class BOLocationManager {
                 }
             }
         }
+    }
+
+
+    /**
+     * Clears the location database
+     */
+    public static void deleteLocationHistory() {
+        BOLocation.deleteAll(BOLocation.class);
+    }
+
+    /**
+     * Updates the visible representation of the Location database
+     */
+    public static ArrayList<BOLocation> getLocationHistory() {
+        ArrayList<BOLocation> resultList = new ArrayList<>();
+        resultList.addAll(BOLocation.listAll(BOLocation.class));
+        return resultList;
     }
 }
