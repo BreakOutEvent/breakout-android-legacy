@@ -28,6 +28,7 @@ import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.BOLocationManager;
+import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.util.BackgroundRunner;
 
 import java.io.BufferedOutputStream;
@@ -53,6 +54,11 @@ public class PostScreenActivity extends BOActivity {
 
     private RelativeLayout _rl_addImage;
     private ImageView _iv_chosenImage;
+    private ImageView _iv_change;
+    private ImageView _iv_cancel;
+    private BOEditText _et_message;
+
+    private BOLocation receivedLocation;
 
     private BOLocationManager _locationManager;
 
@@ -63,10 +69,12 @@ public class PostScreenActivity extends BOActivity {
         _mainFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Constants.Files.BREAKOUT_DIR + File.separator);
         _mainFolder.mkdirs();
         _tv_location = (TextView) findViewById(R.id.post_tv_location);
-        _locationManager = BOLocationManager.getInstance(this);
-
         _rl_addImage = (RelativeLayout) findViewById(R.id.post_rl_addImage);
         _iv_chosenImage = (ImageView) findViewById(R.id.post_iv_chosenImage);
+        _et_message = (BOEditText) findViewById(R.id.post_et_message);
+
+
+        _locationManager = BOLocationManager.getInstance(this);
 
         _rl_addImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,6 +86,13 @@ public class PostScreenActivity extends BOActivity {
         //init and populate Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.title_newPost));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
 
         requestPermissionsAndLocate(this);
     }
@@ -101,6 +116,18 @@ public class PostScreenActivity extends BOActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        setResult(RESULT_CANCELED);
+        finish();
+    }
+
+    /**
+     * Sets the current address as message into the Location text
+     * in the format City, Country
+     * @param currentAddress
+     */
     private void setLocation(Address currentAddress) {
         StringBuilder builder = new StringBuilder();
         builder.append(currentAddress.getLocality())
@@ -111,6 +138,11 @@ public class PostScreenActivity extends BOActivity {
     }
 
 
+    /**
+     * requests all needed permissions and if granted
+     * Location access starts to retrieve the current location
+     * @param c
+     */
     private void requestPermissionsAndLocate(final Context c) {
         getPermissions(new PermissionListener() {
             @Override
@@ -179,7 +211,8 @@ public class PostScreenActivity extends BOActivity {
         startActivityForResult(chooserIntent, REQUESTCODE_IMAGE);
     }
 
-    //Duplicate from ProfileFragment method, will be centralized later
+    //TODO
+    // Duplicate from ProfileFragment method, will be centralized later
     private void moveFileToProfilePath(Uri inputUri) {
         final String booltag = "success";
         BackgroundRunner runner = BackgroundRunner.getRunner(RUNNERTAG_MOVE_IMAGE);
@@ -207,6 +240,26 @@ public class PostScreenActivity extends BOActivity {
         Bundle params = new Bundle();
         params.putParcelable(BUNDLETAG_URI, inputUri);
         runner.execute(params);
+    }
+
+    /**
+     * This method takes the input and uploads it as a post to the server and
+     * finishes the activity
+     */
+    private void sendPostAndFinish() {
+        if (_tempSaveFile.exists() && _tempSaveFile.length() > 0) {
+            if (receivedLocation != null) {
+                String message = "";
+                File uploadImage = _tempSaveFile;
+                BOLocation uploadLocation = receivedLocation;
+                message = (_et_message.getText() != null) ? _et_message.getText() : "";
+
+                //TODO: Add code to actually upload the data
+
+                setResult(RESULT_OK);
+                finish();
+            }
+        }
     }
 
     /**
