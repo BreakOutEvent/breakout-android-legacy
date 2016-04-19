@@ -1,5 +1,6 @@
 package org.break_out.breakout.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -7,12 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.sync.model.Posting;
@@ -20,6 +23,7 @@ import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
 import org.break_out.breakout.ui.fragments.ProfileFragment;
 
 public class MainActivity extends BOActivity implements UserManager.UserDataChangedListener {
+    private static final String TAG = "MainActivity";
 
     private UserManager _userManager = null;
 
@@ -32,7 +36,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
     private ProfileFragment.ProfileFragmentListener _profileListener = null;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -50,6 +54,11 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         menuItem.setChecked(true);
                         _drawerLayout.closeDrawers();
+
+                        switch (menuItem.getItemId()) {
+                            case R.id.post:
+                                startActivityForResult(new Intent(getApplicationContext(),PostScreenActivity.class),0);
+                        }
                         return true;
                     }
                 });
@@ -142,6 +151,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
+        Log.d(TAG,""+menuItem.getItemId());
         switch(menuItem.getItemId()) {
             case android.R.id.home:
                 openDrawer();
@@ -149,6 +159,8 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
             case R.id.action_ok:
                 setCurrentFragment(new EarlyBirdWelcomeFragment());
                 break;
+            case R.id.post:
+                startActivityForResult(new Intent(this,PostScreenActivity.class),0);
         }
         return super.onOptionsItemSelected(menuItem);
     }

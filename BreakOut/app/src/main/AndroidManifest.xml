@@ -55,6 +55,8 @@
             android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
 
+        <activity android:name=".ui.activities.PostScreenActivity"/>
+
         <!-- Receivers -->
         <receiver android:name=".manager.BOLocationManager$BOLocationBroadcastReceiver">
             <intent-filter>
