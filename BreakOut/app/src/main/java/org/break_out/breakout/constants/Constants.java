@@ -12,6 +12,7 @@ public class Constants {
     public class Api {
 
         public static final String BASE_URL = "https://breakout-development.herokuapp.com";
+        public static final String HOST_URL = "breakout-development.herokuapp.com";
         public static final String CLIENT_ID = "breakout_app";
         public static final String CLIENT_SECRET = "123456789";
 

@@ -59,8 +59,10 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         headerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCurrentFragment(new ProfileFragment());
-                _drawerLayout.closeDrawers();
+                if(_userManager.getCurrentUser().isAtLeast(User.Role.USER)) {
+                    setCurrentFragment(new ProfileFragment());
+                    _drawerLayout.closeDrawers();
+                }
             }
         });
 

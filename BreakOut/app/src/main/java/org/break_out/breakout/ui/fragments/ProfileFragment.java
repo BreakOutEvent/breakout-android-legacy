@@ -75,9 +75,8 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
 
     private BOSpinner _spGender = null;
     private BOSpinner _spTShirtSize = null;
-    private BOSpinner _spEventCity = null;
+
     private CircleImageView _civProfileImage = null;
-    private Button _bChangeProfileImage = null;
 
     private View _vEventInformation = null;
     private View _vEventInformationDivider = null;
@@ -115,13 +114,11 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
 
         _spGender = (BOSpinner) v.findViewById(R.id.sp_gender);
         _spTShirtSize = (BOSpinner) v.findViewById(R.id.sp_t_shirt_size);
-        _spEventCity = (BOSpinner) v.findViewById(R.id.sp_event_city);
 
         _vEventInformation = v.findViewById(R.id.ll_event_information);
         _vEventInformationDivider = v.findViewById(R.id.v_event_information_divider);
 
         _civProfileImage = (de.hdodenhof.circleimageview.CircleImageView) v.findViewById(R.id.civ_profile_image);
-        _bChangeProfileImage = (Button) v.findViewById(R.id.b_change_profile_image);
 
         // Init toolbar
         Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
@@ -182,8 +179,9 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
 
         setShowLoadingIndicator(false);
 
-        //make button initiate profile image change
-        _bChangeProfileImage.setOnClickListener(new View.OnClickListener() {
+        // Make button initiate profile image change
+        Button btChangeProfileImage = (Button) v.findViewById(R.id.b_change_profile_image);
+        btChangeProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 requestNewProfileImage();
@@ -302,10 +300,6 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
             return true;
         }
 
-        if(!_spEventCity.getSelectedValue().equals(currUser.getEventCity())) {
-            return true;
-        }
-
         return false;
     }
 
@@ -352,7 +346,6 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
             user.setEmergencyNumber(_etEmergencyNumber.getText());
             user.setHometown(_etHometown.getText());
             user.setTShirtSize(_spTShirtSize.getSelectedValue());
-            user.setEventCity(_spEventCity.getSelectedValue());
         }
 
         // TODO: Is password changeable? -> No
@@ -378,7 +371,6 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
             _etEmergencyNumber.setText(user.getEmergencyNumber());
             _etHometown.setText(user.getHometown());
             _spTShirtSize.setSelectedPosition(ArrayUtils.getPositionOfString(getContext(), R.array.t_shirt_size_array, user.getTShirtSize()));
-            _spEventCity.setSelectedPosition(ArrayUtils.getPositionOfString(getContext(), R.array.event_city_array, user.getEventCity()));
 
             _vEventInformation.setVisibility(View.VISIBLE);
             _vEventInformationDivider.setVisibility(View.VISIBLE);

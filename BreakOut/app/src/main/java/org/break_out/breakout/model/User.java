@@ -350,7 +350,7 @@ public class User implements Serializable {
         // Build URL
         HttpUrl loginUrl = new HttpUrl.Builder()
                 .scheme("https")
-                .host(Constants.Api.BASE_URL)
+                .host(Constants.Api.HOST_URL)
                 .addPathSegment("oauth")
                 .addPathSegment("token")
                 .build();
@@ -442,11 +442,11 @@ public class User implements Serializable {
             updateResponse.body().close();
 
             // Get values
-            long remoteId = (responseObj.has("id") ? responseObj.getLong("id") : -1);
-            String firstName = (responseObj.has("firstname") ? responseObj.getString("firstname") : null);
-            String lastName = (responseObj.has("lastname") ? responseObj.getString("lastname") : null);
-            String email = (responseObj.has("email") ? responseObj.getString("email") : null);
-            String gender = (responseObj.has("gender") ? responseObj.getString("gender") : null);
+            long remoteId = ((responseObj.has("id") && !responseObj.isNull("id")) ? responseObj.getLong("id") : -1);
+            String firstName = ((responseObj.has("firstname") && !responseObj.isNull("firstname")) ? responseObj.getString("firstname") : null);
+            String lastName = ((responseObj.has("lastname") && !responseObj.isNull("lastname")) ? responseObj.getString("lastname") : null);
+            String email = ((responseObj.has("email") && !responseObj.isNull("email")) ? responseObj.getString("email") : null);
+            String gender = ((responseObj.has("gender") && !responseObj.isNull("gender")) ? responseObj.getString("gender") : null);
 
             String emergencyNumber = null;
             String phoneNumber = null;
@@ -458,10 +458,10 @@ public class User implements Serializable {
                 JSONObject participantObj = responseObj.getJSONObject("participant");
 
                 // The user is a participant
-                emergencyNumber = (participantObj.has("emergencynumber") ? participantObj.getString("emergencynumber") : null);
-                phoneNumber = (participantObj.has("phonenumber") ? participantObj.getString("phonenumber") : null);
-                tShirtSize = (participantObj.has("tshirtsize") ? participantObj.getString("tshirtsize") : null);
-                hometown = (participantObj.has("hometown") ? participantObj.getString("hometown") : null);
+                emergencyNumber = ((participantObj.has("emergencynumber") && !responseObj.isNull("emergencynumber")) ? participantObj.getString("emergencynumber") : null);
+                phoneNumber = ((participantObj.has("phonenumber") && !responseObj.isNull("phonenumber")) ? participantObj.getString("phonenumber") : null);
+                tShirtSize = ((participantObj.has("tshirtsize") && !responseObj.isNull("tshirtsize")) ? participantObj.getString("tshirtsize") : null);
+                hometown = ((participantObj.has("hometown") && !responseObj.isNull("hometown")) ? participantObj.getString("hometown") : null);
 
                 // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;

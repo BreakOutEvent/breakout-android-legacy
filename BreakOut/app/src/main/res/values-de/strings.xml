@@ -77,7 +77,7 @@
     <string name="hint_password_not_editable">Passwort nicht editierbar</string>
     <string name="save">Speichern</string>
     <string name="explanation_changes_will_be_lost">Deine Änderungen gehen verloren. Möchtest du trotzdem fortfahren?</string>
-    <string name="personal_information">Persönliche Informationen</string>
+    <string name="user_information">Nutzer Informationen</string>
     <string name="title_profile">Profil</string>
     <string name="choose_source">Quelle auswählen</string>
 
