@@ -15,6 +15,7 @@ import android.widget.TextView;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
 import org.break_out.breakout.ui.fragments.ProfileFragment;
 
@@ -69,6 +70,8 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
         _currentFragment = new EarlyBirdWelcomeFragment();
         setCurrentFragment(_currentFragment);
+
+        new Posting().save();
     }
 
     @Override
