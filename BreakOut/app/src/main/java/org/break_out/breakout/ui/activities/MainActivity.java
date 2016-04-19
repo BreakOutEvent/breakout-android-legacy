@@ -8,17 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
 import org.break_out.breakout.R;
-import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
 import org.break_out.breakout.ui.fragments.ProfileFragment;
 
@@ -151,7 +148,6 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
-        Log.d(TAG,""+menuItem.getItemId());
         switch(menuItem.getItemId()) {
             case android.R.id.home:
                 openDrawer();
