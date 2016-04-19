@@ -1,8 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">BreakOut</string>
 
     <string name="intentaction_locationservice">breakout.intent.action.locationService</string>
     <string name="intentaction_updatelist">breakout.intent.action.updateLocation</string>
     <string name="PREFERENCES_GLOBAL">BreakOutPreferences</string>
     <string name="PREFERENCE_CURRENTLY_LOCATING">IsCurrentlyLocating</string>
+    <string name="account_not_created">The account could not be created.</string>
+    <string name="button_continue">next</string>
+    <string name="error">Error</string>
+    <string name="explanation_participate">By pressing the register button I bindingly register to the event and accept to pay the event fee of 30.00€ as soon as I created a team.</string>
+    <string name="hint_birthday">Birthday</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_emergency_number">Emergency number</string>
+    <string name="hint_first_name">First name</string>
+    <string name="hint_gender">Gender</string>
+    <string name="hint_hometown">Hometown</string>
+    <string name="hint_last_name">Last name</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_phone_number">phone number</string>
+    <string name="hint_repeat_password">Repeat password</string>
+    <string name="hint_t_shirt_size">T-shirt size</string>
+    <string name="login_failed">The login on the server failed.</string>
+    <string name="participate_failed">Could not make you a participant.</string>
+    <string name="registration_successful_title">Account created</string>
+    <string name="registration_successful_text">Your account has successfully been created!\nPlease check your emails to activate your account.</string>
+    <string name="tooltip_username_password">Please enter an email and a password.</string>
+    <string name="textview_about">What is BreakOut?</string>
+    <string name="button_login">Login</string>
+    <string name="button_participate_fee_required">Participate (fee required)</string>
+    <string name="button_register">Register</string>
+    <string name="button_start_register">Register for free</string>
+
+    <string-array name="gender_array">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+
+    <string-array name="t_shirt_size_array">
+        <item>S</item>
+        <item>M</item>
+        <item>L</item>
+        <item>XL</item>
+    </string-array>
+
+    <string-array name="event_city_array">
+        <item>Berlin</item>
+        <item>Munich</item>
+    </string-array>
+
+    <string name="button_participate">Participate</string>
+    <string name="hint_team_name">Your team name</string>
+    <string name="hint_email_partner">Email of your partner</string>
+    <string name="button_create_team">Create team</string>
+    <string name="explanation_create_team">To participate in the event you also have to create a team. Invite your team partner via email and upload a photo now or later.</string>
+    <string name="almost_done">Almost done!</string>
+    <string name="early_bird_welcome_title">It will start soon!</string>
+    <string name="tooltip_mandatory_field">This is a mandatory field.</string>
+    <string name="tooltip_no_valid_phone_number">This is not a valid phone number.</string>
+    <string name="hint_event_city">Event city</string>
+    <string name="explanation_gender">We need to know your gender to find the right t-shirt for you.</string>
+    <string name="explanation_t_shirt_size">We need to know your t-shirt size to find the right t-shirt for you.</string>
+    <string name="explanation_phone_number">We need to know your phone number to be able to directly contact you.</string>
+    <string name="explanation_emergency_number">Please enter a phone number here, which we ca call in the case of an emergency.</string>
+    <string name="explanation_birthday">You have to be at least 18 years old to participate in BreakOut.</string>
+    <string name="explanation_event_city">In which city do you want to start your BreakOut advanture?</string>
+    <string name="tooltip_no_valid_email">This is not a valid email.</string>
+    <string name="not_registered_yet">Not registered yet</string>
+    <string name="title_what_is_breakout">What is BreakOut?</string>
+    <string name="button_choose_profile_picture">Choose profile picture</string>
+    <string name="event_information">Event information</string>
+    <string name="hint_change_password">Change password</string>
+    <string name="hint_start_city">Start city</string>
+    <string name="hint_password_not_editable">Password not editable</string>
+    <string name="save">Save</string>
+    <string name="explanation_changes_will_be_lost">Your changes will be lost. To you still want to continue?</string>
+    <string name="user_information">User information</string>
+    <string name="title_profile">Profile</string>
+    <string name="choose_source">Choose source</string>
 </resources>

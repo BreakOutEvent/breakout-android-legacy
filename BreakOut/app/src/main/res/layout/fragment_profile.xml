@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:paddingEnd="15dp"
+        android:paddingRight="15dp"
+        app:layout_scrollFlags="scroll|enterAlways"
+        app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <ImageView
+            android:id="@+id/iv_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:padding="10dp"
+            android:src="@drawable/ic_check_white_24dp"/>
+
+        <ImageView
+            android:id="@+id/iv_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:padding="10dp"
+            android:src="@android:drawable/stat_notify_sync"/>
+
+        <ProgressBar
+            android:id="@+id/pb_loading_indicator"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:indeterminate="true"/>
+
+    </android.support.v7.widget.Toolbar>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="beforeDescendants"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/default_padding"
+                android:paddingRight="@dimen/default_padding"
+                android:paddingTop="@dimen/default_padding">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/civ_profile_image"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/bg_welcome_600dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginStart="20dp"
+                        android:orientation="vertical">
+
+                        <org.break_out.breakout.ui.views.BOEditText
+                            android:id="@+id/et_first_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:hint="Vorname"
+                            android:inputType="textCapWords"
+                            app:drawableLeftAlpha="0.54"
+                            app:underlined="false"/>
+
+                        <org.break_out.breakout.ui.views.BOEditText
+                            android:id="@+id/et_last_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:hint="Nachname"
+                            android:inputType="textCapWords"
+                            app:drawableLeftAlpha="0.54"
+                            app:underlined="false"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <Button
+                    style="?android:attr/borderlessButtonStyle"
+                    android:id="@+id/b_change_profile_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:padding="0dp"
+                    android:text="@string/button_choose_profile_picture"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="15sp"/>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_transparent_12"/>
+
+            <LinearLayout
+                android:id="@+id/ll_personal_information"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/default_padding">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/user_information"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"/>
+
+                <!-- Non-editable (inputType="") -->
+                <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_email"
+                    android:inputType=""
+                    app:drawableLeft="@drawable/ic_mail_outline_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+                <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/hint_password_not_editable"
+                    android:inputType=""
+                    app:drawableLeft="@drawable/ic_lock_outline_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+                <org.break_out.breakout.ui.views.BOSpinner
+                    android:id="@+id/sp_gender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:entries="@array/gender_array"
+                    android:hint="@string/hint_gender"
+                    app:drawableLeft="@drawable/ic_wc_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/v_event_information_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_transparent_12"/>
+
+            <LinearLayout
+                android:id="@+id/ll_event_information"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/default_padding">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/event_information"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"/>
+
+                <org.break_out.breakout.ui.views.BOSpinner
+                    android:id="@+id/sp_t_shirt_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:entries="@array/t_shirt_size_array"
+                    android:hint="@string/hint_t_shirt_size"
+                    app:drawableLeft="@drawable/ic_tshirt_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+                <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_hometown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/hint_hometown"
+                    android:inputType="textCapWords"
+                    app:drawableLeft="@drawable/ic_location_city_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+                <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_phone_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/hint_phone_number"
+                    android:inputType="phone"
+                    app:drawableLeft="@drawable/ic_phone_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+                <org.break_out.breakout.ui.views.BOEditText
+                    android:id="@+id/et_emergency_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="@string/hint_emergency_number"
+                    android:inputType="phone"
+                    app:drawableLeft="@drawable/ic_sos_black_24dp"
+                    app:drawableLeftAlpha="0.54"
+                    app:underlined="false"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</LinearLayout>

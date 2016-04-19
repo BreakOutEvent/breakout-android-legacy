@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="isTablet">false</bool>
+
+    <!-- Constants for BackgroundImageActivity -->
+    <integer name="background_activity_logo_weight">1</integer>
 </resources>

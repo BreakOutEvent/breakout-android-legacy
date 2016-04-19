@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BOUnderlinedView">
+        <attr name="drawableLeft" format="reference"/>
+        <attr name="drawableRight" format="reference"/>
+        <attr name="drawableLeftAlpha" format="float"/>
+        <attr name="drawableRightAlpha" format="float"/>
+        <attr name="android:hint"/>
+        <attr name="underlined" format="boolean"/>
+        <attr name="darkMode" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="BOSpinner">
+        <attr name="android:entries"/>
+    </declare-styleable>
+
+    <declare-styleable name="BOEditText">
+        <attr name="android:inputType"/>
+    </declare-styleable>
+
+    <declare-styleable name="BOFlatButton">
+        <attr name="buttonColor" format="enum">
+            <enum name="orange" value="0"/>
+            <enum name="white" value="1"/>
+        </attr>
+        <attr name="showBorder" format="boolean"/>
+        <attr name="android:text"/>
+    </declare-styleable>
+</resources>
