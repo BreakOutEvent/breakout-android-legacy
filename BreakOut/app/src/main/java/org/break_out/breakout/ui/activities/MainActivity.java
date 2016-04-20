@@ -44,17 +44,19 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
         // Set up drawer
         _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView navView = (NavigationView) findViewById(R.id.navigation_view);
+        final NavigationView navView = (NavigationView) findViewById(R.id.navigation_view);
         navView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
                         _drawerLayout.closeDrawers();
+                        menuItem.setChecked(true);
 
-                        switch (menuItem.getItemId()) {
+                        switch(menuItem.getItemId()) {
                             case R.id.post:
-                                startActivityForResult(new Intent(getApplicationContext(),PostScreenActivity.class),0);
+                                menuItem.setChecked(false);
+                                startActivity(new Intent(getApplicationContext(), PostScreenActivity.class));
+                                break;
                         }
                         return true;
                     }
@@ -156,7 +158,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                 setCurrentFragment(new EarlyBirdWelcomeFragment());
                 break;
             case R.id.post:
-                startActivityForResult(new Intent(this,PostScreenActivity.class),0);
+                startActivityForResult(new Intent(this, PostScreenActivity.class), 0);
         }
         return super.onOptionsItemSelected(menuItem);
     }

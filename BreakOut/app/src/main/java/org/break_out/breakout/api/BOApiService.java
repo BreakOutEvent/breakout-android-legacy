@@ -23,8 +23,7 @@ public interface BOApiService {
     @POST("/posting/")
     Call<PostingModel> createPosting(@Body PostingModel posting);
 
-    // TODO: Check correctness (GET with body)
-    @HTTP(method = "GET", path = "/posting/", hasBody = true)
+    @POST("/posting/")
     Call<List<PostingModel>> getPostings(@Body long[] ids);
 
     @GET("/posting/get/since/{id}/")

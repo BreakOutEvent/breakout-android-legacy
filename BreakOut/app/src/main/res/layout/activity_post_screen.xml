@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="org.break_out.breakout.ui.activities.PostScreenActivity">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="org.break_out.breakout.ui.activities.PostScreenActivity">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
-        android:title="@string/title_newPost"
         android:elevation="4dp"
         android:paddingEnd="15dp"
         android:paddingRight="15dp"
+        android:title="@string/title_newPost"
         app:layout_scrollFlags="scroll|enterAlways"
         app:navigationIcon="@drawable/ic_close_white_24dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
@@ -24,8 +25,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:padding="10dp"
             android:drawable="@drawable/ic_close_white_24dp"
+            android:padding="10dp"
             />
 
         <ImageView
@@ -36,80 +37,93 @@
             android:padding="10dp"
             android:src="@drawable/ic_check_white_24dp"/>
 
-        </android.support.v7.widget.Toolbar>
+    </android.support.v7.widget.Toolbar>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black_transparent_12">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="250dp"
                 android:background="@color/black_transparent_80">
+
                 <ImageView
                     android:id="@+id/post_iv_chosenImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/bg_login_600dp"
-                    android:scaleType="centerCrop"/>
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/bg_login_600dp"/>
 
                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:background="@color/black_transparent_80"
-                    android:paddingLeft="15dp">
+                    android:background="@color/black_transparent_50"
+                    android:paddingLeft="15dp"
+                    android:paddingStart="15dp">
+
                     <TextView
                         android:id="@+id/post_tv_location"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:textColor="@color/white"
-                        android:text="@string/info_obtaining_location"/>
+                        android:paddingTop="10dp"
+                        android:text="@string/info_obtaining_location"
+                        android:textColor="@color/white"/>
                 </RelativeLayout>
+
                 <RelativeLayout
                     android:id="@+id/post_rl_addImage"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/btn_camera_round"
-                    android:layout_centerInParent="true"/>
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/btn_attachment_round"/>
             </RelativeLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:background="@color/white">
 
                 </RelativeLayout>
-                <RelativeLayout
+
+                <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/black_transparent_25"/>
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="15dp">
+
                     <TextView
                         android:id="@+id/post_tv_messageTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/message"/>
+
                     <org.break_out.breakout.ui.views.BOEditText
                         android:id="@+id/post_et_message"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/post_tv_messageTitle"
+                        android:hint="@string/hint_postComment"
+                        android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
                         app:darkMode="false"
-                        android:inputType="textCapSentences|textAutoCorrect"
-                        app:underlined="true"
-                        android:hint="@string/hint_postComment"/>
+                        app:underlined="true"/>
                 </RelativeLayout>
             </LinearLayout>
         </LinearLayout>

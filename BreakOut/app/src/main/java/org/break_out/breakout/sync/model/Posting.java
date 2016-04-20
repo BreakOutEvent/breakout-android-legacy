@@ -8,6 +8,7 @@ import com.orm.dsl.Ignore;
 
 import org.break_out.breakout.api.BOApiService;
 import org.break_out.breakout.api.PostingModel;
+import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.sync.BOEntityDownloader;
 import org.break_out.breakout.util.ApiUtils;
 import org.json.JSONArray;
@@ -24,7 +25,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import retrofit2.Call;
-import retrofit2.Callback;
 
 /**
  * Created by Tino on 14.12.2015.
@@ -35,21 +35,20 @@ public class Posting extends BOSyncEntity {
     private static final String TAG = "Posting";
 
     @Ignore
-    public static final String BASE_URL = "http://breakout-development.herokuapp.com";
-
-    @Ignore
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private String _challengeId = "";
 
-    // This timestamp is in seconds!
+    /**
+     * Stores the timestamp of creation <b>in seconds</b>.
+     */
     private long _createdTimestamp = 0L;
     private Location _location = null;
     private String _text = "";
 
-    // SugarORM needs an empty constructor
     public Posting() {
-        _createdTimestamp = System.currentTimeMillis();
+        // Timestamp has to be in seconds
+        _createdTimestamp = System.currentTimeMillis()/60;
     }
 
     public Posting(PostingModel model) {
@@ -122,7 +121,7 @@ public class Posting extends BOSyncEntity {
             idsToDownloadJsonString += "]";
 
             Request request = new Request.Builder()
-                    .url(BASE_URL + "/posting/get/ids/")
+                    .url(Constants.Api.BASE_URL + "/posting/get/ids/")
                     .post(RequestBody.create(JSON, idsToDownloadJsonString))
                     .build();
 
@@ -157,7 +156,7 @@ public class Posting extends BOSyncEntity {
             List<Long> newIds = new ArrayList<Long>();
 
             Request request = new Request.Builder()
-                    .url(BASE_URL + "/posting/get/since/" + lastKnownId + "/")
+                    .url(Constants.Api.BASE_URL + "/posting/get/since/" + lastKnownId + "/")
                     .build();
 
             OkHttpClient client = new OkHttpClient();

@@ -79,7 +79,7 @@
     <string name="user_information">User information</string>
     <string name="title_profile">Profile</string>
     <string name="choose_source">Choose source</string>
-    <string name="info_obtaining_location">Obtaining current location...</string>
+    <string name="info_obtaining_location">Obtaining current location…</string>
     <string name="title_newPost">New post</string>
     <string name="hint_postComment">What are you doing?</string>
     <string name="message">Message</string>

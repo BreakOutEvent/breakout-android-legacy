@@ -28,6 +28,8 @@ import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.BOLocationManager;
+import org.break_out.breakout.sync.BOSyncController;
+import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.util.BackgroundRunner;
 
@@ -43,53 +45,69 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PostScreenActivity extends BOActivity {
+
     private final static String TAG = "PostScreenActivity";
+
     private static final String BUNDLETAG_URI = "seturi";
     private static final String RUNNERTAG_MOVE_IMAGE = "moveImage";
     private final static int REQUESTCODE_IMAGE = 0;
 
-    private File _tempSaveFile;
     private static File _mainFolder;
-    private TextView _tv_location;
+    private File _tempSaveFile;
 
-    private RelativeLayout _rl_addImage;
-    private ImageView _iv_chosenImage;
-    private ImageView _iv_change;
-    private ImageView _iv_cancel;
-    private BOEditText _et_message;
+    private TextView _tvLocation;
+    private ImageView _ivChosenImage;
+    private BOEditText _etMessage;
 
     private BOLocation receivedLocation;
 
     private BOLocationManager _locationManager;
+    private BOSyncController _syncController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_screen);
-        _mainFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Constants.Files.BREAKOUT_DIR + File.separator);
-        _mainFolder.mkdirs();
-        _tv_location = (TextView) findViewById(R.id.post_tv_location);
-        _rl_addImage = (RelativeLayout) findViewById(R.id.post_rl_addImage);
-        _iv_chosenImage = (ImageView) findViewById(R.id.post_iv_chosenImage);
-        _et_message = (BOEditText) findViewById(R.id.post_et_message);
 
-
+        _syncController = BOSyncController.getInstance(this);
         _locationManager = BOLocationManager.getInstance(this);
 
-        _rl_addImage.setOnClickListener(new View.OnClickListener() {
+        _mainFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Constants.Files.BREAKOUT_DIR + File.separator);
+        _mainFolder.mkdirs();
+
+        _tvLocation = (TextView) findViewById(R.id.post_tv_location);
+        RelativeLayout rlAddImage = (RelativeLayout) findViewById(R.id.post_rl_addImage);
+        _ivChosenImage = (ImageView) findViewById(R.id.post_iv_chosenImage);
+        _etMessage = (BOEditText) findViewById(R.id.post_et_message);
+
+        rlAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 pickImage();
             }
         });
 
-        //init and populate Toolbar
+        // Init and populate Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.title_newPost));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+
+        // Send posting button
+        View btSend = findViewById(R.id.post_iv_save);
+        btSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Posting p = new Posting();
+                p.setText(_etMessage.getText());
+
+                _syncController.upload(p);
+                setResult(RESULT_OK);
                 finish();
             }
         });
@@ -110,7 +128,7 @@ public class PostScreenActivity extends BOActivity {
                 } else {
                     imageUri = Uri.fromFile(_tempSaveFile);
                 }
-                _iv_chosenImage.setImageURI(imageUri);
+                _ivChosenImage.setImageURI(imageUri);
             }
         } else {
         }
@@ -125,7 +143,8 @@ public class PostScreenActivity extends BOActivity {
 
     /**
      * Sets the current address as message into the Location text
-     * in the format City, Country
+     * in the format City, Country.
+     *
      * @param currentAddress
      */
     private void setLocation(Address currentAddress) {
@@ -134,14 +153,15 @@ public class PostScreenActivity extends BOActivity {
                 .append(", ")
                 .append(currentAddress.getCountryName());
         String location = builder.toString();
-        _tv_location.setText(location);
+        _tvLocation.setText(location);
     }
 
 
     /**
-     * requests all needed permissions and if granted
+     * Requests all needed permissions and if granted
      * Location access starts to retrieve the current location
-     * @param c
+     *
+     * @param c The context
      */
     private void requestPermissionsAndLocate(final Context c) {
         getPermissions(new PermissionListener() {
@@ -181,9 +201,9 @@ public class PostScreenActivity extends BOActivity {
      * one with the build in camera app
      */
     public void pickImage() {
-        //TODO check for permission to write external storage and use camera
-        //Make sure all folders and Files are created and available
-        //List camera apps for chooser intent
+        // TODO check for permission to write external storage and use camera
+        // Make sure all folders and Files are created and available
+        // List camera apps for chooser intent
         final List<Intent> cameraIntents = new ArrayList<>();
         final Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         final PackageManager packageManager = getPackageManager();
@@ -211,7 +231,7 @@ public class PostScreenActivity extends BOActivity {
         startActivityForResult(chooserIntent, REQUESTCODE_IMAGE);
     }
 
-    //TODO
+    // TODO
     // Duplicate from ProfileFragment method, will be centralized later
     private void moveFileToProfilePath(Uri inputUri) {
         final String booltag = "success";
@@ -229,7 +249,7 @@ public class PostScreenActivity extends BOActivity {
                 //reacting to the result later
                 if (successful) {
                     Toast.makeText(getApplicationContext(), "Copying successful!", Toast.LENGTH_SHORT).show();
-                    _iv_chosenImage.setImageURI(Uri.fromFile(_tempSaveFile));
+                    _ivChosenImage.setImageURI(Uri.fromFile(_tempSaveFile));
                 } else {
                     Toast.makeText(getApplicationContext(), "Copying failed!", Toast.LENGTH_SHORT).show();
                 }
@@ -252,7 +272,7 @@ public class PostScreenActivity extends BOActivity {
                 String message = "";
                 File uploadImage = _tempSaveFile;
                 BOLocation uploadLocation = receivedLocation;
-                message = (_et_message.getText() != null) ? _et_message.getText() : "";
+                message = (_etMessage.getText() != null) ? _etMessage.getText() : "";
 
                 //TODO: Add code to actually upload the data
 
