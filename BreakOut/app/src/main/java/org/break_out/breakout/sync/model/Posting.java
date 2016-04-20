@@ -1,11 +1,15 @@
 package org.break_out.breakout.sync.model;
 
+import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
 import com.orm.dsl.Ignore;
 
+import org.break_out.breakout.api.BOApiService;
+import org.break_out.breakout.api.PostingModel;
 import org.break_out.breakout.sync.BOEntityDownloader;
+import org.break_out.breakout.util.ApiUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +23,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * Created by Tino on 14.12.2015.
@@ -35,15 +41,21 @@ public class Posting extends BOSyncEntity {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private String _challengeId = "";
+
+    // This timestamp is in seconds!
     private long _createdTimestamp = 0L;
     private Location _location = null;
-    @Ignore
-    private Long _sentTimestamp = null;
     private String _text = "";
 
     // SugarORM needs an empty constructor
     public Posting() {
         _createdTimestamp = System.currentTimeMillis();
+    }
+
+    public Posting(PostingModel model) {
+        setRemoteId(model.id);
+        setText(model.text);
+        _createdTimestamp = model.date;
     }
 
     public void setText(String text) {
@@ -54,45 +66,40 @@ public class Posting extends BOSyncEntity {
         return _text;
     }
 
-    @Override
-    public boolean uploadToServerSync() {
-        boolean success = false;
-
-        // Get current timestamp as the sent timestamp
-        _sentTimestamp = System.currentTimeMillis();
-
-        RequestBody body = RequestBody.create(JSON, toJSON());
-        Request request = new Request.Builder()
-                .url(BASE_URL + "/posting/")
-                .post(body)
-                .build();
-        OkHttpClient client = new OkHttpClient();
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            if(response.code() == 201) {
-                success = true;
-            }
-        } catch(IOException e) {
-            e.printStackTrace();
-
-            success = false;
-        }
-
-        // The sent timestamp is only valid for one request
-        _sentTimestamp = null;
-
-        return success;
+    public long getCreatedTimestamp() {
+        return _createdTimestamp;
     }
 
     @Override
-    public boolean updateOnServerSync() {
+    public boolean uploadToServerSync(Context context) {
+        BOApiService service = ApiUtils.getService(context);
+
+        Call<PostingModel> call = service.createPosting(new PostingModel(this));
+        try {
+            retrofit2.Response<PostingModel> response = call.execute();
+
+            if(!response.isSuccessful()) {
+                return false;
+            }
+
+            PostingModel p = response.body();
+            setRemoteId(p.id);
+
+            return true;
+        } catch(IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateOnServerSync(Context context) {
         // TODO: Currently randomly returns success or failure
         return (Math.random() > 0.5);
     }
 
     @Override
-    public boolean deleteOnServerSync() {
+    public boolean deleteOnServerSync(Context context) {
         // TODO: Currently randomly returns success or failure
         return (Math.random() > 0.5);
     }
@@ -101,10 +108,10 @@ public class Posting extends BOSyncEntity {
         return new PostingDownloader();
     }
 
-    public static class PostingDownloader extends BOEntityDownloader<Posting> {
+    public static class PostingDownloaderOld extends BOEntityDownloader<Posting> {
 
         @Override
-        public List<Posting> downloadSync(List<Long> idsToDownload) {
+        public List<Posting> downloadSync(Context context, List<Long> idsToDownload) {
 
             List<Posting> postings = new ArrayList<Posting>();
 
@@ -146,7 +153,7 @@ public class Posting extends BOSyncEntity {
         }
 
         @Override
-        public List<Long> downloadNewIDsSync(long lastKnownId) {
+        public List<Long> downloadNewIDsSync(Context context, long lastKnownId) {
             List<Long> newIds = new ArrayList<Long>();
 
             Request request = new Request.Builder()
@@ -180,6 +187,61 @@ public class Posting extends BOSyncEntity {
         }
     }
 
+    public static class PostingDownloader extends BOEntityDownloader<Posting> {
+
+        @Override
+        public List<Posting> downloadSync(Context context, List<Long> idsToDownload) {
+
+            List<Posting> postings = new ArrayList<Posting>();
+
+            long[] idsToDownloadArr = new long[idsToDownload.size()];
+            for(int i = 0; i < idsToDownload.size(); i++) {
+                long id = idsToDownload.get(i);
+                idsToDownloadArr[i] = id;
+            }
+
+            BOApiService service = ApiUtils.getService(context);
+
+            Call<List<PostingModel>> call = service.getPostings(idsToDownloadArr);
+            try {
+                retrofit2.Response<List<PostingModel>> response = call.execute();
+
+                if(response.isSuccessful()) {
+                    for(PostingModel model : response.body()) {
+                        postings.add(new Posting(model));
+                    }
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+
+            return postings;
+        }
+
+        @Override
+        public List<Long> downloadNewIDsSync(Context context, long lastKnownId) {
+            List<Long> newIds = new ArrayList<Long>();
+
+            BOApiService service = ApiUtils.getService(context);
+
+            Call<long[]> call = service.getNewPostingIds(lastKnownId);
+
+            try {
+                retrofit2.Response<long[]> response = call.execute();
+
+                if(response.isSuccessful()) {
+                    for(long id : response.body()) {
+                        newIds.add(id);
+                    }
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+
+            return newIds;
+        }
+    }
+
     public static Posting fromJSON(JSONObject jsonObj) {
         Posting p = new Posting();
 
@@ -201,7 +263,6 @@ public class Posting extends BOSyncEntity {
                 "\"lat\": " + (_location != null ? (int)(_location.getLatitude()) : "0") + "," +
                 "\"lon\": " + (_location != null ? (int)(_location.getLongitude()) : "0") +
                 "}," +
-                "\"sent\": \"" + _sentTimestamp + "\"," +
                 "\"text\": \"" + _text + "\"" +
                 "}";
     }

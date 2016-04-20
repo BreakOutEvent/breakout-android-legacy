@@ -77,7 +77,7 @@ public class UpdateService extends Service {
             BOEntityDownloader<? extends BOSyncEntity> downloader = controller.getDownloader(type);
 
             long lastKnownId = -1;
-            List<T> lastEntityList = T.findWithQuery(type, "SELECT * FROM " + type.getSimpleName() + " ORDER BY " + BOSyncEntity.COLUMN_REMOTE_ID + " DESC LIMIT 1", null);
+            List<T> lastEntityList = T.findWithQuery(type, "SELECT * FROM " + type.getSimpleName() + " ORDER BY " + BOSyncEntity.COLUMN_REMOTE_ID + " DESC LIMIT 1");
             if(lastEntityList != null && !lastEntityList.isEmpty()) {
                 T lastEntity = lastEntityList.get(0);
                 if(lastEntity != null && lastEntity.hasRemoteId()) {
@@ -85,7 +85,7 @@ public class UpdateService extends Service {
                 }
             }
 
-            List<Long> newIds = downloader.downloadNewIDsSync(lastKnownId);
+            List<Long> newIds = downloader.downloadNewIDsSync(UpdateService.this, lastKnownId);
 
             boolean somethingChanged = false;
 

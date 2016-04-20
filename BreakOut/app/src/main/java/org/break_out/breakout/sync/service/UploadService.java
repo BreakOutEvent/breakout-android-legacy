@@ -107,7 +107,7 @@ public class UploadService extends Service {
 
                     // If the entity is supposed to be changed but has not been uploaded yet: Upload entity first
                     if(state != BOSyncEntity.SyncState.UPLOADING && !entity.hasRemoteId()) {
-                        success = entity.updateOnServerSync();
+                        success = entity.updateOnServerSync(UploadService.this);
 
                         if(!success) {
                             continue;
@@ -116,18 +116,18 @@ public class UploadService extends Service {
 
                     switch(state) {
                         case UPLOADING:
-                            success = entity.uploadToServerSync();
+                            success = entity.uploadToServerSync(UploadService.this);
                             break;
                         case UPDATING:
-                            success = entity.updateOnServerSync();
+                            success = entity.updateOnServerSync(UploadService.this);
                             break;
                         case DELETING:
-                            success = entity.deleteOnServerSync();
+                            success = entity.deleteOnServerSync(UploadService.this);
                             break;
                     }
 
-                    if(!entity.hasRemoteId()) {
-                        Log.e(TAG, "Entity did not get a remote ID. Is the remote ID set correctly in " + entity.getClass().getSimpleName() + "'s download(...) method?");
+                    if(success && !entity.hasRemoteId()) {
+                        Log.e(TAG, "Entity did not get a remote ID. Is the remote ID set correctly in " + entity.getClass().getSimpleName() + "'s uploading method?");
                         continue;
                     }
 

@@ -19,13 +19,14 @@ public class BOApplication extends SugarApp {
 
         BOSecrets secrets = new BOSecrets();
 
+        // Enable to get error logs
         Instabug.initialize(this, secrets.getInstabugToken());
 
-        // configure Flurry
-        FlurryAgent.setLogEnabled(false);
+        // Configure Flurry
+        //FlurryAgent.setLogEnabled(false);
 
-        // init Flurry
-        FlurryAgent.init(this, secrets.getFlurryToken());
+        // Init Flurry
+        //FlurryAgent.init(this, secrets.getFlurryToken());
     }
 
 }

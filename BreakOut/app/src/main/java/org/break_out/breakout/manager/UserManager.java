@@ -12,8 +12,15 @@ import org.break_out.breakout.ui.activities.LoginRegisterActivity;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.util.BackgroundRunner;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Credentials;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by Tino on 16.01.2016.
@@ -80,6 +87,21 @@ public class UserManager {
         }
 
         return _instance;
+    }
+
+    public OkHttpClient getOAuthClient() {
+        Interceptor interceptor = new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request newRequest = chain.request().newBuilder().addHeader("Authorization", "Bearer " + _currUser.getAccessToken()).build();
+                return chain.proceed(newRequest);
+            }
+        };
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.interceptors().add(interceptor);
+
+        return builder.build();
     }
 
     /**

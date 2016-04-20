@@ -119,7 +119,7 @@ public class DownloadService extends Service {
                     remoteIds.add(idPair.second);
                 }
 
-                List<? extends BOSyncEntity> items = downloader.downloadSync(remoteIds);
+                List<? extends BOSyncEntity> items = downloader.downloadSync(DownloadService.this, remoteIds);
 
                 boolean downloadedSomething = false;
 

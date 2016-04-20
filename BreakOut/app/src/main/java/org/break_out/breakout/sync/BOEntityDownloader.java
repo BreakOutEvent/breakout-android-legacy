@@ -1,5 +1,7 @@
 package org.break_out.breakout.sync;
 
+import android.content.Context;
+
 import org.break_out.breakout.sync.model.BOSyncEntity;
 
 import java.util.ArrayList;
@@ -31,16 +33,16 @@ public abstract class BOEntityDownloader<T extends BOSyncEntity> {
      * @param idsToDownload The IDs of the entities to downloadSync from the server
      * @return A list of all the downloaded entities
      */
-    public abstract List<T> downloadSync(List<Long> idsToDownload);
+    public abstract List<T> downloadSync(Context context, List<Long> idsToDownload);
 
-    public List<T> downloadSync(long[] idsToDownload) {
+    public List<T> downloadSync(Context context, long[] idsToDownload) {
         List<Long> idsList = new ArrayList<Long>();
 
         for(int i = 0; i < idsToDownload.length; i++) {
             idsList.add(idsToDownload[i]);
         }
 
-        return downloadSync(idsList);
+        return downloadSync(context, idsList);
     }
 
     /**
@@ -51,6 +53,6 @@ public abstract class BOEntityDownloader<T extends BOSyncEntity> {
      *
      * @return A list of the IDs of newly created entities from the server
      */
-    public abstract List<Long> downloadNewIDsSync(long lastKnownId);
+    public abstract List<Long> downloadNewIDsSync(Context context, long lastKnownId);
 
 }

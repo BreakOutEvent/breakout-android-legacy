@@ -1,5 +1,6 @@
 package org.break_out.breakout.sync.model;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.orm.SugarRecord;
@@ -186,11 +187,11 @@ public abstract class BOSyncEntity extends SugarRecord {
         return _isDeleted;
     }
 
-    public abstract boolean uploadToServerSync();
+    public abstract boolean uploadToServerSync(Context context);
 
-    public abstract boolean updateOnServerSync();
+    public abstract boolean updateOnServerSync(Context context);
 
-    public abstract boolean deleteOnServerSync();
+    public abstract boolean deleteOnServerSync(Context context);
 
     public void setDownloadPriority(int priority) {
         if(priority < PRIORITY_NONE) {

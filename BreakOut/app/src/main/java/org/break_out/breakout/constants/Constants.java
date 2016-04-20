@@ -1,9 +1,5 @@
 package org.break_out.breakout.constants;
 
-import android.os.Environment;
-
-import java.io.File;
-
 /**
  * Created by Tino on 19.04.2016.
  */
