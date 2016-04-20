@@ -5,6 +5,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
@@ -22,7 +23,8 @@ public interface BOApiService {
     @POST("/posting/")
     Call<PostingModel> createPosting(@Body PostingModel posting);
 
-    @GET("/posting/")
+    // TODO: Check correctness (GET with body)
+    @HTTP(method = "GET", path = "/posting/", hasBody = true)
     Call<List<PostingModel>> getPostings(@Body long[] ids);
 
     @GET("/posting/get/since/{id}/")

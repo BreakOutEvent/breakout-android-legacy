@@ -98,6 +98,12 @@ public class BOLocationManager {
         _alarmManager.cancel(pendingIntent);
     }
 
+    public boolean locationServicesAvailable() {
+        updateAvailableLocationServices();
+        return _gpsAvailable||_networkAvailable;
+
+    }
+
     /**
      * get the list of registered listeners
      * @return
@@ -204,6 +210,7 @@ public class BOLocationManager {
 
         @Override
         public final void onProviderEnabled(String provider) {
+            Log.d(TAG,"provider: "+provider);
             //TODO
         }
 

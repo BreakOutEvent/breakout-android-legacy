@@ -80,5 +80,9 @@
     <string name="user_information">Nutzer Informationen</string>
     <string name="title_profile">Profil</string>
     <string name="choose_source">Quelle auswählen</string>
+    <string name="info_obtaining_location">Aktueller Ort wird ermittelt...</string>
+    <string name="title_newPost">Neuer Post</string>
+    <string name="hint_postComment">Was machst du gerade?</string>
+    <string name="message">Nachricht</string>
 
 </resources>
