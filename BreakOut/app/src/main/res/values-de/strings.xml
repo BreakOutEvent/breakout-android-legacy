@@ -84,5 +84,6 @@
     <string name="message">Nachricht</string>
     <string name="info_obtaining_location">Aktueller Ort wird ermittelt…</string>
     <string name="hint_postComment">Was machst du gerade?</string>
+    <string name="title_allPosts">Alle Posts</string>
 
 </resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:elevation="20dp"
+        card_view:cardCornerRadius="4dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/posting_iv_image"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:maxHeight="200dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bg_welcome_600dp"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="10dp"
+                android:orientation="vertical">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center_vertical">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/posting_civ_teamPic"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@drawable/bg_login_600dp"
+                        android:scaleType="centerCrop"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginEnd="15dp"/>
+                    <TextView
+                        android:id="@+id/posting_tv_teamName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/posting_civ_teamPic"
+                        android:layout_toEndOf="@id/posting_civ_teamPic"/>
+                    <TextView
+                        android:id="@+id/posting_tv_teamLocation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/posting_tv_teamName"
+                        android:layout_alignStart="@id/posting_tv_teamName"
+                        android:layout_alignLeft="@id/posting_tv_teamName"
+                        android:textColor="@color/black_transparent_25"/>
+                    <TextView
+                        android:id="@+id/posting_tv_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:textColor="@color/black_transparent_25"/>
+
+                </RelativeLayout>
+                <TextView
+                    android:id="@+id/posting_tv_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+</LinearLayout>

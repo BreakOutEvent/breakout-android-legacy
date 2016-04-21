@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class Posting extends BOSyncEntity {
     private long _createdTimestamp = 0L;
     private Location _location = null;
     private String _text = "";
+    private boolean _hasImage = false;
 
     public Posting() {
         // Timestamp has to be in seconds
@@ -67,6 +69,10 @@ public class Posting extends BOSyncEntity {
 
     public long getCreatedTimestamp() {
         return _createdTimestamp;
+    }
+
+    public boolean hasImage() {
+        return _hasImage;
     }
 
     @Override

@@ -103,12 +103,7 @@ public class PostScreenActivity extends BOActivity {
         btSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Posting p = new Posting();
-                p.setText(_etMessage.getText());
-
-                _syncController.upload(p);
-                setResult(RESULT_OK);
-                finish();
+                sendPostAndFinish();
             }
         });
 
@@ -269,13 +264,10 @@ public class PostScreenActivity extends BOActivity {
     private void sendPostAndFinish() {
         if (_tempSaveFile.exists() && _tempSaveFile.length() > 0) {
             if (receivedLocation != null) {
-                String message = "";
-                File uploadImage = _tempSaveFile;
-                BOLocation uploadLocation = receivedLocation;
-                message = (_etMessage.getText() != null) ? _etMessage.getText() : "";
+                Posting p = new Posting();
+                p.setText(_etMessage.getText());
 
-                //TODO: Add code to actually upload the data
-
+                _syncController.upload(p);
                 setResult(RESULT_OK);
                 finish();
             }
@@ -283,9 +275,8 @@ public class PostScreenActivity extends BOActivity {
     }
 
     /**
-     * A runnable which is solely for the purpose of copying a given image into
-     * the set profile image file position and therefor replace the old image if
-     * any is set
+     *Temp copy from ProfileFragment to move file to
+     * desired position, will be centralized later
      */
     private class UpdateImageRunnable implements BackgroundRunner.BackgroundRunnable {
         final String boolTag = "success";

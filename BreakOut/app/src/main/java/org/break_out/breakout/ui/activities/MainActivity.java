@@ -16,6 +16,7 @@ import android.widget.TextView;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.ui.fragments.AllPostsFragment;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
 import org.break_out.breakout.ui.fragments.ProfileFragment;
 
@@ -57,6 +58,9 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                                 menuItem.setChecked(false);
                                 startActivity(new Intent(getApplicationContext(), PostScreenActivity.class));
                                 break;
+                            case R.id.all_posts:
+                                menuItem.setChecked(false);
+                                setCurrentFragment(new AllPostsFragment());
                         }
                         return true;
                     }
