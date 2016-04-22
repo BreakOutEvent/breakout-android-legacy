@@ -21,7 +21,9 @@ import java.util.ArrayList;
  * Created by Maximilian Duehr on 21.04.2016.
  */
 public class AllPostsFragment extends BOFragment {
+
     private static final String TAG = "AllPostsFragment";
+
     private PostingListAdapter _adapter;
     private ArrayList<Posting> _dataList;
 
@@ -39,6 +41,7 @@ public class AllPostsFragment extends BOFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_all_posts, container, false);
+
         _recyclerView = (RecyclerView) v.findViewById(R.id.allPosts_recyclerView);
         _recyclerView.setAdapter(_adapter);
         _recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -54,6 +57,7 @@ public class AllPostsFragment extends BOFragment {
                 if(!(activity instanceof MainActivity)) {
                     return;
                 }
+                
                 MainActivity mainActivity = (MainActivity) activity;
                 mainActivity.openDrawer();
             }
