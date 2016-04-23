@@ -59,7 +59,7 @@ public class PostScreenActivity extends BOActivity {
     private ImageView _ivChosenImage;
     private BOEditText _etMessage;
 
-    private BOLocation receivedLocation;
+    private BOLocation _receivedLocation;
 
     private BOLocationManager _locationManager;
     private BOSyncController _syncController;
@@ -168,15 +168,17 @@ public class PostScreenActivity extends BOActivity {
                         _locationManager.getLocation(c, new BOLocationManager.BOLocationRequestListener() {
                             @Override
                             public void onLocationObtained(BOLocation currentLocation) {
+                                _receivedLocation = currentLocation;
+
                                 List<Address> adressList = null;
                                 Geocoder coder = new Geocoder(getApplicationContext());
                                 try {
                                     adressList = coder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
-                                } catch (IOException e) {
+                                } catch(IOException e) {
                                     e.printStackTrace();
                                 }
-                                if (adressList != null) {
-                                    if (adressList.size() > 0) {
+                                if(adressList != null) {
+                                    if(adressList.size() > 0) {
                                         setLocation(adressList.get(0));
                                     }
                                 }
@@ -262,15 +264,18 @@ public class PostScreenActivity extends BOActivity {
      * finishes the activity
      */
     private void sendPostAndFinish() {
-        if (_tempSaveFile.exists() && _tempSaveFile.length() > 0) {
-            if (receivedLocation != null) {
-                Posting p = new Posting();
-                p.setText(_etMessage.getText());
+        if(_receivedLocation != null) {
+            Posting p = new Posting();
+            p.setText(_etMessage.getText());
+            p.setLocation(_receivedLocation);
 
-                _syncController.upload(p);
-                setResult(RESULT_OK);
-                finish();
+            if(_tempSaveFile != null && _tempSaveFile.exists() && _tempSaveFile.length() > 0) {
+                // TODO: Add photo
             }
+
+            _syncController.upload(p);
+            setResult(RESULT_OK);
+            finish();
         }
     }
 
