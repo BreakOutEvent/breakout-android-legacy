@@ -84,6 +84,7 @@
     <string name="title_allPosts">All posts</string>
     <string name="hint_postComment">What are you doing?</string>
     <string name="message">Message</string>
+    <string name="activate_location_services">Please activate your location services!</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

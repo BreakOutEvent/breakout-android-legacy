@@ -18,18 +18,22 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.BOLocationManager;
+import org.break_out.breakout.manager.PostingManager;
+import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.User;
 import org.break_out.breakout.sync.BOSyncController;
-import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.util.BackgroundRunner;
 
@@ -43,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 
 public class PostScreenActivity extends BOActivity {
 
@@ -59,11 +64,13 @@ public class PostScreenActivity extends BOActivity {
     private ImageView _ivChosenImage;
     private BOEditText _etMessage;
 
-    private BOLocation receivedLocation;
+    private BOLocation _receivedLocation;
 
     private BOLocationManager _locationManager;
     private BOSyncController _syncController;
 
+    private UserManager _userManager;
+    private User _currentUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +78,10 @@ public class PostScreenActivity extends BOActivity {
 
         _syncController = BOSyncController.getInstance(this);
         _locationManager = BOLocationManager.getInstance(this);
+        _userManager = UserManager.getInstance(this);
+
+        _currentUser = _userManager.getCurrentUser();
+        Log.d(TAG,"current user ID: "+_currentUser.getRemoteId());
 
         _mainFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Constants.Files.BREAKOUT_DIR + File.separator);
         _mainFolder.mkdirs();
@@ -103,7 +114,8 @@ public class PostScreenActivity extends BOActivity {
         btSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendPostAndFinish();
+                Log.d(TAG,"File: "+_tempSaveFile.length());
+                sendPostAndFinish(_etMessage.getText(),_receivedLocation,_tempSaveFile);
             }
         });
 
@@ -163,8 +175,17 @@ public class PostScreenActivity extends BOActivity {
             @Override
             public void onPermissionsResult(Map<String, Boolean> result) {
                 boolean permissionGranted = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
+                BOLocationManager.BOLocationServiceListener listener = new BOLocationManager.BOLocationServiceListener() {
+                    @Override
+                    public void onServiceStatusChanged() {
+                        if(_locationManager.locationServicesAvailable()) {
+                            requestPermissionsAndLocate(c);
+                        }
+                    }
+                };
                 if (permissionGranted) {
                     if (_locationManager.locationServicesAvailable()) {
+                        _tvLocation.setText(getString(R.string.info_obtaining_location));
                         _locationManager.getLocation(c, new BOLocationManager.BOLocationRequestListener() {
                             @Override
                             public void onLocationObtained(BOLocation currentLocation) {
@@ -182,6 +203,9 @@ public class PostScreenActivity extends BOActivity {
                                 }
                             }
                         });
+                    } else {
+                        _tvLocation.setText(getString(R.string.activate_location_services));
+                        _locationManager.addServiceListener(listener);
                     }
                 } else {
                     Toast.makeText(getApplicationContext(), "please enable location services", Toast.LENGTH_SHORT).show();
@@ -261,16 +285,22 @@ public class PostScreenActivity extends BOActivity {
      * This method takes the input and uploads it as a post to the server and
      * finishes the activity
      */
-    private void sendPostAndFinish() {
-        if (_tempSaveFile.exists() && _tempSaveFile.length() > 0) {
-            if (receivedLocation != null) {
-                Posting p = new Posting();
-                p.setText(_etMessage.getText());
+    private void sendPostAndFinish(String comment,@Nullable BOLocation location,@Nullable File image) {
+        Log.d(TAG,"sendPost triggered");
+        String sendComment = comment;
+        BOLocation sendLocation = null;
 
-                _syncController.upload(p);
-                setResult(RESULT_OK);
-                finish();
-            }
+        if(location != null) {
+            sendLocation = location;
+        }
+
+        //invalid post
+        if(comment.isEmpty() && location == null && !(image==null)) {
+            return;
+        } else {
+
+            PostingManager m = PostingManager.getInstance();
+            m.sendPostingToServer(this,PostingManager.buildPosting(sendComment,sendLocation,image));
         }
     }
 
@@ -325,4 +355,6 @@ public class PostScreenActivity extends BOActivity {
             return resultBundle;
         }
     }
+
+
 }

@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.secrets.BOSecrets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -346,6 +347,8 @@ public class User implements Serializable {
      */
     public boolean loginOnServerSync() {
         OkHttpClient client = new OkHttpClient();
+        Log.d(TAG,"loginOnServerSync");
+        Log.d(TAG,"set password: "+_password);
 
         // Build URL
         HttpUrl loginUrl = new HttpUrl.Builder()
@@ -355,22 +358,25 @@ public class User implements Serializable {
                 .addPathSegment("token")
                 .build();
 
+
         // Build x-www-form-urlencoded body
         RequestBody body = new FormBody.Builder()
                 .add("password", _password)
                 .add("username", _email)
                 .add("scope", "read write")
-                .add("client_secret", Constants.Api.CLIENT_SECRET)
-                .add("client_id", Constants.Api.CLIENT_ID)
                 .add("grant_type", "password")
                 .build();
 
         Request loginRequest = new Request.Builder()
                 .url(loginUrl)
                 .post(body)
-                .addHeader("Authorization", Credentials.basic("breakout_app", "123456789"))
+                .addHeader("Authorization", Credentials.basic("breakout_app", new BOSecrets().getClientSecret()))
                 .addHeader("Content-Type", FORM_URL_ENCODED)
                 .build();
+
+        Log.d(TAG,Credentials.basic("breakout_app", new BOSecrets().getClientSecret()));
+
+        Log.d(TAG,"request: "+loginRequest.toString());
 
         try {
             Response loginResponse = client.newCall(loginRequest).execute();

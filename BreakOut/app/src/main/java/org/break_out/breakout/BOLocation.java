@@ -10,7 +10,6 @@ public class BOLocation extends SugarRecord {
     private double _latitude;
     private double _longitude;
     public BOLocation() {
-
     }
 
     public BOLocation(long timestamp, double lati, double longi) {

@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,7 +24,7 @@ import java.util.List;
 /**
  * Created by Maximilian Dühr on 01.03.2016.
  */
-public class BOLocationManager {
+public class BOLocationManager  {
     private static final String TAG = "BOLocationManager";
     private static final int MIN_DISTANCE = 5;
     private static final int TEN_MINUTES = 1*1000*60*10;
@@ -34,7 +35,8 @@ public class BOLocationManager {
     private static boolean _gpsAvailable = false;
     private static Context _context;
     private static LocationManager _locationManager;
-    private static ArrayList<BOLocationRequestListener> _listenerList;
+    private static ArrayList<BOLocationListener> _listenerList;
+    private static ArrayList<BOLocationServiceListener> _statusListenerList;
     private static BOLocationManager _instance;
 
     private static SharedPreferences _preferences;
@@ -44,7 +46,8 @@ public class BOLocationManager {
     private BOLocationManager(Context c) {
         _locationManager = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
         _alarmManager = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
-        _listenerList = new ArrayList<BOLocationRequestListener>();
+        _listenerList = new ArrayList<>();
+        _statusListenerList = new ArrayList<>();
         _context = c;
 
         //TODO:REMOVE
@@ -57,6 +60,7 @@ public class BOLocationManager {
                 BOLocation.save(currentLocation);
             }
         };
+
     }
 
     /**
@@ -86,6 +90,28 @@ public class BOLocationManager {
     }
 
     /**
+     * Tell all listeners that locationServices have changed
+     */
+    private static void callServiceListeners() {
+        for(BOLocationServiceListener listener : _statusListenerList) {
+            listener.onServiceStatusChanged();
+            Log.d(TAG,"listener called");
+        }
+    }
+
+    public void addServiceListener(BOLocationServiceListener listener) {
+        if(!_statusListenerList.contains(listener)) {
+            _statusListenerList.add(listener);
+        }
+    }
+
+    public void removeServiceListener(BOLocationServiceListener listener) {
+        if(_statusListenerList.contains(listener)) {
+            _statusListenerList.remove(listener);
+        }
+    }
+
+    /**
      * stop periodically updating the Location
      * @param c context of the calling Activity
      */
@@ -108,7 +134,7 @@ public class BOLocationManager {
      * get the list of registered listeners
      * @return
      */
-    private ArrayList<BOLocationRequestListener> getListenerList() {
+    private ArrayList<BOLocationListener> getListenerList() {
         return _listenerList;
     }
 
@@ -182,10 +208,12 @@ public class BOLocationManager {
         _isLocating = false;
     }
 
+
     /**
      * Check which location services are active and store that information in the corresponding variables
      */
     private void updateAvailableLocationServices() {
+        Log.d(TAG,"provider updated");
         _networkAvailable = _locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         _gpsAvailable = _locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
@@ -205,6 +233,7 @@ public class BOLocationManager {
 
         @Override
         public final void onStatusChanged(String provider, int status, Bundle extras) {
+            callServiceListeners();
             //TODO
         }
 
@@ -247,6 +276,9 @@ public class BOLocationManager {
         }
     }
 
+    public interface BOLocationServiceListener {
+        public void onServiceStatusChanged();
+    }
 
     /**
      * Receiver that starts and stops the LocationService that obtains locations in the background
@@ -292,5 +324,18 @@ public class BOLocationManager {
         ArrayList<BOLocation> resultList = new ArrayList<>();
         resultList.addAll(BOLocation.listAll(BOLocation.class));
         return resultList;
+    }
+
+    public static final class BOLocationServiceBroadcastReceiver extends BroadcastReceiver {
+
+        public BOLocationServiceBroadcastReceiver() {
+            //empoty constructor
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG,"providers changed");
+            callServiceListeners();
+        }
     }
 }

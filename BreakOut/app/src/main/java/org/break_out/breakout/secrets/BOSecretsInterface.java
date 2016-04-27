@@ -18,4 +18,6 @@ public interface BOSecretsInterface {
 
     public String getFlurryToken();
 
+    public String getClientSecret();
+
 }

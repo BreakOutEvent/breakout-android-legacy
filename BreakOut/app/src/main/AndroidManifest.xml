@@ -23,7 +23,7 @@
 
         <!-- SugarORM configuration -->
         <meta-data android:name="DATABASE" android:value="breakout.db" />
-        <meta-data android:name="VERSION" android:value="1" />
+        <meta-data android:name="VERSION" android:value="2" />
         <meta-data android:name="QUERY_LOG" android:value="true" />
         <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="org.break_out.breakout" />
 
@@ -55,12 +55,19 @@
             android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
 
-        <activity android:name=".ui.activities.PostScreenActivity"/>
+        <activity android:name=".ui.activities.PostScreenActivity"
+            android:screenOrientation="portrait"/>
 
         <!-- Receivers -->
         <receiver android:name=".manager.BOLocationManager$BOLocationBroadcastReceiver">
             <intent-filter>
                 <action android:name="breakout.intent.action.locationService" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".manager.BOLocationManager$BOLocationServiceBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED"/>
             </intent-filter>
         </receiver>
 

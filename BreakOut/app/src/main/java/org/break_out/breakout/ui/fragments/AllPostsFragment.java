@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
@@ -60,5 +61,10 @@ public class AllPostsFragment extends BOFragment {
         });
 
         return v;
+    }
+
+    private void updatePostList() {
+        BOSyncController controller = BOSyncController.getInstance(getContext());
+        controller.get(Posting.class,0,10);
     }
 }

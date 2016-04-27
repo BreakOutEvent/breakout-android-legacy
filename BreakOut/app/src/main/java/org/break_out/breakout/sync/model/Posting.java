@@ -2,10 +2,12 @@ package org.break_out.breakout.sync.model;
 
 import android.content.Context;
 import android.location.Location;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.orm.dsl.Ignore;
 
+import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.api.BOApiService;
 import org.break_out.breakout.api.PostingModel;
 import org.break_out.breakout.constants.Constants;
@@ -44,14 +46,27 @@ public class Posting extends BOSyncEntity {
      * Stores the timestamp of creation <b>in seconds</b>.
      */
     private long _createdTimestamp = 0L;
-    private Location _location = null;
+    private BOLocation _location = null;
     private String _text = "";
+    private File _imageFile = null;
     private boolean _hasImage = false;
+    private String _uploadToken = "";
+    private String _remoteID = "";
 
     public Posting() {
         // Timestamp has to be in seconds
         _createdTimestamp = System.currentTimeMillis()/60;
     }
+
+    public Posting(String message, BOLocation location,File imageFile) {
+        this();
+        _hasImage = imageFile!=null;
+        if(_hasImage) {
+            _imageFile = imageFile;
+        }
+        _text = message;
+    }
+
 
     public Posting(PostingModel model) {
         setRemoteId(model.id);
@@ -71,15 +86,40 @@ public class Posting extends BOSyncEntity {
         return _createdTimestamp;
     }
 
+    @Nullable
+    public File getImageFile() { return _imageFile;}
+
+    @Nullable
+    public BOLocation getLocation() { return _location;}
+
     public boolean hasImage() {
         return _hasImage;
     }
+
+    public boolean hasUploadCredentials() {
+        return (!_remoteID.isEmpty()&&!_uploadToken.isEmpty());
+    }
+
+    public String getUploadToken() {
+        return _uploadToken;
+    }
+
+    public String getRemoteID() {
+        return _remoteID;
+    }
+
+    public void setUploadCredentials(String id,String token) {
+        _remoteID = id;
+        _uploadToken = token;
+    }
+
 
     @Override
     public boolean uploadToServerSync(Context context) {
         BOApiService service = ApiUtils.getService(context);
 
         Call<PostingModel> call = service.createPosting(new PostingModel(this));
+        Log.d(TAG,"uploadToServerSync");
         try {
             retrofit2.Response<PostingModel> response = call.execute();
 
