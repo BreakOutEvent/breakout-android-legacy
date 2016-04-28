@@ -51,15 +51,12 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         _drawerLayout.closeDrawers();
-                        menuItem.setChecked(true);
 
                         switch(menuItem.getItemId()) {
                             case R.id.post:
-                                menuItem.setChecked(false);
                                 startActivity(new Intent(getApplicationContext(), PostScreenActivity.class));
                                 break;
                             case R.id.all_posts:
-                                menuItem.setChecked(false);
                                 setCurrentFragment(new AllPostsFragment());
                         }
                         return true;

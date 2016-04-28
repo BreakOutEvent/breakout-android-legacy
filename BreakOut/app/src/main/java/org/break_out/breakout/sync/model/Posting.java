@@ -1,7 +1,6 @@
 package org.break_out.breakout.sync.model;
 
 import android.content.Context;
-import android.location.Location;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -15,7 +14,6 @@ import org.break_out.breakout.sync.BOEntityDownloader;
 import org.break_out.breakout.util.ApiUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,12 +33,11 @@ import retrofit2.Call;
 
 public class Posting extends BOSyncEntity {
 
+    @Ignore
     private static final String TAG = "Posting";
 
     @Ignore
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
-    private String _challengeId = "";
 
     /**
      * Stores the timestamp of creation <b>in seconds</b>.
@@ -71,7 +68,14 @@ public class Posting extends BOSyncEntity {
     public Posting(PostingModel model) {
         setRemoteId(model.id);
         setText(model.text);
-        _createdTimestamp = model.date;
+
+        if(model.date != null) {
+            _createdTimestamp = model.date;
+        }
+
+        if(model.postingLocation != null) {
+            _location = new BOLocation(_createdTimestamp, model.postingLocation.latitude, model.postingLocation.longitude);
+        }
     }
 
     public void setText(String text) {
@@ -91,6 +95,10 @@ public class Posting extends BOSyncEntity {
 
     @Nullable
     public BOLocation getLocation() { return _location;}
+
+    public void setLocation(BOLocation location) {
+        _location = location;
+    }
 
     public boolean hasImage() {
         return _hasImage;
@@ -184,7 +192,7 @@ public class Posting extends BOSyncEntity {
                     JSONArray idArr = new JSONArray(jsonString);
 
                     for(int i = 0; i < idArr.length(); i++) {
-                        postings.add(Posting.fromJSON(idArr.getJSONObject(i)));
+                        //postings.add(Posting.fromJSON(idArr.getJSONObject(i)));
                     }
                 }
             } catch(IOException e) {
@@ -285,31 +293,6 @@ public class Posting extends BOSyncEntity {
 
             return newIds;
         }
-    }
-
-    public static Posting fromJSON(JSONObject jsonObj) {
-        Posting p = new Posting();
-
-        try {
-            p.setRemoteId(jsonObj.getLong("id"));
-            p.setText(jsonObj.getString("text"));
-        } catch(JSONException e) {
-            e.printStackTrace();
-        }
-
-        return p;
-    }
-
-    private String toJSON() {
-        return "{" +
-                "\"challenge_id\": \"" + _challengeId + "\"," +
-                "\"created\": \"" + _createdTimestamp + "\"," +
-                "\"location\": {" +
-                "\"lat\": " + (_location != null ? (int)(_location.getLatitude()) : "0") + "," +
-                "\"lon\": " + (_location != null ? (int)(_location.getLongitude()) : "0") +
-                "}," +
-                "\"text\": \"" + _text + "\"" +
-                "}";
     }
 
     @Override

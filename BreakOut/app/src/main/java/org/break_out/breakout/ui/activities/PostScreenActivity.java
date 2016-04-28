@@ -189,15 +189,17 @@ public class PostScreenActivity extends BOActivity {
                         _locationManager.getLocation(c, new BOLocationManager.BOLocationRequestListener() {
                             @Override
                             public void onLocationObtained(BOLocation currentLocation) {
+                                _receivedLocation = currentLocation;
+
                                 List<Address> adressList = null;
                                 Geocoder coder = new Geocoder(getApplicationContext());
                                 try {
                                     adressList = coder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
-                                } catch (IOException e) {
+                                } catch(IOException e) {
                                     e.printStackTrace();
                                 }
-                                if (adressList != null) {
-                                    if (adressList.size() > 0) {
+                                if(adressList != null) {
+                                    if(adressList.size() > 0) {
                                         setLocation(adressList.get(0));
                                     }
                                 }

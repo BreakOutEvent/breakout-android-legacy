@@ -2,6 +2,7 @@ package org.break_out.breakout.api;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.sync.model.Posting;
 
 /**
@@ -36,6 +37,9 @@ public class PostingModel {
         date = posting.getCreatedTimestamp();
         text = posting.getText();
 
-        // TODO: Location (still a bug in the backend)!
+        BOLocation loc = posting.getLocation();
+        if(loc != null) {
+            postingLocation = new LocationModel(loc.getLatitude(), loc.getLongitude());
+        }
     }
 }
