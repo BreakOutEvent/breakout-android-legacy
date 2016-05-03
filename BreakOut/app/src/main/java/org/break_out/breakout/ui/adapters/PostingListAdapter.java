@@ -13,6 +13,8 @@ import org.break_out.breakout.R;
 import org.break_out.breakout.sync.model.Posting;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -20,20 +22,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by Maximilian Duehr on 21.04.2016.
  */
 public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.PostingViewHolder> {
-    
+    private static final String TAG = "PostingListAdapter";
+
     private ArrayList<Posting> _postingList;
 
     public PostingListAdapter(ArrayList<Posting> postingList) {
         _postingList = postingList;
-
-        // FIXME: Test data
-        Posting p1 = new Posting();
-        p1.setText("post nummer 1");
-        _postingList.add(p1);
-
-        Posting p2 = new Posting();
-        p2.setText("a short test lol");
-        _postingList.add(p2);
     }
 
     @Override
@@ -75,20 +69,64 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     private void populateView(PostingViewHolder holder, int pos) {
         Posting posting = _postingList.get(pos);
 
-        if(posting.getCreatedTimestamp() != 0L) {
-            holder.tv_time.setReferenceTime(posting.getCreatedTimestamp() * 60);
+        if (posting.getCreatedTimestamp() != 0L) {
+            holder.tv_time.setText(timeBuilder(posting.getCreatedTimestamp()));
         }
 
-        if(!posting.getText().isEmpty()) {
+        if (!posting.getText().isEmpty()) {
             holder.tvComment.setText(posting.getText());
         }
 
-        if(!posting.hasImage()) {
+        if (!posting.hasImage()) {
             holder.ivPosting.setVisibility(View.GONE);
         } else {
             holder.ivPosting.setVisibility(View.VISIBLE);
             //TODO: Set image
         }
+    }
 
+    private String timeBuilder(long timestamp) {
+        long curTime = System.currentTimeMillis();
+        long dif = curTime - (timestamp * 1000);
+        StringBuilder responseBuilder = new StringBuilder();
+        int minutes = (int) (dif / 1000) / 60;
+        int hours = 0;
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(timestamp * 1000);
+
+        for (long i = minutes; (i - 60) > 0; i -= 60) {
+            hours++;
+        }
+
+        if (hours == 0) {
+            if (Locale.getDefault().getISO3Language().contains("de")) {
+                responseBuilder.append("vor ")
+                        .append(minutes)
+                        .append(" Minuten");
+            } else {
+                responseBuilder.append(minutes)
+                        .append(" minutes")
+                        .append(" ago");
+            }
+        } else if (hours < 24) {
+            if (Locale.getDefault().getISO3Language().contains("de")) {
+                responseBuilder.append("vor ")
+                        .append(hours)
+                        .append(" Stunden");
+            } else {
+                responseBuilder.append(hours)
+                        .append(" hours")
+                        .append(" ago");
+            }
+        } else {
+            responseBuilder.append(c.get(Calendar.DAY_OF_MONTH) + 1)
+                    .append(".")
+                    .append(c.get(Calendar.MONTH) + 1)
+                    .append(".")
+                    .append(c.get(Calendar.YEAR));
+        }
+
+
+        return responseBuilder.toString();
     }
 }

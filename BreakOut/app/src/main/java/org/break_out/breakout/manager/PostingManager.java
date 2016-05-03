@@ -2,12 +2,14 @@ package org.break_out.breakout.manager;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.sync.model.Posting;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -17,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -63,6 +66,14 @@ public class PostingManager {
         if (posting.hasImage()) {
             File imageFile = posting.getImageFile();
         }
+    }
+
+    public void getAllPosts(@Nullable PostingListener postingListener) {
+        new FetchPostingsTask(postingListener).execute();
+    }
+
+    public void resetPostingList() {
+        Posting.deleteAll(Posting.class);
     }
 
     private class SendPostToServerTask extends AsyncTask<Void, Void, Posting> {
@@ -152,6 +163,67 @@ public class PostingManager {
         }
     }
 
+    private class FetchPostingsTask extends AsyncTask<Void,Void,ArrayList<Posting>> {
+        private PostingListener listener;
+
+        public FetchPostingsTask() {}
+
+        public FetchPostingsTask(PostingListener listener) {
+            this.listener = listener;
+        }
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected ArrayList<Posting> doInBackground(Void... params) {
+            ArrayList<Posting> responseList = new ArrayList<>();
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(Constants.Api.POSTINGLIST_URL)
+                    .addHeader("Accept", "application/json;")
+                    .build();
+            try {
+                Response response = client.newCall(request).execute();
+                if(response.isSuccessful()) {
+                    String JSONResponse = response.body().string();
+                    JSONArray array = new JSONArray(JSONResponse);
+                    responseList = generateFromJSON(array);
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return responseList;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Posting> postings) {
+            super.onPostExecute(postings);
+            for(Posting p : postings) {
+                p.save();
+            }
+            if(listener != null) {
+                listener.onPostingListChanged();
+            }
+        }
+
+        private ArrayList<Posting> generateFromJSON(JSONArray array) {
+            ArrayList<Posting> responseList = new ArrayList<Posting>();
+            try {
+                for(int i=0; i<array.length();i++) {
+                    JSONObject object = array.getJSONObject(i);
+                    Posting tempPost = Posting.fromJSON(object);
+                    responseList.add(tempPost);
+                }
+            } catch(JSONException e) {
+                e.printStackTrace();
+            }
+
+            return responseList;
+        }
+    }
+
     private class UploadMediaToServerTask extends AsyncTask<Void, Void, Boolean> {
         private Posting toBeUploadedPosting;
         String attachmentFileName = "";
@@ -196,5 +268,9 @@ public class PostingManager {
             }
             return null;
         }
+    }
+
+    public interface PostingListener {
+        void onPostingListChanged();
     }
 }

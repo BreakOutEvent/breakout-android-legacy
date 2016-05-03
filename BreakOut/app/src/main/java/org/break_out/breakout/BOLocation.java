@@ -28,6 +28,14 @@ public class BOLocation extends SugarRecord {
         return _longitude;
     }
 
+    public void setLatitude(double latitude) {
+        _latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        _longitude = longitude;
+    }
+
     public long getTimestamp() {
         return _timestamp;
     }

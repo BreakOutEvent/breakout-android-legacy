@@ -51,7 +51,7 @@ public class BOSyncController {
 
     private void initEntities() {
         // Register all your entities here
-        registerEntity(Posting.class, Posting.getDownloader());
+        /*registerEntity(Posting.class, Posting.getDownloader());*/
     }
 
     private <T extends BOSyncEntity> void registerEntity(Class<T> type, BOEntityDownloader<T> entityLoader) {

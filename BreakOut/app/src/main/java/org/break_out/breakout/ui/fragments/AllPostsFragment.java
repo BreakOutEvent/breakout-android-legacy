@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.break_out.breakout.R;
-import org.break_out.breakout.sync.BOSyncController;
+import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
@@ -33,7 +33,7 @@ public class AllPostsFragment extends BOFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(_dataList == null) {
+        if (_dataList == null) {
             _dataList = new ArrayList<>();
         }
         _adapter = new PostingListAdapter(_dataList);
@@ -55,20 +55,34 @@ public class AllPostsFragment extends BOFragment {
             public void onClick(View v) {
                 Activity activity = getActivity();
 
-                if(!(activity instanceof MainActivity)) {
+                if (!(activity instanceof MainActivity)) {
                     return;
                 }
-                
+
                 MainActivity mainActivity = (MainActivity) activity;
                 mainActivity.openDrawer();
             }
         });
 
+        fetchAllPosts();
+
         return v;
     }
 
+    private void fetchAllPosts() {
+        PostingManager m = PostingManager.getInstance();
+        m.resetPostingList();
+        PostingManager.getInstance().getAllPosts(new PostingManager.PostingListener() {
+            @Override
+            public void onPostingListChanged() {
+                updatePostList();
+            }
+        });
+    }
+
     private void updatePostList() {
-        BOSyncController controller = BOSyncController.getInstance(getContext());
-        controller.get(Posting.class,0,10);
+        _dataList.clear();
+        _dataList.addAll(Posting.listAll(Posting.class));
+        _adapter.notifyDataSetChanged();
     }
 }
