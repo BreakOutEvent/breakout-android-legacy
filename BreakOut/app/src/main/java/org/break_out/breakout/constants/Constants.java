@@ -16,7 +16,8 @@ public class Constants {
     }
 
     public class Files {
-
+        public static final String DIR_IMAGES = "images";
+        public static final String DIR_VIDEOS = "videos";
         public static final String BREAKOUT_DIR = "BreakOut";
         public static final String PROFILE_IMAGE_FILENAME = "profile_image.jpg";
 

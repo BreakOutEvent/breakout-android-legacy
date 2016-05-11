@@ -7,21 +7,14 @@ import android.util.Log;
 
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.sync.model.BOMedia;
 import org.break_out.breakout.sync.model.Posting;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.util.ArrayList;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import okhttp3.*;
 import okhttp3.OkHttpClient;
@@ -34,6 +27,8 @@ import okhttp3.RequestBody;
 public class PostingManager {
     private final static String TAG = "PostingManager";
     private static PostingManager instance;
+
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private PostingManager() {
 
@@ -54,8 +49,12 @@ public class PostingManager {
         return new Posting(message, location, null);
     }
 
-    public static Posting buildPosting(String message, BOLocation location, File file) {
-        return new Posting(message, location, file);
+    public static Posting buildPosting(String message, BOLocation location, BOMedia media) {
+        return new Posting(message, location,media);
+    }
+
+    public static Posting buildPosting(String message,BOMedia media) {
+        return new Posting(message,null,media);
     }
 
     public void sendPostingToServer(Context c, Posting p) {
@@ -63,8 +62,8 @@ public class PostingManager {
     }
 
     public void uploadImage(Posting posting) {
-        if (posting.hasImage()) {
-            File imageFile = posting.getImageFile();
+        if (posting.hasMedia()) {
+            File imageFile = posting.getMediaFile();
         }
     }
 
@@ -93,13 +92,13 @@ public class PostingManager {
         @Override
         protected Posting doInBackground(Void... params) {
             try {
-                URL targetUrl = new URL(Constants.Api.BASE_URL + "/posting/");
+                /*URL targetUrl = new URL(Constants.Api.BASE_URL + "/posting/");
                 HttpsURLConnection connection = (HttpsURLConnection) targetUrl.openConnection();
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(10000);
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Accept", "*/*");
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
+                connection.setRequestMethod("POST");*/
+                //connection.setRequestProperty("Accept", "*/*");
+                /*connection.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setRequestProperty("Authorization", "Bearer " + UserManager.getInstance(context).getCurrentUser().getAccessToken());
                 connection.setRequestProperty("Connection", "close");
@@ -108,7 +107,7 @@ public class PostingManager {
 
                 NameValuePair<String> postingPair = new NameValuePair<>("text", posting.getText());
                 NameValuePair<BOLocation> locationPair = new NameValuePair<>("postingLocation", posting.getLocation());
-                NameValuePair<String> mediaPair = new NameValuePair<>("media", "image");
+                NameValuePair<String> mediaPair = new NameValuePair<>("uploadMediaTypes", "image");
 
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(
@@ -134,7 +133,44 @@ public class PostingManager {
                 JSONObject responseObject = new JSONObject(responseBuilder.toString());
                 JSONObject mediaObject = new JSONObject(new JSONArray(responseObject.getString("media")).getJSONObject(0).toString());
 
-                posting.setUploadCredentials(mediaObject.getString("id"), mediaObject.getString("uploadToken"));
+                posting.setUploadCredentials(mediaObject.getString("id"), mediaObject.getString("uploadToken"));*/
+
+                OkHttpClient client = new OkHttpClient();
+
+                JSONObject requestObject = new JSONObject();
+                requestObject.accumulate("text",posting.getText())
+                        .accumulate("date",posting.getCreatedTimestamp())
+                        .accumulate("uploadMediaTypes",new JSONArray().put("image"));
+                if(posting.getLocation()!=null) {
+                    requestObject.accumulate("postingLocation",new JSONObject()
+                            .accumulate("latitude",posting.getLocation().getLatitude())
+                            .accumulate("longitude",posting.getLocation().getLongitude()));
+                } else {
+                    Log.d(TAG,"location is null. wtf");
+                }
+
+                RequestBody requestBody = RequestBody.create(JSON, requestObject.toString());
+
+                Log.d(TAG,"Json request:\n"+requestObject.toString());
+
+                Request request = new Request.Builder()
+                        .addHeader("Authorization", "Bearer "+UserManager.getInstance(context).getCurrentUser().getAccessToken())
+                        .addHeader("Content-Type","application/json")
+                        .url(Constants.Api.BASE_URL+"/posting/")
+                        .post(requestBody)
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                String responseBody = response.body().string();
+                Log.d(TAG,responseBody);
+                if(posting.hasMedia()) {
+                    JSONObject responseJSON = new JSONObject(responseBody);
+                    JSONObject mediaDataJSON = new JSONObject(new JSONArray(responseJSON.getString("media")).getJSONObject(0).toString());
+                    posting.setUploadCredentials(mediaDataJSON.getString("id"),mediaDataJSON.getString("uploadToken"));
+                }
+                response.body().close();
+
+
                 return posting;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -145,7 +181,7 @@ public class PostingManager {
         @Override
         protected void onPostExecute(Posting posting) {
             super.onPostExecute(posting);
-            if (posting.hasImage()) {
+            if (posting.hasMedia()) {
                 if (posting.hasUploadCredentials()) {
                     new UploadMediaToServerTask(posting).execute();
                 }
@@ -190,6 +226,7 @@ public class PostingManager {
                     String JSONResponse = response.body().string();
                     JSONArray array = new JSONArray(JSONResponse);
                     responseList = generateFromJSON(array);
+
                 }
             } catch(Exception e) {
                 e.printStackTrace();
@@ -198,10 +235,19 @@ public class PostingManager {
         }
 
         @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            if(listener != null) {
+                listener.onPostingListChanged();
+            }
+        }
+
+        @Override
         protected void onPostExecute(ArrayList<Posting> postings) {
             super.onPostExecute(postings);
             for(Posting p : postings) {
                 p.save();
+                onProgressUpdate();
             }
             if(listener != null) {
                 listener.onPostingListChanged();
@@ -230,8 +276,8 @@ public class PostingManager {
 
         public UploadMediaToServerTask(Posting posting) {
             toBeUploadedPosting = posting;
-            attachmentFileName = toBeUploadedPosting.getImageFile().getName();
-            if(toBeUploadedPosting.getImageFile() == null){
+            attachmentFileName = toBeUploadedPosting.getMedia().getFile().getName();
+            if(toBeUploadedPosting.getMediaFile() == null){
                 //TODO:Handle missing file
                 Log.d(TAG,"file not found");
             }
@@ -239,15 +285,15 @@ public class PostingManager {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            if(toBeUploadedPosting.getImageFile() != null && toBeUploadedPosting.getImageFile().length()>0) {
+            if(toBeUploadedPosting.getMediaFile() != null && toBeUploadedPosting.getMediaFile().length()>0) {
                 try {
                     OkHttpClient client = new OkHttpClient();
 
                     RequestBody requestBody = new MultipartBody.Builder()
                             .setType(MultipartBody.FORM)
                             .addFormDataPart("id", toBeUploadedPosting.getRemoteID())
-                            .addFormDataPart("file", toBeUploadedPosting.getImageFile().getName(),
-                                    RequestBody.create(MediaType.parse("image/jpeg"),toBeUploadedPosting.getImageFile()))
+                            .addFormDataPart("file", toBeUploadedPosting.getMediaFile().getName(),
+                                    RequestBody.create(MediaType.parse("image/jpeg"),toBeUploadedPosting.getMediaFile()))
                             .build();
 
                     Request request = new Request.Builder()
@@ -260,6 +306,25 @@ public class PostingManager {
                     if(!response.isSuccessful()) {
                         //TODO: handle errors
                         Log.d(TAG,"no success: "+response.code()+" message: "+response.message());
+                    } else {
+                        //find out which URL the image is stored at and prevent double data loading
+                        int size = 0;
+                        String setURL = "";
+                        String responseBody = response.body().string();
+                        Log.d(TAG,"Body: "+responseBody);
+                        /*JSONArray responseArray = new JSONArray(response.body().string());
+                        for(int i = 0; i<responseArray.length(); i++) {
+                            JSONObject curObject = new JSONObject(responseArray.getString(i));
+                            int currentImageSize = curObject.getInt("size");
+                            if(currentImageSize > size) {
+                                setURL = curObject.getString("url");
+                            }
+                        }
+                        if(!setURL.isEmpty()) {
+                            toBeUploadedPosting.getMedia().setURL(setURL);
+                            toBeUploadedPosting.getMedia().setSaveState(BOMedia.SAVESTATE.SAVED);
+                        }*/
+
                     }
 
                 } catch (Exception e) {
