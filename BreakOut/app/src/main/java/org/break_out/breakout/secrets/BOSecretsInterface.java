@@ -20,4 +20,6 @@ public interface BOSecretsInterface {
 
     public String getClientSecret();
 
+    public String getMapsKey();
+
 }

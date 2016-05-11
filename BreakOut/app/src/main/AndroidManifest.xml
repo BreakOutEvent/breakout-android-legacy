@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="org.break_out.breakout"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.break_out.breakout">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -22,16 +20,24 @@
         android:theme="@style/AppTheme">
 
         <!-- SugarORM configuration -->
-        <meta-data android:name="DATABASE" android:value="breakout.db" />
-        <meta-data android:name="VERSION" android:value="1" />
-        <meta-data android:name="QUERY_LOG" android:value="true" />
-        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="org.break_out.breakout" />
+        <meta-data
+            android:name="DATABASE"
+            android:value="breakout.db" />
+        <meta-data
+            android:name="VERSION"
+            android:value="1" />
+        <meta-data
+            android:name="QUERY_LOG"
+            android:value="true" />
+        <meta-data
+            android:name="DOMAIN_PACKAGE_NAME"
+            android:value="org.break_out.breakout" />
 
         <!-- Services -->
         <service android:name=".sync.service.UploadService" />
         <service android:name=".sync.service.DownloadService" />
         <service android:name=".sync.service.UpdateService" />
-        <service android:name=".LocationService"/>
+        <service android:name=".LocationService" />
 
         <!-- Activities -->
         <activity
@@ -39,51 +45,63 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.activities.LoginRegisterActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden">
-        </activity>
-
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".ui.activities.WebViewActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden">
-        </activity>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".ui.activities.PostScreenActivity"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.PostScreenActivity"
-            android:screenOrientation="portrait"/>
-        
         <!-- Receivers -->
         <receiver android:name=".manager.BOLocationManager$BOLocationBroadcastReceiver">
             <intent-filter>
                 <action android:name="breakout.intent.action.locationService" />
             </intent-filter>
         </receiver>
-
         <receiver android:name=".manager.BOLocationManager$BOLocationServiceBroadcastReceiver">
             <intent-filter>
-                <action android:name="android.location.PROVIDERS_CHANGED"/>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name=".sync.BOSyncReceiver" >
+        <receiver android:name=".sync.BOSyncReceiver">
             <intent-filter>
                 <action android:name="org.break_out.posting.SYNC_RECEIVER" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name=".sync.InternetReceiver" >
+        <receiver android:name=".sync.InternetReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".ui.activities.MapsActivity"
+            android:label="@string/title_activity_maps">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.break_out.breakout.ui.activities.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
