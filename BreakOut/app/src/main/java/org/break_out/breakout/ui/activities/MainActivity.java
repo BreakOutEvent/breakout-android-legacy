@@ -58,6 +58,9 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                                 break;
                             case R.id.all_posts:
                                 setCurrentFragment(new AllPostsFragment());
+                                break;
+                            case R.id.map:
+                                startActivity(new Intent(getApplicationContext(), MapsActivity.class));
                         }
                         return true;
                     }

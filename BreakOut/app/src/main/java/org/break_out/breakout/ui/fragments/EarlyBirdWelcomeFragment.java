@@ -67,7 +67,7 @@ public class EarlyBirdWelcomeFragment extends Fragment {
         User currUser = UserManager.getInstance(getContext()).getCurrentUser();
 
         // Set up button
-        if(currUser.getRole() == User.Role.USER) {
+        if(currUser.getRole() != User.Role.VISITOR) {
             _btParticipate.setVisibility(View.GONE);
             return;
         }

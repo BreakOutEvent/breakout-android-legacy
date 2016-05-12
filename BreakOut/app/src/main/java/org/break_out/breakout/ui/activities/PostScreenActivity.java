@@ -184,7 +184,8 @@ public class PostScreenActivity extends BOActivity {
                     }
                 };
                 if (permissionGranted) {
-                    if (_locationManager.locationServicesAvailable()) {
+                    Log.d(TAG,"permissions granted");
+/*                    if (_locationManager.locationServicesAvailable()) {
                         _tvLocation.setText(getString(R.string.info_obtaining_location));
                         _locationManager.getLocation(c, new BOLocationManager.BOLocationRequestListener() {
                             @Override
@@ -208,12 +209,41 @@ public class PostScreenActivity extends BOActivity {
                     } else {
                         _tvLocation.setText(getString(R.string.activate_location_services));
                         _locationManager.addServiceListener(listener);
-                    }
+                    }*/
+                    locate();
                 } else {
                     Toast.makeText(getApplicationContext(), "please enable location services", Toast.LENGTH_SHORT).show();
                 }
             }
         }, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    }
+
+    private void locate() {
+        if (_locationManager.locationServicesAvailable()) {
+            Log.d(TAG,"locationservices are available");
+            _tvLocation.setText(getString(R.string.info_obtaining_location));
+            _locationManager.getLocation(this, new BOLocationManager.BOLocationRequestListener() {
+                @Override
+                public void onLocationObtained(BOLocation currentLocation) {
+                    _receivedLocation = currentLocation;
+
+                    List<Address> adressList = null;
+                    Geocoder coder = new Geocoder(getApplicationContext());
+                    try {
+                        adressList = coder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
+                    } catch(IOException e) {
+                        e.printStackTrace();
+                    }
+                    if(adressList != null) {
+                        if(adressList.size() > 0) {
+                            setLocation(adressList.get(0));
+                        }
+                    }
+                }
+            });
+        } else {
+            _tvLocation.setText(getString(R.string.activate_location_services));
+        }
     }
 
     /**

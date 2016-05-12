@@ -270,6 +270,7 @@ public class BOLocationManager  {
             super.onLocationChanged(location);
             try {
                 _locationManager.removeUpdates(this);
+                _isLocating = false;
             } catch(SecurityException e) {
                 e.printStackTrace();
             }
