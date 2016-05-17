@@ -35,8 +35,8 @@ public class BOLocationManager  {
     private static boolean _gpsAvailable = false;
     private static Context _context;
     private static LocationManager _locationManager;
-    private static ArrayList<BOLocationListener> _listenerList;
-    private static ArrayList<BOLocationServiceListener> _statusListenerList;
+    private static ArrayList<BOLocationListener> _listenerList = new ArrayList<>();
+    private static ArrayList<BOLocationServiceListener> _statusListenerList = new ArrayList<>();
     private static BOLocationManager _instance;
 
     private static SharedPreferences _preferences;
