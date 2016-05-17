@@ -32,22 +32,24 @@ public class Posting extends SugarRecord {
     private long _createdTimestamp = 0L;
     private BOLocation _location = null;
     private String _text = "";
-    private File _imageFile = null;
-    private boolean _hasImage = false;
+    private boolean _hasMedia = false;
     private String _uploadToken = "";
     private String _remoteID = "";
     private String _fileURL="";
-
+    private BOMedia _linkedMedia;
     public Posting() {
         // Timestamp has to be in seconds
         _createdTimestamp = System.currentTimeMillis()/60;
     }
 
-    public Posting(String message, BOLocation location,File imageFile) {
+    public Posting(String message,@Nullable BOLocation location,@Nullable BOMedia media) {
         this();
-        _hasImage = imageFile!=null;
-        if(_hasImage) {
-            _imageFile = imageFile;
+        _hasMedia = media!=null;
+        if(_hasMedia) {
+            _linkedMedia = media;
+        }
+        if(location != null) {
+            _location = location;
         }
         _text = message;
     }
@@ -65,7 +67,7 @@ public class Posting extends SugarRecord {
     }
 
     @Nullable
-    public File getImageFile() { return _imageFile;}
+    public File getMediaFile() { return _linkedMedia == null ? null : _linkedMedia.getFile();}
 
     @Nullable
     public BOLocation getLocation() { return _location;}
@@ -74,8 +76,8 @@ public class Posting extends SugarRecord {
         _location = location;
     }
 
-    public boolean hasImage() {
-        return _hasImage;
+    public boolean hasMedia() {
+        return _linkedMedia!=null;
     }
 
     public boolean hasUploadCredentials() {
@@ -92,6 +94,10 @@ public class Posting extends SugarRecord {
 
     public Long getID(){return id;}
 
+    public BOMedia getMedia() {
+        return _linkedMedia;
+    }
+
     public void setRemoteID(String id) { _remoteID = id;}
 
     public void setUploadCredentials(String id,String token) {
@@ -99,13 +105,14 @@ public class Posting extends SugarRecord {
         _uploadToken = token;
     }
 
+    public void setLinkedMedia(BOMedia media) {
+        _linkedMedia = media;
+    }
+
     private void setTimestamp(long timestamp) {
         _createdTimestamp = timestamp;
     }
 
-    private void setFileURL(String url) {
-        _fileURL = url;
-    }
 
     public static Posting fromJSON(JSONObject object) throws JSONException {
         String id = object.getString("id");

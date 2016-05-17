@@ -77,7 +77,7 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             holder.tvComment.setText(posting.getText());
         }
 
-        if (!posting.hasImage()) {
+        if (!posting.hasMedia()) {
             holder.ivPosting.setVisibility(View.GONE);
         } else {
             holder.ivPosting.setVisibility(View.VISIBLE);
