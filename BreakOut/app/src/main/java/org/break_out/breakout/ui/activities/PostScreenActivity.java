@@ -39,7 +39,6 @@ import org.break_out.breakout.model.User;
 import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.util.BackgroundRunner;
-import org.json.JSONArray;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -51,14 +50,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
 
 public class PostScreenActivity extends BOActivity {
 
     private final static String TAG = "PostScreenActivity";
+
+    private PostScreenActivity instance;
 
     private static final String BUNDLETAG_URI = "seturi";
     private static final String RUNNERTAG_MOVE_IMAGE = "moveImage";
@@ -69,6 +66,7 @@ public class PostScreenActivity extends BOActivity {
     private TextView _tvLocation;
     private ImageView _ivChosenImage;
     private BOEditText _etMessage;
+    private RelativeLayout _rlChallenge;
 
     private BOLocation _receivedLocation;
     private BOMedia _postMedia;
@@ -88,6 +86,7 @@ public class PostScreenActivity extends BOActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_screen);
 
+        instance = this;
         _challenges = new ArrayList<>();
 
         _syncController = BOSyncController.getInstance(this);
@@ -95,8 +94,6 @@ public class PostScreenActivity extends BOActivity {
         _userManager = UserManager.getInstance(this);
 
         _currentUser = _userManager.getCurrentUser();
-        Log.d(TAG, "current user ID: " + _currentUser.getRemoteId());
-        Log.d(TAG, "current user team id: " + _currentUser.getTeamId());
 
         _mainFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Constants.Files.BREAKOUT_DIR + File.separator);
         _mainFolder.mkdirs();
@@ -105,11 +102,20 @@ public class PostScreenActivity extends BOActivity {
         RelativeLayout rlAddImage = (RelativeLayout) findViewById(R.id.post_rl_addImage);
         _ivChosenImage = (ImageView) findViewById(R.id.post_iv_chosenImage);
         _etMessage = (BOEditText) findViewById(R.id.post_et_message);
+        _rlChallenge = (RelativeLayout) findViewById(R.id.post_rl_challenge);
 
         rlAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 pickImage();
+            }
+        });
+
+        _rlChallenge.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startChallengeChooseIntent = new Intent(instance,ChooseChallengeActivity.class);
+                instance.startActivityForResult(startChallengeChooseIntent,0);
             }
         });
 
@@ -146,8 +152,6 @@ public class PostScreenActivity extends BOActivity {
         _locationManager.addServiceListener(_listener);
 
         requestPermissionsAndLocate(this);
-
-        fetchChallenges();
     }
 
     @Override
@@ -176,7 +180,6 @@ public class PostScreenActivity extends BOActivity {
                     /*moveFileToProfilePath(imageUri);*/
                 } else {
                     imageUri = Uri.fromFile(_postMedia.getFile());
-                    Log.d(TAG, "uri: " + imageUri + toString());
                 }
                 _ivChosenImage.setImageURI(imageUri);
                 MediaManager.getInstance().moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
@@ -184,7 +187,6 @@ public class PostScreenActivity extends BOActivity {
                     public void onFileMoved(File result) {
                         Uri newUri = Uri.fromFile(result);
                         _ivChosenImage.setImageURI(newUri);
-                        Toast.makeText(getApplicationContext(), "Moving was successfull", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -266,7 +268,6 @@ public class PostScreenActivity extends BOActivity {
 
     private void locate() {
         if(_locationManager.locationServicesAvailable()) {
-            Log.d(TAG, "locationservices are available");
             _tvLocation.setText(getString(R.string.info_obtaining_location));
             _locationManager.getLocation(this, new BOLocationManager.BOLocationRequestListener() {
                 @Override
@@ -360,20 +361,12 @@ public class PostScreenActivity extends BOActivity {
         runner.execute(params);
     }
 
-    private void fetchChallenges() {
-        User curuser = _userManager.getCurrentUser();
-        int eventId = curuser.getEventId();
-        int teamID = curuser.getTeamId();
-
-        new FetchChallengesTask(eventId,teamID).execute();
-    }
 
     /**
      * This method takes the input and uploads it as a post to the server and
      * finishes the activity
      */
     private void sendPostAndFinish(String comment, @Nullable BOLocation location, @Nullable BOMedia media) {
-        Log.d(TAG, "sendPost triggered");
         BOLocation sendLocation = null;
 
         if(location != null) {
@@ -446,32 +439,6 @@ public class PostScreenActivity extends BOActivity {
         public void onPostSend() {
             setResult(RESULT_OK);
             finish();
-        }
-    }
-
-    private class FetchChallengesTask extends AsyncTask<Void,Void,Void> {
-        private int eventId,teamId;
-
-        public FetchChallengesTask(int eventId, int teamId) {
-            this.eventId = eventId;
-            this.teamId = teamId;
-        }
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            OkHttpClient client = new OkHttpClient();
-            Request callRequest = new Request.Builder().url(Constants.Api.BASE_URL + "/" + "event" + "/" + eventId + "/" + "team" + "/" + teamId + "/" + "challenge" + "/").build();
-            Log.d(TAG,Constants.Api.BASE_URL + "/" + "event" + "/" + eventId + "/" + "team" + "/" + teamId + "/" + "challenge" + "/");
-
-            try{
-                Response response = client.newCall(callRequest).execute();
-                String responseString = response.body().string();
-                ArrayList<Challenge> responseList = Challenge.fromJSON(new JSONArray(responseString));
-                Log.d(TAG, "challenge size: " + responseList.size());
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-            return null;
         }
     }
 }

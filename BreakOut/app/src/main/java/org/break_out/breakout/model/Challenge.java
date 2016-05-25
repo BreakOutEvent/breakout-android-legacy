@@ -1,6 +1,7 @@
 package org.break_out.breakout.model;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.orm.SugarRecord;
 
@@ -14,6 +15,8 @@ import java.util.ArrayList;
  * Created by Maximilian Duehr on 24.05.2016.
  */
 public class Challenge extends SugarRecord {
+    private static final String TAG = "Challenge";
+
     private int _remoteID;
     private int _eventID;
     private int _teamID;
@@ -40,6 +43,8 @@ public class Challenge extends SugarRecord {
         _contract = contract;
         _unregisteredSponsor = unregisteredSponsor;
     }
+
+    public Challenge(){}
 
     public int getRemoteID() { return _remoteID;}
     public int getEventID() { return _eventID;}
@@ -72,6 +77,8 @@ public class Challenge extends SugarRecord {
     @Nullable
     public static Challenge fromJSON(JSONObject object) {
         try {
+            Log.d(TAG,object.getString("unregisteredSponsor"));
+            Log.d(TAG,"equals: "+object.getString("unregisteredSponsor").equals("null"));
             int remoteID = object.getInt("id");
             int eventID = object.getInt("eventId");
             String status = object.getString("status");
@@ -80,7 +87,7 @@ public class Challenge extends SugarRecord {
             int sponsorID = object.getInt("sponsorId");
             int userID = object.getInt("userId");
             boolean sponsorIsHidden = object.getBoolean("sponsorIsHidden");
-            JSONObject unregisteredSponsorObject = !object.getString("unregisteredSponsor").isEmpty() ? object.getJSONObject("unregisteredSponsor") : new JSONObject("");
+            JSONObject unregisteredSponsorObject = !object.getString("unregisteredSponsor").equals("null") ? object.getJSONObject("unregisteredSponsor") : null;
             int amount = object.getInt("amount");
             String description = object.getString("description");
             JSONObject contractObject = object.getJSONObject("contract");

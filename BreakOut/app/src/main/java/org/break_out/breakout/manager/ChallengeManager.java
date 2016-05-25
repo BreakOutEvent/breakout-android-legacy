@@ -1,19 +1,32 @@
 package org.break_out.breakout.manager;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
+import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.model.Challenge;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by Maximilian Duehr on 24.05.2016.
  */
 public class ChallengeManager  {
+    private static final String TAG = "ChallengeManager";
     private static ChallengeManager _instance;
+    private static ArrayList<Challenge> _challenges;
 
-    private ChallengeManager() { }
+    private ChallengeManager() {
+        _challenges = new ArrayList<>();
+    }
 
     public static ChallengeManager getInstance() {
         if(_instance == null) {
@@ -39,7 +52,71 @@ public class ChallengeManager  {
     public ArrayList<Challenge> getAllChallenges() {
         ArrayList<Challenge> returnChallenge = new ArrayList<>();
         returnChallenge.addAll(Challenge.listAll(Challenge.class));
-
-        return returnChallenge;
+        return _challenges;
     }
+
+    public void fetchChallenges(Context c,@Nullable ChallengesFetchedListener listener) {
+        new FetchChallengesTask(c,listener).execute();
+    }
+
+    public interface ChallengesFetchedListener {
+        void onChallengesFetched();
+    }
+
+    private class FetchChallengesTask extends AsyncTask<Void,Void,Void> {
+        Context _context;
+        ChallengesFetchedListener _listener;
+
+        public FetchChallengesTask(Context c,@Nullable ChallengesFetchedListener listener) {
+            _context = c;
+            _listener = listener;
+        }
+        @Override
+        protected Void doInBackground(Void... params) {
+            int eventId = UserManager.getInstance(_context).getCurrentUser().getEventId();
+            int teamId = UserManager.getInstance(_context).getCurrentUser().getTeamId();
+
+            OkHttpClient client = new OkHttpClient();
+            Request callRequest = new Request.Builder().url(Constants.Api.BASE_URL + "/" + "event" + "/" + eventId + "/" + "team" + "/" + teamId + "/" + "challenge" + "/").build();
+
+            try{
+                Response response = client.newCall(callRequest).execute();
+                String responseString = response.body().string();
+                ArrayList<Challenge> responseList = Challenge.fromJSON(new JSONArray(responseString));
+                for(Challenge c : responseList) {
+                    if(!isSaved(c)){
+                        _challenges.add(c);
+                    }
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(_listener != null) {
+                _listener.onChallengesFetched();
+            }
+        }
+
+        private boolean isSaved(Challenge challenge) {
+            boolean saved = false;
+            /*for(Challenge c : Challenge.listAll(Challenge.class)) {
+                if(c.getRemoteID() == challenge.getRemoteID()) {
+                    saved = true;
+                }
+            }*/
+
+            for(Challenge c : _challenges) {
+                if(c.getRemoteID() == challenge.getRemoteID()) {
+                    saved = true;
+                }
+            }
+            return saved;
+        }
+    }
+
 }
