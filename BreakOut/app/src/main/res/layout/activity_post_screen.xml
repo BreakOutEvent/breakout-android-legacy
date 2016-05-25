@@ -42,7 +42,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_transparent_12">
+        android:background="@color/background_grey">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -81,8 +81,8 @@
 
                 <RelativeLayout
                     android:id="@+id/post_rl_addImage"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/btn_attachment_round"/>
             </RelativeLayout>
@@ -95,15 +95,30 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@color/white"
-                    android:visibility="gone">
+                    android:background="@color/white">
+
+                    <ImageView
+                        android:id="@+id/post_iv_addChallenge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_add_circle_outline_black_24dp"
+                        android:layout_marginLeft="24dp"
+                        android:layout_centerVertical="true"
+                        android:alpha="0.4"/>
+
+                    <TextView
+                        android:id="@+id/post_tv_chooseChallenge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="please choose a challenge"
+                        android:layout_centerInParent="true"/>
 
                 </RelativeLayout>
 
                 <View
-                    android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/black_transparent_25"/>
+                    android:layout_width="match_parent"
+                    android:background="@color/black_transparent_12"/>
 
                 <RelativeLayout
                     android:layout_width="match_parent"

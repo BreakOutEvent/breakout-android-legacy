@@ -55,7 +55,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_toEndOf="@id/posting_civ_teamPic"
-                        android:layout_toRightOf="@id/posting_civ_teamPic"/>
+                        android:layout_toRightOf="@id/posting_civ_teamPic"
+                        android:text="teamname"/>
 
                     <TextView
                         android:id="@+id/posting_tv_teamLocation"
@@ -64,14 +65,16 @@
                         android:layout_alignLeft="@id/posting_tv_teamName"
                         android:layout_alignStart="@id/posting_tv_teamName"
                         android:layout_below="@id/posting_tv_teamName"
+                        android:text="location"
                         android:textColor="@color/black_transparent_25"/>
 
-                    <com.github.curioustechizen.ago.RelativeTimeTextView
+                    <TextView
                         android:id="@+id/posting_tv_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
                         android:textColor="@color/black_transparent_25"/>
 
                 </RelativeLayout>

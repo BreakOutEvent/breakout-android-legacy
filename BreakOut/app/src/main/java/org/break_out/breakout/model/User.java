@@ -1,10 +1,13 @@
 package org.break_out.breakout.model;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.secrets.BOSecrets;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +42,7 @@ public class User implements Serializable {
 
     // User information
     private long _remoteId = -1;
+    private int _teamID = -1;
     private String _email = "";
     private String _password = "";
     private String _accessToken = "";
@@ -55,6 +59,7 @@ public class User implements Serializable {
     private String _tShirtSize = "";
     private Calendar _birthday = null;
     private String _eventCity = "";
+    private int _eventId = -1;
 
     /**
      * Represents the role of a user.
@@ -95,6 +100,7 @@ public class User implements Serializable {
         setFirstName(original.getFirstName());
         setLastName(original.getLastName());
         setRemoteId(original.getRemoteId());
+        setTeamId(original.getTeamId());
         setRole(original.getRole());
         setHometown(original.getHometown());
         setAccessToken(original.getAccessToken());
@@ -103,6 +109,8 @@ public class User implements Serializable {
         setGender(original.getGender());
         setTShirtSize(original.getTShirtSize());
         setEventCity(original.getEventCity());
+        setEventId(original.getEventId());
+
     }
 
     /**
@@ -123,6 +131,10 @@ public class User implements Serializable {
     public long getRemoteId() {
         return _remoteId;
     }
+
+    public int getTeamId() { return _teamID; }
+
+    public void setTeamId(int teamId) { _teamID = teamId; }
 
     /**
      * Sets an email to this user.
@@ -262,6 +274,12 @@ public class User implements Serializable {
         return _hometown;
     }
 
+    public void setEventId(int id) {
+        _eventId = id;
+        Log.d(TAG,"set event id to: "+_eventId);
+    }
+
+    public int getEventId() { return _eventId;}
     public void setPhoneNumber(@Nullable String phoneNumber) {
         _phoneNumber = phoneNumber != null ? phoneNumber : "";
     }
@@ -345,7 +363,7 @@ public class User implements Serializable {
      *
      * @return True if the login has been successful, false otherwise
      */
-    public boolean loginOnServerSync() {
+    public boolean loginOnServerSync(Context c) {
         OkHttpClient client = new OkHttpClient();
         Log.d(TAG,"loginOnServerSync");
         Log.d(TAG,"set password: "+_password);
@@ -373,29 +391,27 @@ public class User implements Serializable {
                 .addHeader("Authorization", Credentials.basic("breakout_app", new BOSecrets().getClientSecret()))
                 .addHeader("Content-Type", FORM_URL_ENCODED)
                 .build();
-
-        Log.d(TAG,Credentials.basic("breakout_app", new BOSecrets().getClientSecret()));
-
-        Log.d(TAG,"request: "+loginRequest.toString());
-
         try {
             Response loginResponse = client.newCall(loginRequest).execute();
 
+            String response = loginResponse.body().string();
             if(!loginResponse.isSuccessful()) {
                 Log.e(TAG, loginResponse.body().string());
                 return false;
             }
 
             // Get access token from JSON body and set it to this user
-            JSONObject loginResponseJson = new JSONObject(loginResponse.body().string());
+            JSONObject loginResponseJson = new JSONObject(response);
             loginResponse.body().close();
 
             _accessToken = loginResponseJson.getString("access_token");
             _role = Role.USER;
 
+            Log.d(TAG,loginResponseJson.toString());
+
             Log.d(TAG, "OAuth access token: " + _accessToken);
 
-            boolean updateSuccessful = updateFromServerSync();
+            boolean updateSuccessful = updateFromServerSync(c);
             if(!updateSuccessful) {
                 Log.e(TAG, "Login process failed: Could not finish due to error while updating user.");
                 return false;
@@ -419,7 +435,7 @@ public class User implements Serializable {
      *
      * @return If the update was successful or not
      */
-    public boolean updateFromServerSync() {
+    public boolean updateFromServerSync(Context c) {
         if(_role == Role.VISITOR) {
             Log.e(TAG, "Could not update user because it does not have an account");
             return false;
@@ -447,6 +463,10 @@ public class User implements Serializable {
             JSONObject responseObj = new JSONObject(updateResponse.body().string());
             updateResponse.body().close();
 
+            Log.d(TAG,"response object: "+responseObj.toString());
+
+
+
             // Get values
             long remoteId = ((responseObj.has("id") && !responseObj.isNull("id")) ? responseObj.getLong("id") : -1);
             String firstName = ((responseObj.has("firstname") && !responseObj.isNull("firstname")) ? responseObj.getString("firstname") : null);
@@ -458,6 +478,8 @@ public class User implements Serializable {
             String phoneNumber = null;
             String tShirtSize = null;
             String hometown = null;
+            int teamId = -1;
+            int eventId = -1;
 
             // Get participant values
             if(!responseObj.isNull("participant")) {
@@ -468,6 +490,9 @@ public class User implements Serializable {
                 phoneNumber = ((participantObj.has("phonenumber") && !participantObj.isNull("phonenumber")) ? participantObj.getString("phonenumber") : null);
                 tShirtSize = ((participantObj.has("tshirtsize") && !participantObj.isNull("tshirtsize")) ? participantObj.getString("tshirtsize") : null);
                 hometown = ((participantObj.has("hometown") && !participantObj.isNull("hometown")) ? participantObj.getString("hometown") : null);
+                teamId = ((participantObj.has("teamId") && !participantObj.isNull("teamId")) ? participantObj.getInt("teamId") : -1);
+                eventId = ((participantObj.has("eventId") && !participantObj.isNull("eventId")) ? participantObj.getInt("eventId") : -1);
+
 
                 // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;
@@ -487,6 +512,10 @@ public class User implements Serializable {
             _phoneNumber = (phoneNumber != null ? phoneNumber : "");
             _tShirtSize = (tShirtSize != null ? tShirtSize : "");
             _hometown = (hometown != null ? hometown : "");
+            setTeamId(teamId);
+            setEventId(eventId);
+
+            UserManager.getInstance(c).setCurrentUser(this);
 
             return true;
         } catch(IOException | JSONException e) {

@@ -86,5 +86,6 @@
     <string name="hint_postComment">Was machst du gerade?</string>
     <string name="title_allPosts">Alle Posts</string>
     <string name="activate_location_services">Bitte aktiviere Ortungsdienste!</string>
+    <string name="toast_login_first">Du musst dich zuerst einloggen!</string>
 
 </resources>

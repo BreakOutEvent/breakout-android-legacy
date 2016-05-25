@@ -17,6 +17,8 @@
         <item
             android:id="@+id/chat"
             android:icon="@drawable/ic_chat_black_24dp"
+            android:enabled="false"
+            android:visible="false"
             android:title="Chat"/>
     </group>
 
@@ -31,6 +33,8 @@
         <item
             android:id="@+id/news"
             android:icon="@drawable/ic_forum_black_24dp"
+            android:enabled="false"
+            android:visible="false"
             android:title="News"/>
 
         <item
@@ -41,6 +45,8 @@
         <item
             android:id="@+id/all_teams"
             android:icon="@drawable/ic_groups_black_24dp"
+            android:enabled="false"
+            android:visible="false"
             android:title="Alle Teams"/>
 
     </group>
@@ -51,11 +57,13 @@
         <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_settings_black_24dp"
+            android:enabled="false"
             android:title="Einstellungen"/>
 
         <item
             android:id="@+id/help"
             android:icon="@drawable/ic_help_outline_black_24dp"
+            android:enabled="false"
             android:title="Hilfe"/>
 
     </group>

@@ -185,7 +185,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
             public void onClick(View v) {
                 setShowLoadingIndicator(true);
 
-                _userManager.updateFromServer(new UserManager.UserUpdateListener() {
+                _userManager.updateFromServer(getContext(),new UserManager.UserUpdateListener() {
                     @Override
                     public void userUpdated() {
                         setShowLoadingIndicator(false);

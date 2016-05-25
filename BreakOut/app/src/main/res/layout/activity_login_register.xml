@@ -16,6 +16,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:hint="@string/hint_email"
+        android:typeface="normal"
         android:inputType="textEmailAddress"
         app:darkMode="true"
         app:drawableLeft="@drawable/ic_mail_outline_white_24dp"/>
@@ -27,6 +28,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:hint="@string/hint_password"
+        android:typeface="normal"
         android:inputType="textPassword"
         app:darkMode="true"
         app:drawableLeft="@drawable/ic_lock_outline_white_24dp"/>

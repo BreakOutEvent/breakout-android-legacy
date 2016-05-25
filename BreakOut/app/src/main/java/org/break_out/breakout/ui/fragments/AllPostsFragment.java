@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,9 @@ public class AllPostsFragment extends BOFragment {
         if (_dataList == null) {
             _dataList = new ArrayList<>();
         }
-        _adapter = new PostingListAdapter(_dataList);
+        _adapter = new PostingListAdapter(getContext(),_dataList);
+        //Intent downloadAllIntent = new Intent(getContext(), MediaLoaderService.class);
+        //getContext().startService(downloadAllIntent);
     }
 
     @Override
@@ -54,11 +57,9 @@ public class AllPostsFragment extends BOFragment {
             @Override
             public void onClick(View v) {
                 Activity activity = getActivity();
-
                 if (!(activity instanceof MainActivity)) {
                     return;
                 }
-
                 MainActivity mainActivity = (MainActivity) activity;
                 mainActivity.openDrawer();
             }
@@ -72,7 +73,7 @@ public class AllPostsFragment extends BOFragment {
     private void fetchAllPosts() {
         PostingManager m = PostingManager.getInstance();
         m.resetPostingList();
-        PostingManager.getInstance().getAllPosts(new PostingManager.PostingListener() {
+        PostingManager.getInstance().getAllPosts(getContext(),new PostingManager.PostingListener() {
             @Override
             public void onPostingListChanged() {
                 updatePostList();

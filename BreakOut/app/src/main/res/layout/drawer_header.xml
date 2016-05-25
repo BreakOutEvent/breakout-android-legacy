@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="190dp"
+             android:layout_height="172dp"
              android:orientation="vertical">
 
     <ImageView
@@ -36,7 +36,7 @@
             android:gravity="left"
             android:paddingBottom="4dp"
             android:text="Test person"
-            android:textColor="#FFF"
+            android:textColor="#ccc"
             android:textSize="14sp"
             android:textStyle="bold"/>
 
@@ -50,7 +50,7 @@
             android:layout_marginBottom="8dp"
             android:gravity="left"
             android:text="your.email@here.com"
-            android:textColor="#fff"
+            android:textColor="#ccc"
             android:textSize="14sp"/>
 
     </RelativeLayout>

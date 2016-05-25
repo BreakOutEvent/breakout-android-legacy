@@ -190,15 +190,12 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             User user = new User(email, password);
 
             // Log user in via OAuth
-            boolean loginSuccessful = user.loginOnServerSync();
+            boolean loginSuccessful = user.loginOnServerSync(getApplicationContext());
 
             if(!loginSuccessful) {
                 result.putBoolean(KEY_SUCCESS, false);
                 return result;
             }
-
-            Log.d(TAG, "User remote ID: " + user.getRemoteId());
-
             // Everything went well -> set user as current user in UserManager
             _userManager.setCurrentUser(user);
 

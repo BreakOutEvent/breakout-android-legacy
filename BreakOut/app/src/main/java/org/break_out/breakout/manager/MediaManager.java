@@ -4,9 +4,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
-import org.break_out.breakout.sync.model.BOMedia;
-import org.break_out.breakout.sync.model.Posting;
+import org.break_out.breakout.model.BOMedia;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,9 +23,7 @@ public class MediaManager {
     private static MediaManager instance;
 
 
-    private MediaManager() {
-
-    }
+    private MediaManager() {    }
 
     public static MediaManager getInstance() {
         if (instance == null) {
@@ -33,7 +32,7 @@ public class MediaManager {
         return instance;
     }
 
-    public ArrayList<BOMedia> getSavedMediaList() {
+    public static ArrayList<BOMedia> getSavedMediaList() {
         ArrayList<BOMedia> resultList = new ArrayList<>();
         resultList.addAll(BOMedia.listAll(BOMedia.class));
         return resultList;
@@ -72,7 +71,22 @@ public class MediaManager {
         return resultList;
     }
 
-    public BOMedia createTempMedia(Context c, BOMedia.TYPE type) {
+    public ArrayList<BOMedia> getUndownloadedMediaList() {
+        ArrayList<BOMedia> resultList = new ArrayList<>();
+        ArrayList<BOMedia> allMediaList = getSavedMediaList();
+        resultList.clear();
+        for (BOMedia m : allMediaList) {
+            if (!m.isDownloaded()) {
+                if(!m.getUrl().isEmpty()) {
+                    resultList.add(m);
+                    Log.d(TAG,"ListSize: "+resultList.size());
+                }
+            }
+        }
+        return resultList;
+    }
+
+    public BOMedia createExternalMedia(Context c, BOMedia.TYPE type) {
         //TODO
         File outputFile = null;
         String filename = UUID.randomUUID().toString();
@@ -81,10 +95,13 @@ public class MediaManager {
                 outputFile = new File(c.getExternalCacheDir(), filename + ".jpg");
                 break;
             case VIDEO:
-                outputFile = new File(c.getFilesDir(), filename + ".mp4");
+                outputFile = new File(c.getExternalCacheDir(), filename + ".mp4");
                 break;
             case AUDIO:
-                outputFile = new File(c.getFilesDir(), filename + ".mp3");
+                outputFile = new File(c.getExternalCacheDir(), filename + ".mp3");
+                break;
+            default:
+                outputFile = new File(c.getExternalCacheDir(), filename + ".jpg");
         }
         BOMedia resultMedia = new BOMedia("", BOMedia.TYPE.IMAGE, outputFile);
         if (resultMedia.getUrl().isEmpty()) {
@@ -96,13 +113,59 @@ public class MediaManager {
         return resultMedia;
     }
 
+    public BOMedia createInternalMedia(Context c, BOMedia.TYPE type) {
+        File outputFile = null;
+        String filename = UUID.randomUUID().toString();
+        switch (type) {
+            case IMAGE:
+                outputFile = new File(c.getFilesDir(), filename + ".jpg");
+                break;
+            case VIDEO:
+                outputFile = new File(c.getFilesDir(), filename + ".mp4");
+                break;
+            case AUDIO:
+                outputFile = new File(c.getFilesDir(), filename + ".mp3");
+                break;
+            default:
+                outputFile = new File(c.getExternalCacheDir(), filename + ".jpg");
+        }
+        BOMedia resultMedia = new BOMedia("", BOMedia.TYPE.IMAGE, outputFile);
+        if (resultMedia.getUrl().isEmpty()) {
+            resultMedia.setSaveState(BOMedia.SAVESTATE.TEMP);
+        } else {
+            resultMedia.setSaveState(BOMedia.SAVESTATE.SAVED);
+        }
+        resultMedia.save();
+        return resultMedia;
+    }
+
+
+    public static boolean isMediaAlreadySaved(int remoteID) {
+        boolean result = false;
+        for(BOMedia media : getSavedMediaList()) {
+            if(media.getId() == remoteID) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    public void setMedia(BOMedia media, View v) {
+        media = getMediaByID(media.getRemoteID());
+        if(v instanceof ImageView) {
+            ImageView view = (ImageView) v;
+            view.setImageURI(media.getFileUri());
+
+        }
+    }
+
     /**
      * Moves file of incoming post to internal Storage
      * @param c
      * @param media
      * @param listener
      * */
-    public void moveToInternal(Context c, final BOMedia media,@Nullable OnFileMovedListener listener) {
+    public static void moveToInternal(Context c, final BOMedia media, @Nullable OnFileMovedListener listener) {
         String postfix = ".jpg";
         CutAndPastePostingToInternalRunnable runnable = new CutAndPastePostingToInternalRunnable(media, c, listener);
         Handler movingHandler = new Handler();
@@ -110,12 +173,29 @@ public class MediaManager {
 
     }
 
-    private class CutAndPastePostingToInternalRunnable implements Runnable {
+    public static BOMedia createMedia(int id, BOMedia.TYPE type,String url) {
+        if(isMediaAlreadySaved(id)) {
+
+        }
+        return null;
+    }
+
+    @Nullable
+    public static BOMedia getMediaByID(int id) {
+        for(BOMedia m : getSavedMediaList()) {
+            if(m.getRemoteID() == id) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    private static class CutAndPastePostingToInternalRunnable implements Runnable {
         private BOMedia _media;
         private Context _context;
         private OnFileMovedListener _listener = null;
         private boolean hasListener = false;
-        public CutAndPastePostingToInternalRunnable(BOMedia m, Context c,@Nullable OnFileMovedListener listener) {
+        public CutAndPastePostingToInternalRunnable(BOMedia m, Context c, @Nullable OnFileMovedListener listener) {
             _media = m;
             _context = c;
             if(listener != null) {
@@ -143,6 +223,7 @@ public class MediaManager {
                 //establish new reference
                 _media.setFile(toFile);
                 _media.setSaveState(BOMedia.SAVESTATE.SAVED);
+                _media.save();
 
                 //delete old reference
                 fromFile.delete();
@@ -160,7 +241,6 @@ public class MediaManager {
         private String getFileExt(String filename) {
                 return filename.substring(filename.lastIndexOf(".") + 1, filename.length());
         }
-
     }
 
     public interface OnFileMovedListener {

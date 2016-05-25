@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
@@ -41,7 +42,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         setContentView(R.layout.activity_main);
 
         _userManager = UserManager.getInstance(this);
-        _userManager.updateFromServer(null);
+        _userManager.updateFromServer(this,null);
 
         // Set up drawer
         _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -54,7 +55,12 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
                         switch(menuItem.getItemId()) {
                             case R.id.post:
-                                startActivity(new Intent(getApplicationContext(), PostScreenActivity.class));
+                                if(UserManager.getInstance(getApplicationContext()).getCurrentUsersRole()== User.Role.VISITOR) {
+                                    Toast.makeText(getApplicationContext(),getApplicationContext().getString(R.string.toast_login_first),Toast.LENGTH_LONG).show();
+                                    startActivity(new Intent(getApplicationContext(),LoginRegisterActivity.class));
+                                } else {
+                                    startActivity(new Intent(getApplicationContext(), PostScreenActivity.class));
+                                }
                                 break;
                             case R.id.all_posts:
                                 setCurrentFragment(new AllPostsFragment());

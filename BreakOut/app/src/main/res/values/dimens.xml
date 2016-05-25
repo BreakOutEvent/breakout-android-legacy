@@ -13,4 +13,7 @@
     <dimen name="linearLayout_vertical_margin_elements">10dp</dimen>
     <dimen name="content_width">@dimen/match_parent</dimen>
     <dimen name="tool_bar_top_padding">24dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
 </resources>

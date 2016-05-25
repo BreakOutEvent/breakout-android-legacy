@@ -1,11 +1,17 @@
 package org.break_out.breakout.sync.model;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
 import org.break_out.breakout.BOLocation;
+import org.break_out.breakout.manager.MediaManager;
+import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.BOMedia;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,10 +42,11 @@ public class Posting extends SugarRecord {
     private String _uploadToken = "";
     private String _remoteID = "";
     private String _fileURL="";
+    private String _teamName = "";
+    private String _userName = "";
     private BOMedia _linkedMedia;
     public Posting() {
-        // Timestamp has to be in seconds
-        _createdTimestamp = System.currentTimeMillis()/60;
+        _createdTimestamp = System.currentTimeMillis();
     }
 
     public Posting(String message,@Nullable BOLocation location,@Nullable BOMedia media) {
@@ -54,13 +61,25 @@ public class Posting extends SugarRecord {
         _text = message;
     }
 
-    public void setText(String text) {
-        _text = text;
+    public Posting(String teamName,String message,@Nullable BOLocation location,@Nullable BOMedia media) {
+        this();
+        _hasMedia = media!=null;
+        if(_hasMedia) {
+            _linkedMedia = media;
+        }
+        if(location != null) {
+            _location = location;
+        }
+        _text = message;
+        _teamName = teamName;
     }
 
+    //getters
     public String getText() {
         return _text;
     }
+
+    public String getTeamName() { return _teamName;}
 
     public long getCreatedTimestamp() {
         return _createdTimestamp;
@@ -98,6 +117,13 @@ public class Posting extends SugarRecord {
         return _linkedMedia;
     }
 
+    public String getusername() { return _userName; }
+
+    //setters
+    public void setText(String text) {
+        _text = text;
+    }
+
     public void setRemoteID(String id) { _remoteID = id;}
 
     public void setUploadCredentials(String id,String token) {
@@ -113,24 +139,56 @@ public class Posting extends SugarRecord {
         _createdTimestamp = timestamp;
     }
 
+    public void setUsername(String username) {
+        _userName = username;
+    }
 
-    public static Posting fromJSON(JSONObject object) throws JSONException {
+    public void setTeamname(String teamname) { _teamName = teamname;}
+
+
+    public static Posting fromJSON(Context c, JSONObject object) throws JSONException {
         String id = object.getString("id");
         String text = object.getString("text");
         String timestamp = object.getString("date");
-        long latitude = !object.getString("postingLocation").equals("null") ? object.getJSONObject("postingLocation").getLong("latitude") : 0;
-        long longitude = !object.getString("postingLocation").equals("null") ? object.getJSONObject("postingLocation").getLong("longitude") : 0;
+        JSONObject locationObject = object.getJSONObject("postingLocation");
+        long latitude = locationObject.getLong("latitude");
+        long longitude = locationObject.getLong("longitude");
+        Log.d(TAG,"latitude: "+latitude+" longitude: "+longitude);
+        String teamName = locationObject.getString("team");
         BOLocation location = new BOLocation();
         if(!(latitude == 0 || longitude == 0)) {
-            location.setLongitude(latitude);
+            location.setLatitude(latitude);
             location.setLongitude(longitude);
+            Log.d(TAG,"location set lat long");
         } else {
             location = null;
         }
+        JSONArray mediaArray;
+        BOMedia correlatingMedia = null;
+        if((mediaArray= object.getJSONArray("media")).length()>0) {
+            int mediaID = mediaArray.getJSONObject(0).getInt("id");
+            if(MediaManager.getMediaByID(mediaID) == null) {
+                correlatingMedia = BOMedia.fromJSON(c, mediaArray);
+            } else {
+                correlatingMedia = MediaManager.getMediaByID(mediaID);
+            }
+        }
 
-        Posting returnPosting = new Posting(text,location,null);
+        JSONObject userObject = object.getJSONObject("user");
+        JSONObject userDataObject = userObject.getJSONObject("participant");
+        String teamname = userDataObject.getString("teamName");
+
+
+        Posting returnPosting = new Posting(teamName,text,location,null);
         returnPosting.setRemoteID(id);
         returnPosting.setTimestamp(Long.parseLong(timestamp));
+        returnPosting.setTeamname(teamname);
+
+        if(correlatingMedia != null) {
+            correlatingMedia.setPosting(returnPosting);
+            returnPosting.setLinkedMedia(correlatingMedia);
+            Log.d(TAG,"media is set!");
+        }
         return returnPosting;
     }
 

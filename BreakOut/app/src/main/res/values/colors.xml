@@ -12,6 +12,9 @@
     <color name="black_transparent_25">#4000</color>
     <color name="black_transparent_50">#8000</color>
     <color name="black_transparent_80">#C000</color>
+    <color name="black">#000</color>
+
+    <color name="background_grey">#f2f2f2</color>
 
     <color name="text_dark">#333</color>
 </resources>

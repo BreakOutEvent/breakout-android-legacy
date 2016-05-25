@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,6 +31,8 @@ public class UserManager {
     private static final String PREF_KEY = "pref_key_user";
 
     private static final String KEY_REMOTE_ID = "key_id";
+    private static final String KEY_TEAM_ID = "key_team_id";
+    private static final String KEY_EVENT_ID = "key_event-id";
     private static final String KEY_ROLE = "key_role";
     private static final String KEY_EMAIL = "key_email";
     private static final String KEY_PASSWORD = "key_password";
@@ -158,12 +159,13 @@ public class UserManager {
      */
     public void setCurrentUser(User user) {
         _currUser = user;
+        Log.d(TAG,"curUser set with teamID: "+_currUser.getTeamId());
         saveCurrUserToPrefs();
 
         notifyDataChangedListeners();
     }
 
-    public void updateFromServer(@Nullable final UserUpdateListener listener) {
+    public void updateFromServer(final Context c,@Nullable final UserUpdateListener listener) {
         // Set up runner
         BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_UPDATE_FROM_SERVER);
 
@@ -173,7 +175,7 @@ public class UserManager {
             public Bundle run(@Nullable Bundle params) {
                 Bundle result = new Bundle();
 
-                result.putBoolean(KEY_UPDATE_SUCCESS, _currUser.updateFromServerSync());
+                result.putBoolean(KEY_UPDATE_SUCCESS, _currUser.updateFromServerSync(c));
 
                 return result;
             }
@@ -335,6 +337,8 @@ public class UserManager {
         SharedPreferences.Editor editor = sharedPref.edit();
 
         editor.putLong(KEY_REMOTE_ID, _currUser.getRemoteId());
+        editor.putInt(KEY_TEAM_ID,_currUser.getTeamId());
+        editor.putInt(KEY_EVENT_ID,_currUser.getEventId());
         editor.putString(KEY_ROLE, _currUser.getRole().toString());
         editor.putString(KEY_EMAIL, _currUser.getEmail());
         editor.putString(KEY_PASSWORD, _currUser.getPassword());
@@ -365,6 +369,8 @@ public class UserManager {
 
         // Get values from prefs
         long remoteId = sharedPref.getLong(KEY_REMOTE_ID, -1);
+        int teamId = sharedPref.getInt(KEY_TEAM_ID,-1);
+        int eventId = sharedPref.getInt(KEY_EVENT_ID,-1);
         User.Role role = User.Role.fromString(sharedPref.getString(KEY_ROLE, ""));
         String email = sharedPref.getString(KEY_EMAIL, "");
         String password = sharedPref.getString(KEY_PASSWORD, "");
@@ -410,8 +416,11 @@ public class UserManager {
         user.setTShirtSize(tShirtSize);
         user.setGender(gender);
         user.setEventCity(eventCity);
+        user.setEventId(eventId);
+        user.setTeamId(teamId);
 
         _currUser = user;
     }
+
 
 }

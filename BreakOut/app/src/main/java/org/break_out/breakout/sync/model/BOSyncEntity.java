@@ -49,7 +49,6 @@ public abstract class BOSyncEntity extends SugarRecord {
 
     private int _downloadPriority = PRIORITY_NONE;
 
-    @Ignore
     public enum SyncState {
         UPLOADING,
         UPDATING,

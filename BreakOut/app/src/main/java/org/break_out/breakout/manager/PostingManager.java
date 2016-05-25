@@ -7,8 +7,9 @@ import android.util.Log;
 
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.constants.Constants;
-import org.break_out.breakout.sync.model.BOMedia;
+import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.sync.model.Posting;
+import org.break_out.breakout.ui.activities.PostScreenActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,16 +51,40 @@ public class PostingManager {
     }
 
     public static Posting buildPosting(String message, BOLocation location, BOMedia media) {
-        return new Posting(message, location,media);
+        return new Posting(message,location,media);
     }
 
     public static Posting buildPosting(String message,BOMedia media) {
         return new Posting(message,null,media);
     }
 
-    public void sendPostingToServer(Context c, Posting p) {
-        new SendPostToServerTask(c, p).execute();
+    public void sendPostingToServer(Context c, Posting p, PostScreenActivity.PostingSentListener listener) {
+        new SendPostToServerTask(c, p,listener).execute();
     }
+
+    public static Posting buildRemotPosting(String username,String message,BOLocation location,BOMedia media) {
+        Posting returnPosting = buildPosting(message,location,media);
+        returnPosting.setUsername(username);
+        return returnPosting;
+    }
+
+    /**
+     * get posting from already saved postings by id
+     * @param id remoteID of the posting
+     * @return posting with matching remote ID or null
+     */
+    @Nullable
+    public Posting getPostingById(int id) {
+        ArrayList<Posting> postings = new ArrayList<>();
+        postings.addAll(Posting.listAll(Posting.class));
+        for(Posting curPosting : postings) {
+            if(Integer.parseInt(curPosting.getRemoteID()) == id) {
+                return curPosting;
+            }
+        }
+        return null;
+    }
+
 
     public void uploadImage(Posting posting) {
         if (posting.hasMedia()) {
@@ -67,8 +92,8 @@ public class PostingManager {
         }
     }
 
-    public void getAllPosts(@Nullable PostingListener postingListener) {
-        new FetchPostingsTask(postingListener).execute();
+    public void getAllPosts(Context c,@Nullable PostingListener postingListener) {
+        new FetchPostingsTask(c,postingListener).execute();
     }
 
     public void resetPostingList() {
@@ -78,10 +103,12 @@ public class PostingManager {
     private class SendPostToServerTask extends AsyncTask<Void, Void, Posting> {
         private Posting posting;
         private Context context;
+        private PostScreenActivity.PostingSentListener curListener;
 
-        public SendPostToServerTask(Context c, Posting posting) {
+        public SendPostToServerTask(Context c, Posting posting, PostScreenActivity.PostingSentListener listener) {
             this.posting = posting;
             context = c;
+            curListener = listener;
         }
 
         @Override
@@ -183,7 +210,7 @@ public class PostingManager {
             super.onPostExecute(posting);
             if (posting.hasMedia()) {
                 if (posting.hasUploadCredentials()) {
-                    new UploadMediaToServerTask(posting).execute();
+                    new UploadMediaToServerTask(posting,curListener).execute();
                 }
             }
         }
@@ -201,11 +228,13 @@ public class PostingManager {
 
     private class FetchPostingsTask extends AsyncTask<Void,Void,ArrayList<Posting>> {
         private PostingListener listener;
+        private Context context;
 
-        public FetchPostingsTask() {}
+        public FetchPostingsTask(Context c) {context = c;}
 
-        public FetchPostingsTask(PostingListener listener) {
+        public FetchPostingsTask(Context c,PostingListener listener) {
             this.listener = listener;
+            context = c;
         }
         @Override
         protected void onPreExecute() {
@@ -225,7 +254,7 @@ public class PostingManager {
                 if(response.isSuccessful()) {
                     String JSONResponse = response.body().string();
                     JSONArray array = new JSONArray(JSONResponse);
-                    responseList = generateFromJSON(array);
+                    responseList = generateFromJSON(context,array);
 
                 }
             } catch(Exception e) {
@@ -240,26 +269,29 @@ public class PostingManager {
             if(listener != null) {
                 listener.onPostingListChanged();
             }
+            Log.d(TAG,"onProgressUpdate called, posting saved");
         }
 
         @Override
         protected void onPostExecute(ArrayList<Posting> postings) {
             super.onPostExecute(postings);
             for(Posting p : postings) {
-                p.save();
-                onProgressUpdate();
+                if(getPostingById(Integer.parseInt(p.getRemoteID())) == null) {
+                    p.save();
+                    onProgressUpdate();
+                }
             }
             if(listener != null) {
                 listener.onPostingListChanged();
             }
         }
 
-        private ArrayList<Posting> generateFromJSON(JSONArray array) {
+        private ArrayList<Posting> generateFromJSON(Context c,JSONArray array) {
             ArrayList<Posting> responseList = new ArrayList<Posting>();
             try {
                 for(int i=0; i<array.length();i++) {
                     JSONObject object = array.getJSONObject(i);
-                    Posting tempPost = Posting.fromJSON(object);
+                    Posting tempPost = Posting.fromJSON(c,object);
                     responseList.add(tempPost);
                 }
             } catch(JSONException e) {
@@ -270,17 +302,29 @@ public class PostingManager {
         }
     }
 
-    private class UploadMediaToServerTask extends AsyncTask<Void, Void, Boolean> {
-        private Posting toBeUploadedPosting;
+    private class UploadMediaToServerTask extends AsyncTask<Void, Integer, Boolean> {
+        Posting toBeUploadedPosting;
         String attachmentFileName = "";
+        PostScreenActivity.PostingSentListener curListener;
 
-        public UploadMediaToServerTask(Posting posting) {
+        public UploadMediaToServerTask(Posting posting, PostScreenActivity.PostingSentListener listener) {
             toBeUploadedPosting = posting;
             attachmentFileName = toBeUploadedPosting.getMedia().getFile().getName();
+            curListener = listener;
             if(toBeUploadedPosting.getMediaFile() == null){
                 //TODO:Handle missing file
                 Log.d(TAG,"file not found");
             }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
         }
 
         @Override
@@ -307,31 +351,30 @@ public class PostingManager {
                         //TODO: handle errors
                         Log.d(TAG,"no success: "+response.code()+" message: "+response.message());
                     } else {
-                        //find out which URL the image is stored at and prevent double data loading
-                        int size = 0;
-                        String setURL = "";
+                        //find out the media id to prevent double loading
                         String responseBody = response.body().string();
                         Log.d(TAG,"Body: "+responseBody);
-                        /*JSONArray responseArray = new JSONArray(response.body().string());
-                        for(int i = 0; i<responseArray.length(); i++) {
-                            JSONObject curObject = new JSONObject(responseArray.getString(i));
-                            int currentImageSize = curObject.getInt("size");
-                            if(currentImageSize > size) {
-                                setURL = curObject.getString("url");
-                            }
-                        }
-                        if(!setURL.isEmpty()) {
-                            toBeUploadedPosting.getMedia().setURL(setURL);
-                            toBeUploadedPosting.getMedia().setSaveState(BOMedia.SAVESTATE.SAVED);
-                        }*/
-
+                        JSONObject responseObject = new JSONObject(responseBody);
+                        JSONArray mediaArray = responseObject.getJSONArray("media");
+                        toBeUploadedPosting.getMedia().setID(mediaArray.getJSONObject(0).getInt("id"));
+                        toBeUploadedPosting.getMedia().setIsDownloaded(true);
+                        return true;
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
+                    return false;
                 }
             }
-            return null;
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            if(result) {
+                curListener.onPostSend();
+            }
         }
     }
 
