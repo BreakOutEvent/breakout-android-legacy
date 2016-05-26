@@ -155,7 +155,7 @@ public class BOMedia extends SugarRecord {
         this.save();
     }
 
-    public void setID(int id) {
+    public void setRemoteID(int id) {
         _remoteID = id;
         callListener();
         this.save();
@@ -199,7 +199,7 @@ public class BOMedia extends SugarRecord {
                         String url = currentSize.getString(JSON_URL);
                         if(MediaManager.getMediaByID(id)==null) {
                             media = manager.createExternalMedia(c, TYPE.IMAGE);
-                            media.setID(id);
+                            media.setRemoteID(id);
                             media.setURL(url);
                         } else {
                             Log.d(TAG,"media already existing");

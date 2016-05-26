@@ -26,6 +26,7 @@ public class ChallengeManager  {
 
     private ChallengeManager() {
         _challenges = new ArrayList<>();
+        Log.d(TAG,"arrayList reseted");
     }
 
     public static ChallengeManager getInstance() {
@@ -50,8 +51,6 @@ public class ChallengeManager  {
     }
 
     public ArrayList<Challenge> getAllChallenges() {
-        ArrayList<Challenge> returnChallenge = new ArrayList<>();
-        returnChallenge.addAll(Challenge.listAll(Challenge.class));
         return _challenges;
     }
 
@@ -63,7 +62,7 @@ public class ChallengeManager  {
         void onChallengesFetched();
     }
 
-    private class FetchChallengesTask extends AsyncTask<Void,Void,Void> {
+    private class FetchChallengesTask extends AsyncTask<Void,Void,ArrayList<Challenge>> {
         Context _context;
         ChallengesFetchedListener _listener;
 
@@ -72,7 +71,7 @@ public class ChallengeManager  {
             _listener = listener;
         }
         @Override
-        protected Void doInBackground(Void... params) {
+        protected ArrayList<Challenge> doInBackground(Void... params) {
             int eventId = UserManager.getInstance(_context).getCurrentUser().getEventId();
             int teamId = UserManager.getInstance(_context).getCurrentUser().getTeamId();
 
@@ -85,9 +84,10 @@ public class ChallengeManager  {
                 ArrayList<Challenge> responseList = Challenge.fromJSON(new JSONArray(responseString));
                 for(Challenge c : responseList) {
                     if(!isSaved(c)){
-                        _challenges.add(c);
+                        getAllChallenges().add(c);
                     }
                 }
+                return getAllChallenges();
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -95,8 +95,8 @@ public class ChallengeManager  {
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(ArrayList<Challenge> list) {
+            super.onPostExecute(list);
             if(_listener != null) {
                 _listener.onChallengesFetched();
             }
@@ -104,13 +104,7 @@ public class ChallengeManager  {
 
         private boolean isSaved(Challenge challenge) {
             boolean saved = false;
-            /*for(Challenge c : Challenge.listAll(Challenge.class)) {
-                if(c.getRemoteID() == challenge.getRemoteID()) {
-                    saved = true;
-                }
-            }*/
-
-            for(Challenge c : _challenges) {
+            for(Challenge c : getAllChallenges()) {
                 if(c.getRemoteID() == challenge.getRemoteID()) {
                     saved = true;
                 }
@@ -118,5 +112,4 @@ public class ChallengeManager  {
             return saved;
         }
     }
-
 }

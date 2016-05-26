@@ -30,6 +30,7 @@ import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.BOLocationManager;
+import org.break_out.breakout.manager.ChallengeManager;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.manager.UserManager;
@@ -60,11 +61,14 @@ public class PostScreenActivity extends BOActivity {
     private static final String BUNDLETAG_URI = "seturi";
     private static final String RUNNERTAG_MOVE_IMAGE = "moveImage";
     private final static int REQUESTCODE_IMAGE = 0;
+    public final static int REQUESTCODE_CHALLENGE = 3;
 
     private static File _mainFolder;
 
     private TextView _tvLocation;
+    private TextView _tvChallengeDescription;
     private ImageView _ivChosenImage;
+    private ImageView _ivChallengeIcon;
     private BOEditText _etMessage;
     private RelativeLayout _rlChallenge;
 
@@ -76,6 +80,7 @@ public class PostScreenActivity extends BOActivity {
 
     private UserManager _userManager;
     private User _currentUser;
+    private Challenge _chosenChallenge;
 
     private ArrayList<Challenge> _challenges;
 
@@ -103,6 +108,8 @@ public class PostScreenActivity extends BOActivity {
         _ivChosenImage = (ImageView) findViewById(R.id.post_iv_chosenImage);
         _etMessage = (BOEditText) findViewById(R.id.post_et_message);
         _rlChallenge = (RelativeLayout) findViewById(R.id.post_rl_challenge);
+        _ivChallengeIcon = (ImageView) findViewById(R.id.post_iv_addChallenge);
+        _tvChallengeDescription = (TextView) findViewById(R.id.post_tv_chooseChallenge);
 
         rlAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,7 +122,7 @@ public class PostScreenActivity extends BOActivity {
             @Override
             public void onClick(View v) {
                 Intent startChallengeChooseIntent = new Intent(instance,ChooseChallengeActivity.class);
-                instance.startActivityForResult(startChallengeChooseIntent,0);
+                instance.startActivityForResult(startChallengeChooseIntent,REQUESTCODE_CHALLENGE);
             }
         });
 
@@ -172,24 +179,34 @@ public class PostScreenActivity extends BOActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == Activity.RESULT_OK) {
-            boolean fromCamera = data.getData() == null;
             if(requestCode == REQUESTCODE_IMAGE) {
-                Uri imageUri = null;
-                if(!fromCamera) {
-                    imageUri = data.getData();
+                boolean fromCamera = data.getData() == null;
+                if(requestCode == REQUESTCODE_IMAGE) {
+                    Uri imageUri = null;
+                    if(!fromCamera) {
+                        imageUri = data.getData();
                     /*moveFileToProfilePath(imageUri);*/
-                } else {
-                    imageUri = Uri.fromFile(_postMedia.getFile());
-                }
-                _ivChosenImage.setImageURI(imageUri);
-                MediaManager.getInstance().moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
-                    @Override
-                    public void onFileMoved(File result) {
-                        Uri newUri = Uri.fromFile(result);
-                        _ivChosenImage.setImageURI(newUri);
+                    } else {
+                        imageUri = Uri.fromFile(_postMedia.getFile());
                     }
-                });
+                    _ivChosenImage.setImageURI(imageUri);
+                    MediaManager.getInstance().moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
+                        @Override
+                        public void onFileMoved(File result) {
+                            Uri newUri = Uri.fromFile(result);
+                            _ivChosenImage.setImageURI(newUri);
+                        }
+                    });
+                }
+            } else if(requestCode == REQUESTCODE_CHALLENGE) {
+                int challengeId = data.getIntExtra(ChooseChallengeActivity.RESULT_ID,-1);
+                if(challengeId!=-1) {
+                    Log.d(TAG,"challenge chosen: "+challengeId);
+                    Challenge chosenChallenge = ChallengeManager.getInstance().getChallengeByRemoteID(challengeId);
+                    setChosenChallenge(chosenChallenge);
+                }
             }
+
         } else {
             Toast.makeText(this, "Result False", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "result code: " + resultCode);
@@ -293,6 +310,13 @@ public class PostScreenActivity extends BOActivity {
         }
     }
 
+    private void setChosenChallenge(Challenge challenge) {
+        String description = challenge.getDescription();
+        _tvChallengeDescription.setText(description);
+        _ivChallengeIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_trophy_black_24dp));
+        _chosenChallenge = challenge;
+    }
+
     /**
      * Request to select/take a profile picture, either
      * by selecting one from an gallery app or by taking
@@ -379,7 +403,7 @@ public class PostScreenActivity extends BOActivity {
         } else {
 
             PostingManager m = PostingManager.getInstance();
-            m.sendPostingToServer(this, PostingManager.buildPosting(comment, sendLocation, media), new PostingSentListener());
+            m.sendPostingToServer(this, PostingManager.buildPosting(comment, sendLocation, media),_chosenChallenge, new PostingSentListener());
         }
     }
 

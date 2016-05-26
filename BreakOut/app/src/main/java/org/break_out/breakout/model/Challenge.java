@@ -102,4 +102,8 @@ public class Challenge extends SugarRecord {
         }
         return null;
     }
+
+    public enum STATE{
+        PROPOSED,WITH_PROOF;
+    }
 }

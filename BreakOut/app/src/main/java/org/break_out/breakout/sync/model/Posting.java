@@ -9,7 +9,6 @@ import com.orm.dsl.Ignore;
 
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.manager.MediaManager;
-import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.BOMedia;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,13 +39,14 @@ public class Posting extends SugarRecord {
     private String _text = "";
     private boolean _hasMedia = false;
     private String _uploadToken = "";
+    private String _mediaId = "";
     private String _remoteID = "";
     private String _fileURL="";
     private String _teamName = "";
     private String _userName = "";
     private BOMedia _linkedMedia;
     public Posting() {
-        _createdTimestamp = System.currentTimeMillis();
+        _createdTimestamp = System.currentTimeMillis()/1000;
     }
 
     public Posting(String message,@Nullable BOLocation location,@Nullable BOMedia media) {
@@ -88,6 +88,8 @@ public class Posting extends SugarRecord {
     @Nullable
     public File getMediaFile() { return _linkedMedia == null ? null : _linkedMedia.getFile();}
 
+    public String getMediaId() {return _mediaId;}
+
     @Nullable
     public BOLocation getLocation() { return _location;}
 
@@ -126,8 +128,10 @@ public class Posting extends SugarRecord {
 
     public void setRemoteID(String id) { _remoteID = id;}
 
+    public void setMediaId(String id) { _mediaId = id;}
+
     public void setUploadCredentials(String id,String token) {
-        _remoteID = id;
+        setMediaId(id);
         _uploadToken = token;
     }
 
