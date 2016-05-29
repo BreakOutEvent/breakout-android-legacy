@@ -12,6 +12,7 @@
         <item
             android:id="@+id/your_team"
             android:icon="@drawable/ic_group_black_24dp"
+            android:enabled="false"
             android:title="Dein Team"/>
 
         <item

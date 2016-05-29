@@ -67,15 +67,15 @@ public class AllPostsFragment extends BOFragment {
             }
         });
 
-        fetchAllPosts();
-
+        /*fetchAllPosts();*/
+        fetchNewPosts();
         return v;
     }
 
     private void fetchAllPosts() {
         PostingManager m = PostingManager.getInstance();
         m.resetPostingList();
-        PostingManager.getInstance().getAllPosts(getContext(), new PostingManager.PostingListener() {
+        m.getAllPosts(getContext(), new PostingManager.PostingListener() {
             @Override
             public void onPostingListChanged() {
                 updatePostList();
@@ -83,11 +83,37 @@ public class AllPostsFragment extends BOFragment {
         });
     }
 
-    private void updatePostList() {
-        _dataList.clear();
-        _dataList.addAll(Posting.listAll(Posting.class, "_CREATED_TIMESTAMP"));
-        Collections.reverse(_dataList);
+    private void fetchNewPosts() {
+        PostingManager m = PostingManager.getInstance();
+        m.getAllPosts(getContext(), new PostingManager.PostingListener() {
+            @Override
+            public void onPostingListChanged() {
+                updateNewPosts();
+            }
+        });
+    }
+
+    private void updateNewPosts(){
+        for(Posting p : Posting.listAll(Posting.class)) {
+            if(!isInDataList(p)) {
+                _dataList.add(p);
+            }
+        }
         _adapter.notifyDataSetChanged();
     }
 
+    private void updatePostList() {
+        _dataList.clear();
+        _dataList.addAll(Posting.listAll(Posting.class));
+        _adapter.notifyDataSetChanged();
+    }
+
+    private boolean isInDataList(Posting posting) {
+        for(Posting p : _dataList) {
+            if(p.getRemoteID() == posting.getRemoteID()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

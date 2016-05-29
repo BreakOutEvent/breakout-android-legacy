@@ -142,17 +142,22 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             }
         }
         holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_account_box_white_24dp));
-        if(!posting.getProfileImage().isDownloaded()) {
-            new LoadImageTask(posting.getProfileImage(), holder.civTeamPic, BOMedia.SIZE.SMALL).execute();
-        } else {
-            if(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()) != null) {
-                holder.civTeamPic.setImageBitmap(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()));
+        if(posting.getProfileImage()!=null) {
+            if(!posting.getProfileImage().isDownloaded()) {
+                new LoadImageTask(posting.getProfileImage(), holder.civTeamPic, BOMedia.SIZE.SMALL).execute();
             } else {
-                Bitmap profileImageBitmap = MediaManager.decodeSampledBitmapFromFile(posting.getProfileImage(), 75, 75);
-                MediaManager.getInstance().addToCache(posting.getProfileImage().getUrl(), profileImageBitmap);
-                holder.civTeamPic.setImageBitmap(profileImageBitmap);
+                if(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()) != null) {
+                    holder.civTeamPic.setImageBitmap(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()));
+                } else {
+                    Bitmap profileImageBitmap = MediaManager.decodeSampledBitmapFromFile(posting.getProfileImage(), 75, 75);
+                    MediaManager.getInstance().addToCache(posting.getProfileImage().getUrl(), profileImageBitmap);
+                    holder.civTeamPic.setImageBitmap(profileImageBitmap);
+                }
             }
+        } else {
+            holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.placeholder_profile_pic));
         }
+
         if(posting.getProvenChallengeId() != -1) {
             holder.rlChallenge.setVisibility(View.VISIBLE);
             holder.tvChallenge.setText(posting.getChallengeDescription());

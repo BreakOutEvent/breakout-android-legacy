@@ -1,23 +1,23 @@
-<LinearLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/map_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:elevation="4dp"
         android:paddingEnd="15dp"
         android:paddingRight="15dp"
-        android:title="@string/title_newPost"
+        android:title="@string/title_activity_maps"
+        app:layout_scrollFlags="scroll|enterAlways"
         app:navigationIcon="@drawable/ic_close_white_24dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-        </android.support.v7.widget.Toolbar>
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
@@ -27,4 +27,12 @@
               android:layout_height="match_parent"
               tools:context="org.break_out.breakout.ui.activities.MapsActivity" />
 
-</LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        app:layout_anchor="@+id/map"
+        app:layout_anchorGravity="bottom|right|end"
+        android:src="@drawable/ic_my_location_black_24dp"/>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -3,10 +3,10 @@
 
     <string name="app_name">BreakOut</string>
 
-    <string name="intentaction_locationservice">breakout.intent.action.locationService</string>
-    <string name="intentaction_updatelist">breakout.intent.action.updateLocation</string>
-    <string name="PREFERENCES_GLOBAL">BreakOutPreferences</string>
-    <string name="PREFERENCE_CURRENTLY_LOCATING">IsCurrentlyLocating</string>
+    <string name="intentaction_locationservice" translatable="false">breakout.intent.action.locationService</string>
+    <string name="intentaction_updatelist" translatable="false">breakout.intent.action.updateLocation</string>
+    <string name="PREFERENCES_GLOBAL" translatable="false">BreakOutPreferences</string>
+    <string name="PREFERENCE_CURRENTLY_LOCATING" translatable="false">IsCurrentlyLocating</string>
     <string name="account_not_created">The account could not be created.</string>
     <string name="button_continue">next</string>
     <string name="error">Error</string>
@@ -89,11 +89,14 @@
     <string name="toast_login_first">You have to log in first!</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="title_activity_maps">Map</string>
 
     <string name="from">from</string>
 
     <string name="progress_please_wait">please wait...</string>
+    <string name="early_bird_welcome_text">We are currently working on making the app perfect for your trip around the world. Login to continue</string>
+
+    <string name="choose_challenge">Choose challenge (optional)</string>
 
 </resources>

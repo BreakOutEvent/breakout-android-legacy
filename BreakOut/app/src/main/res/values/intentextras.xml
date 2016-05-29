@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="INTENTEXTRA_MEDIA">mediaID</string>
+    <string name="INTENTEXTRA_MEDIA" translatable="false">mediaID</string>
 </resources>

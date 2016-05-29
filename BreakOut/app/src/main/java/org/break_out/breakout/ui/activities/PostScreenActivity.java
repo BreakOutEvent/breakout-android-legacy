@@ -311,7 +311,9 @@ public class PostScreenActivity extends BOActivity {
     private void setChosenChallenge(Challenge challenge) {
         String description = challenge.getDescription();
         _tvChallengeDescription.setText(description);
+        _tvChallengeDescription.setAlpha(1.0f);
         _ivChallengeIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_trophy_black_24dp));
+        _ivChallengeIcon.setAlpha(1.0f);
         _chosenChallenge = challenge;
     }
 

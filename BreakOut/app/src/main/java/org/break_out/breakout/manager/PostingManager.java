@@ -92,13 +92,6 @@ public class PostingManager {
         return null;
     }
 
-
-    public void uploadImage(Posting posting) {
-        if(posting.hasMedia()) {
-            File imageFile = posting.getMediaFile();
-        }
-    }
-
     public void getAllPosts(Context c, @Nullable PostingListener postingListener) {
         new FetchPostingsTask(c, postingListener).execute();
     }

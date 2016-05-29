@@ -30,7 +30,7 @@
     <string name="textview_about">Was ist Breakout?</string>
     <string name="tooltip_username_password">Bitte gib deine E-Mail und ein Passwort ein.</string>
 
-    <string name="early_bird_welcome_text">Wir arbeiten gerade daran die App perfekt zu machen für deinen Trip um die Welt. Damit es auch für dich am 3./4. Juni losgehen kann musst du dich noch für das Event registrieren und zusammen mit einem Partner ein Team bilden.</string>
+    <string name="early_bird_welcome_text">Wir arbeiten gerade daran die App perfekt zu machen für deinen Trip um die Welt. Logge dich ein, um fortzufahren</string>
     <string name="early_bird_welcome_title">Bald geht es los!</string>
 
     <string-array name="gender_array">
@@ -89,5 +89,7 @@
     <string name="toast_login_first">Du musst dich zuerst einloggen!</string>
     <string name="from">von</string>
     <string name="progress_please_wait">Bitte warten...</string>
+    <string name="title_activity_maps">Karte</string>
+    <string name="choose_challenge">Challenge wählen (optional)</string>
 
 </resources>

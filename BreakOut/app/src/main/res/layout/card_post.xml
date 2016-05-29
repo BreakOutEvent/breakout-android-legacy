@@ -31,9 +31,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:paddingTop="10dp">
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="16dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -48,25 +48,33 @@
                         android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bg_login_600dp"/>
-
-                    <TextView
-                        android:id="@+id/posting_tv_teamName"
+                        android:src="@drawable/placeholder_profile_pic"/>
+                    <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_toEndOf="@id/posting_civ_teamPic"
                         android:layout_toRightOf="@id/posting_civ_teamPic"
-                        android:text="teamname"/>
+                        android:layout_centerVertical="true">
 
-                    <TextView
-                        android:id="@+id/posting_tv_teamLocation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignLeft="@id/posting_tv_teamName"
-                        android:layout_alignStart="@id/posting_tv_teamName"
-                        android:layout_below="@id/posting_tv_teamName"
-                        android:text="location"
-                        android:textColor="@color/black_transparent_25"/>
+                        <TextView
+                            android:id="@+id/posting_tv_teamName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:text="teamname"/>
+
+                        <TextView
+                            android:id="@+id/posting_tv_teamLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignLeft="@id/posting_tv_teamName"
+                            android:layout_alignStart="@id/posting_tv_teamName"
+                            android:layout_below="@id/posting_tv_teamName"
+                            android:textSize="12sp"
+                            android:text="location"
+                            android:textColor="@color/black_transparent_25"/>
+
+                    </RelativeLayout>
 
                     <TextView
                         android:id="@+id/posting_tv_time"
@@ -75,6 +83,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
+                        android:textSize="14sp"
                         android:textColor="@color/black_transparent_25"/>
 
                 </RelativeLayout>
@@ -83,7 +92,9 @@
                     android:id="@+id/posting_tv_comment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textSize="14sp"
                     android:text="fksdfkjsfdsf"/>
 
                 <RelativeLayout
@@ -91,7 +102,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/box_challenge"
-                    android:padding="@dimen/activity_horizontal_margin"
+                    android:paddingLeft="20dp"
                     android:minHeight="50dp"
                     android:visibility="visible"
                     android:layout_marginBottom="12dp">
@@ -108,9 +119,16 @@
                         android:layout_height="wrap_content"
                         android:layout_toEndOf="@+id/post_iv_trophy"
                         android:layout_toRightOf="@id/post_iv_trophy"
-                        android:gravity="center_horizontal"
-                        android:layout_marginLeft="5dp"
-                        android:text="aaaaaaaaa"/>
+                        android:layout_centerInParent="true"
+                        android:gravity="left"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:textSize="13sp"
+                        android:text="aaaaaaaaa\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"/>
                 </RelativeLayout>
             </LinearLayout>
 
