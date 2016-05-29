@@ -1,10 +1,13 @@
 package org.break_out.breakout.manager;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.break_out.breakout.BOLocation;
+import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.Challenge;
@@ -108,6 +111,7 @@ public class PostingManager {
         private Posting posting;
         private Context context;
         private Challenge chosenChallenge;
+        private ProgressDialog progressDialog;
         private PostScreenActivity.PostingSentListener curListener;
 
         public SendPostToServerTask(Context c, Posting posting, @Nullable Challenge chosenChallenge, PostScreenActivity.PostingSentListener listener) {
@@ -120,6 +124,10 @@ public class PostingManager {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setCancelable(false);
+            progressDialog.setMessage("creating Posting...");
+            progressDialog.show();
         }
 
         @Override
@@ -193,6 +201,7 @@ public class PostingManager {
                 Response response = client.newCall(request).execute();
                 String responseBody = response.body().string();
                 JSONObject responseJSON = new JSONObject(responseBody);
+                Log.d(TAG, responseJSON.toString());
                 posting.setRemoteID(responseJSON.getString("id"));
                 if(posting.hasMedia()) {
                     JSONObject mediaDataJSON = new JSONObject(new JSONArray(responseJSON.getString("media")).getJSONObject(0).toString());
@@ -213,10 +222,29 @@ public class PostingManager {
             super.onPostExecute(posting);
             if(posting.hasMedia()) {
                 if(posting.hasUploadCredentials()) {
-                    new UploadMediaToServerTask(posting, curListener).execute();
+                    if(chosenChallenge != null) {
+                        new PostChallengeTask(context, chosenChallenge, posting, null).execute();
+                    }
+                    new UploadMediaToServerTask(posting, curListener, progressDialog).execute();
+                } else {
+                    if(chosenChallenge != null) {
+                        new PostChallengeTask(context, chosenChallenge, posting, curListener).execute();
+                        if(progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                    }
                 }
+            } else {
                 if(chosenChallenge != null) {
-                    new PostChallengeTask(context, chosenChallenge, posting).execute();
+                    new PostChallengeTask(context, chosenChallenge, posting, curListener).execute();
+                    if(progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                } else {
+                    curListener.onPostSend();
+                    if(progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
                 }
             }
         }
@@ -236,11 +264,13 @@ public class PostingManager {
         private Context context;
         private Challenge chosenChallenge;
         private Posting posting;
+        private PostScreenActivity.PostingSentListener listener;
 
-        public PostChallengeTask(Context context, Challenge challenge, Posting posting) {
+        public PostChallengeTask(Context context, Challenge challenge, Posting posting, @Nullable PostScreenActivity.PostingSentListener listener) {
             this.context = context;
             this.chosenChallenge = challenge;
             this.posting = posting;
+            this.listener = listener;
         }
 
         @Override
@@ -268,12 +298,16 @@ public class PostingManager {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            if(listener != null) {
+                listener.onPostSend();
+            }
         }
     }
 
     private class FetchPostingsTask extends AsyncTask<Void, Void, ArrayList<Posting>> {
         private PostingListener listener;
         private Context context;
+        ProgressDialog dialog;
 
         public FetchPostingsTask(Context c) {
             context = c;
@@ -287,6 +321,10 @@ public class PostingManager {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            dialog = new ProgressDialog(context);
+            dialog.setMessage(context.getString(R.string.progress_please_wait));
+            dialog.setCancelable(false);
+            dialog.show();
         }
 
         @Override
@@ -303,7 +341,6 @@ public class PostingManager {
                     String JSONResponse = response.body().string();
                     JSONArray array = new JSONArray(JSONResponse);
                     responseList = generateFromJSON(context, array);
-
                 }
             } catch(Exception e) {
                 e.printStackTrace();
@@ -320,16 +357,18 @@ public class PostingManager {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Posting> postings) {
-            super.onPostExecute(postings);
-            for(Posting p : postings) {
+        protected void onPostExecute(ArrayList<Posting> responseList) {
+            super.onPostExecute(responseList);
+            for(Posting p : responseList) {
                 if(getPostingById(Integer.parseInt(p.getRemoteID())) == null) {
                     p.save();
-                    onProgressUpdate();
                 }
             }
             if(listener != null) {
                 listener.onPostingListChanged();
+            }
+            if(dialog.isShowing()) {
+                dialog.dismiss();
             }
         }
 
@@ -353,19 +392,24 @@ public class PostingManager {
         Posting toBeUploadedPosting;
         String attachmentFileName = "";
         PostScreenActivity.PostingSentListener curListener;
+        ProgressDialog dialog;
 
-        public UploadMediaToServerTask(Posting posting, PostScreenActivity.PostingSentListener listener) {
+        public UploadMediaToServerTask(Posting posting, PostScreenActivity.PostingSentListener listener, @Nullable ProgressDialog dialog) {
             toBeUploadedPosting = posting;
             attachmentFileName = toBeUploadedPosting.getMedia().getFile().getName();
             curListener = listener;
             if(toBeUploadedPosting.getMediaFile() == null) {
                 //TODO:Handle missing file
             }
+            this.dialog = dialog;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            if(dialog != null) {
+                dialog.setMessage("uploading Media...");
+            }
         }
 
         @Override
@@ -398,10 +442,15 @@ public class PostingManager {
                     } else {
                         //find out the media id to prevent double loading
                         String responseBody = response.body().string();
-                        JSONObject responseObject = new JSONObject(responseBody);
-                        JSONArray mediaArray = responseObject.getJSONArray("media");
-                        toBeUploadedPosting.getMedia().setRemoteID(mediaArray.getJSONObject(0).getInt("id"));
-                        toBeUploadedPosting.getMedia().setIsDownloaded(true);
+                        Log.d(TAG, "response : " + responseBody);
+                        try {
+                            JSONObject responseObject = new JSONObject(responseBody);
+                            JSONArray mediaArray = responseObject.getJSONArray("media");
+                            toBeUploadedPosting.getMedia().setRemoteID(mediaArray.getJSONObject(0).getInt("id"));
+                            toBeUploadedPosting.getMedia().setIsDownloaded(true);
+                        } catch(JSONException e) {
+                            e.printStackTrace();
+                        }
                         return true;
                     }
 
@@ -418,6 +467,11 @@ public class PostingManager {
             super.onPostExecute(result);
             if(result) {
                 curListener.onPostSend();
+            }
+            if(dialog != null) {
+                if(dialog.isShowing()) {
+                    dialog.dismiss();
+                }
             }
         }
     }

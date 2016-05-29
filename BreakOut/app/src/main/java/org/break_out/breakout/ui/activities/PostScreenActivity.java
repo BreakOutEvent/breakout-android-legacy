@@ -184,18 +184,17 @@ public class PostScreenActivity extends BOActivity {
                 if(requestCode == REQUESTCODE_IMAGE) {
                     Uri imageUri = null;
                     if(!fromCamera) {
-                    /*moveFileToProfilePath(imageUri);*/
+                        imageUri = data.getData();
+                        _ivChosenImage.setImageURI(imageUri);
+                        moveFileToProfilePath(imageUri);
                     } else {
-                        imageUri = Uri.fromFile(_postMedia.getFile());
+                        MediaManager.moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
+                            @Override
+                            public void onFileMoved(File result) {
+                                _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
+                            }
+                        });
                     }
-                    _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
-                    MediaManager.getInstance().moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
-                        @Override
-                        public void onFileMoved(File result) {
-                            Uri newUri = Uri.fromFile(result);
-                            _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
-                        }
-                    });
                 }
             } else if(requestCode == REQUESTCODE_CHALLENGE) {
                 int challengeId = data.getIntExtra(ChooseChallengeActivity.RESULT_ID,-1);
@@ -372,6 +371,12 @@ public class PostScreenActivity extends BOActivity {
                 if(successful) {
                     Toast.makeText(getApplicationContext(), "Copying successful!", Toast.LENGTH_SHORT).show();
                     _ivChosenImage.setImageURI(Uri.fromFile(_postMedia.getFile()));
+                    MediaManager.moveToInternal(getApplicationContext(), _postMedia, new MediaManager.OnFileMovedListener() {
+                        @Override
+                        public void onFileMoved(File result) {
+                            _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
+                        }
+                    });
                 } else {
                     Toast.makeText(getApplicationContext(), "Copying failed!", Toast.LENGTH_SHORT).show();
                 }
@@ -459,7 +464,9 @@ public class PostScreenActivity extends BOActivity {
     }
 
     public final class PostingSentListener {
+        public PostingSentListener() {}
         public void onPostSend() {
+            Log.d(TAG,"onPostSend called");
             setResult(RESULT_OK);
             finish();
         }

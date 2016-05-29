@@ -88,5 +88,6 @@
     <string name="activate_location_services">Bitte aktiviere Ortungsdienste!</string>
     <string name="toast_login_first">Du musst dich zuerst einloggen!</string>
     <string name="from">von</string>
+    <string name="progress_please_wait">Bitte warten...</string>
 
 </resources>

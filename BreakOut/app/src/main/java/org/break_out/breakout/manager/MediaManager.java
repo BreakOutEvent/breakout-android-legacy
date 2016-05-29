@@ -3,6 +3,7 @@ package org.break_out.breakout.manager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.LruCache;

@@ -94,4 +94,6 @@
 
     <string name="from">from</string>
 
+    <string name="progress_please_wait">please wait...</string>
+
 </resources>
