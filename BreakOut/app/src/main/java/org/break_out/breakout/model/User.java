@@ -12,6 +12,7 @@ import org.break_out.breakout.secrets.BOSecrets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -60,6 +61,8 @@ public class User implements Serializable {
     private Calendar _birthday = null;
     private String _eventCity = "";
     private int _eventId = -1;
+
+    private BOMedia _profileImage;
 
     /**
      * Represents the role of a user.
@@ -310,6 +313,15 @@ public class User implements Serializable {
 
     public @NonNull String getEventCity() {
         return _eventCity;
+    }
+
+    public void setProfileImage(BOMedia media) {
+        _profileImage = media;
+    }
+
+    @Nullable
+    public BOMedia getProfileImage() {
+        return _profileImage;
     }
 
     /**

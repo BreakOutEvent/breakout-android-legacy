@@ -17,6 +17,7 @@ import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by Maximilian Duehr on 21.04.2016.
@@ -33,10 +34,10 @@ public class AllPostsFragment extends BOFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (_dataList == null) {
+        if(_dataList == null) {
             _dataList = new ArrayList<>();
         }
-        _adapter = new PostingListAdapter(getContext(),_dataList);
+        _adapter = new PostingListAdapter(getContext(), _dataList);
         //Intent downloadAllIntent = new Intent(getContext(), MediaLoaderService.class);
         //getContext().startService(downloadAllIntent);
     }
@@ -56,7 +57,7 @@ public class AllPostsFragment extends BOFragment {
             @Override
             public void onClick(View v) {
                 Activity activity = getActivity();
-                if (!(activity instanceof MainActivity)) {
+                if(!(activity instanceof MainActivity)) {
                     return;
                 }
                 MainActivity mainActivity = (MainActivity) activity;
@@ -72,7 +73,7 @@ public class AllPostsFragment extends BOFragment {
     private void fetchAllPosts() {
         PostingManager m = PostingManager.getInstance();
         m.resetPostingList();
-        PostingManager.getInstance().getAllPosts(getContext(),new PostingManager.PostingListener() {
+        PostingManager.getInstance().getAllPosts(getContext(), new PostingManager.PostingListener() {
             @Override
             public void onPostingListChanged() {
                 updatePostList();
@@ -82,7 +83,9 @@ public class AllPostsFragment extends BOFragment {
 
     private void updatePostList() {
         _dataList.clear();
-        _dataList.addAll(Posting.listAll(Posting.class));
+        _dataList.addAll(Posting.listAll(Posting.class, "_CREATED_TIMESTAMP"));
+        Collections.reverse(_dataList);
         _adapter.notifyDataSetChanged();
     }
+
 }

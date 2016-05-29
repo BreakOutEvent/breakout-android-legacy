@@ -2,7 +2,6 @@ package org.break_out.breakout.model;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
@@ -16,6 +15,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Created by Maximilian Dühr on 04.05.2016.
@@ -26,6 +26,8 @@ public class BOMedia extends SugarRecord {
     private String _url;
     private int _remoteID;
     private String _fileURI;
+    private SIZE _size;
+    private int _sizeFromServer;
 
     @Ignore
     private MediaChangedListener _listener = null;
@@ -64,13 +66,17 @@ public class BOMedia extends SugarRecord {
     }
 
     public BOMedia(String url, TYPE type, File file, Posting linkedPosting) {
-        this(url,type,file);
+        this(url, type, file);
         _linkedPosting = linkedPosting;
     }
 
     public BOMedia(String url, TYPE type, File file, Posting linkedPosting, boolean isDownloaded) {
-        this(url,type,file,linkedPosting);
+        this(url, type, file, linkedPosting);
         _isDownloaded = isDownloaded;
+    }
+
+    public SIZE getSize() {
+        return _size;
     }
 
     @Override
@@ -86,7 +92,6 @@ public class BOMedia extends SugarRecord {
     }
 
     public void registerMediaChangedListener(MediaChangedListener listener) {
-        Log.d(TAG,"listener registered, mediaID: "+getRemoteID());
         _listener = listener;
         save();
     }
@@ -96,15 +101,26 @@ public class BOMedia extends SugarRecord {
     }
 
 
-    public TYPE getType() { return _mediaType;}
+    public TYPE getType() {
+        return _mediaType;
+    }
 
-    public String getUrl() { return _url;}
+    public String getUrl() {
+        return _url;
+    }
 
-    public File getFile() { return new File(getFileUri().getPath());}
+    public File getFile() {
+        return new File(getFileUri().getPath());
+    }
 
-    public Uri getFileUri() { return Uri.parse(_fileURI);}
+    public Uri getFileUri() {
+        return Uri.parse(_fileURI);
+    }
 
-    public SAVESTATE getSavestate() { return _mediaSaveState;}
+    public SAVESTATE getSavestate() {
+        return _mediaSaveState;
+    }
+
 
     public boolean isDownloaded() {
         return _isDownloaded;
@@ -117,11 +133,10 @@ public class BOMedia extends SugarRecord {
     }
 
     public boolean setURL(String url) {
-        try{
-            URL objectURL = new URL (url);
+        try {
+            URL objectURL = new URL(url);
             _url = url;
             this.save();
-            Log.d(TAG,"url updated");
             callListener();
             return true;
         } catch(MalformedURLException e) {
@@ -133,7 +148,6 @@ public class BOMedia extends SugarRecord {
     public void setIsDownloaded(boolean state) {
         _isDownloaded = state;
         callListener();
-        Log.d(TAG,"Id: "+getRemoteID()+" is saved: "+isDownloaded());
         this.save();
     }
 
@@ -145,8 +159,13 @@ public class BOMedia extends SugarRecord {
         this.save();
     }
 
+    public void setSize(SIZE size, int remoteSize) {
+        _size = size;
+        _sizeFromServer = remoteSize;
+    }
+
     public enum TYPE {
-        IMAGE,VIDEO,AUDIO;
+        IMAGE, VIDEO, AUDIO;
     }
 
     public void setPosting(Posting posting) {
@@ -162,12 +181,10 @@ public class BOMedia extends SugarRecord {
     }
 
     public enum SAVESTATE {
-        TEMP,SAVED,DIRTY;
+        TEMP, SAVED, DIRTY;
     }
 
     private void callListener() {
-        Log.d(TAG,"call lsitener called");
-        Log.d(TAG,"listener = "+_listener);
         if(_listener != null) {
             _listener.onMediaChanged();
         }
@@ -175,34 +192,35 @@ public class BOMedia extends SugarRecord {
 
     /**
      * generates BOMedia object from JSON array
+     *
      * @param c
      * @param mediaObject json array representing media
      * @return
      * @throws JSONException
      */
-    public static BOMedia fromJSON(Context c, JSONArray mediaObject) throws JSONException {
+    public static BOMedia fromJSON(Context c, JSONArray mediaObject, SIZE size) throws JSONException {
         BOMedia media = null;
         MediaManager manager = MediaManager.getInstance();
-        if(!(mediaObject==null)) {
+        if(!(mediaObject == null)) {
             //get the media array , size always 1
-            for(int i = 0; i< mediaObject.length(); i++) {
+            for(int i = 0; i < mediaObject.length(); i++) {
                 JSONObject curObj = mediaObject.getJSONObject(i);
 
                 //fetch data for different image sizes
                 //TODO: fetch best size for current internet connection
-                JSONArray sizesArray =curObj.getJSONArray(JSONARR_SIZES);
+                JSONArray sizesArray = curObj.getJSONArray(JSONARR_SIZES);
 
-                for(int j = 0; j<sizesArray.length()&&sizesArray.getJSONObject(j).getInt(JSON_SIZE)<=(1280*720);j++){
+                for(int j = 0; j < sizesArray.length(); j++) {
                     JSONObject currentSize = sizesArray.getJSONObject(j);
                     int id = currentSize.getInt(JSON_ID);
-                    if(sizesArray.getJSONObject(j).getInt(JSON_SIZE)>=10000) {
+                    ArrayList<BOMedia> mediaList;
+                    if(sizesArray.getJSONObject(j).getInt(JSON_SIZE) >= 10000) {
                         String url = currentSize.getString(JSON_URL);
-                        if(MediaManager.getMediaByID(id)==null) {
+                        if(MediaManager.getMediaByID(id) == null) {
                             media = manager.createExternalMedia(c, TYPE.IMAGE);
                             media.setRemoteID(id);
                             media.setURL(url);
                         } else {
-                            Log.d(TAG,"media already existing");
                             return MediaManager.getMediaByID(id);
                         }
                     }
@@ -217,4 +235,10 @@ public class BOMedia extends SugarRecord {
     public interface MediaChangedListener {
         void onMediaChanged();
     }
+
+    public enum SIZE {
+        SMALL, MEDIUM, LARGE;
+    }
+
+
 }

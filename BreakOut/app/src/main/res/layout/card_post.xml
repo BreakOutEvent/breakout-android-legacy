@@ -83,7 +83,35 @@
                     android:id="@+id/posting_tv_comment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"/>
+                    android:layout_marginBottom="10dp"
+                    android:text="fksdfkjsfdsf"/>
+
+                <RelativeLayout
+                    android:id="@+id/post_rl_challengeWrap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/box_challenge"
+                    android:padding="@dimen/activity_horizontal_margin"
+                    android:minHeight="50dp"
+                    android:visibility="visible"
+                    android:layout_marginBottom="12dp">
+                    <ImageView
+                        android:id="@+id/post_iv_trophy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:alpha=".4"
+                        android:src="@drawable/ic_trophy_black_24dp"/>
+                    <TextView
+                        android:id="@+id/post_tv_challenge"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@+id/post_iv_trophy"
+                        android:layout_toRightOf="@id/post_iv_trophy"
+                        android:gravity="center_horizontal"
+                        android:layout_marginLeft="5dp"
+                        android:text="aaaaaaaaa"/>
+                </RelativeLayout>
             </LinearLayout>
 
         </LinearLayout>

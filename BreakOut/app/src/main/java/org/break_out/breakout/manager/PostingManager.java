@@ -3,7 +3,6 @@ package org.break_out.breakout.manager;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.constants.Constants;
@@ -40,7 +39,7 @@ public class PostingManager {
     }
 
     public static PostingManager getInstance() {
-        if (instance == null) {
+        if(instance == null) {
             instance = new PostingManager();
         }
         return instance;
@@ -55,25 +54,26 @@ public class PostingManager {
     }
 
     public static Posting buildPosting(String message, BOLocation location, BOMedia media) {
-        return new Posting(message,location,media);
+        return new Posting(message, location, media);
     }
 
-    public static Posting buildPosting(String message,BOMedia media) {
-        return new Posting(message,null,media);
+    public static Posting buildPosting(String message, BOMedia media) {
+        return new Posting(message, null, media);
     }
 
     public void sendPostingToServer(Context c, Posting p, @Nullable Challenge chosenChallenge, PostScreenActivity.PostingSentListener listener) {
-        new SendPostToServerTask(c, p,chosenChallenge,listener).execute();
+        new SendPostToServerTask(c, p, chosenChallenge, listener).execute();
     }
 
-    public static Posting buildRemotPosting(String username,String message,BOLocation location,BOMedia media) {
-        Posting returnPosting = buildPosting(message,location,media);
+    public static Posting buildRemotPosting(String username, String message, BOLocation location, BOMedia media) {
+        Posting returnPosting = buildPosting(message, location, media);
         returnPosting.setUsername(username);
         return returnPosting;
     }
 
     /**
      * get posting from already saved postings by id
+     *
      * @param id remoteID of the posting
      * @return posting with matching remote ID or null
      */
@@ -91,13 +91,13 @@ public class PostingManager {
 
 
     public void uploadImage(Posting posting) {
-        if (posting.hasMedia()) {
+        if(posting.hasMedia()) {
             File imageFile = posting.getMediaFile();
         }
     }
 
-    public void getAllPosts(Context c,@Nullable PostingListener postingListener) {
-        new FetchPostingsTask(c,postingListener).execute();
+    public void getAllPosts(Context c, @Nullable PostingListener postingListener) {
+        new FetchPostingsTask(c, postingListener).execute();
     }
 
     public void resetPostingList() {
@@ -110,7 +110,7 @@ public class PostingManager {
         private Challenge chosenChallenge;
         private PostScreenActivity.PostingSentListener curListener;
 
-        public SendPostToServerTask(Context c, Posting posting,@Nullable Challenge chosenChallenge,PostScreenActivity.PostingSentListener listener) {
+        public SendPostToServerTask(Context c, Posting posting, @Nullable Challenge chosenChallenge, PostScreenActivity.PostingSentListener listener) {
             this.posting = posting;
             this.chosenChallenge = chosenChallenge;
             context = c;
@@ -171,40 +171,38 @@ public class PostingManager {
                 OkHttpClient client = new OkHttpClient();
 
                 JSONObject requestObject = new JSONObject();
-                requestObject.accumulate("text",posting.getText())
-                        .accumulate("date",posting.getCreatedTimestamp())
-                        .accumulate("uploadMediaTypes",new JSONArray().put("image"));
-                if(posting.getLocation()!=null) {
-                    requestObject.accumulate("postingLocation",new JSONObject()
-                            .accumulate("latitude",posting.getLocation().getLatitude())
-                            .accumulate("longitude",posting.getLocation().getLongitude()));
+                requestObject.accumulate("text", posting.getText())
+                        .accumulate("date", posting.getCreatedTimestamp())
+                        .accumulate("uploadMediaTypes", new JSONArray().put("image"));
+                if(posting.getLocation() != null) {
+                    requestObject.accumulate("postingLocation", new JSONObject()
+                            .accumulate("latitude", posting.getLocation().getLatitude())
+                            .accumulate("longitude", posting.getLocation().getLongitude()));
                 }
 
                 RequestBody requestBody = RequestBody.create(JSON, requestObject.toString());
 
-                Log.d(TAG,"Json request:\n"+requestObject.toString());
 
                 Request request = new Request.Builder()
-                        .addHeader("Authorization", "Bearer "+UserManager.getInstance(context).getCurrentUser().getAccessToken())
-                        .addHeader("Content-Type","application/json")
-                        .url(Constants.Api.BASE_URL+"/posting/")
+                        .addHeader("Authorization", "Bearer " + UserManager.getInstance(context).getCurrentUser().getAccessToken())
+                        .addHeader("Content-Type", "application/json")
+                        .url(Constants.Api.BASE_URL + "/posting/")
                         .post(requestBody)
                         .build();
 
                 Response response = client.newCall(request).execute();
                 String responseBody = response.body().string();
-                Log.d(TAG,responseBody);
                 JSONObject responseJSON = new JSONObject(responseBody);
                 posting.setRemoteID(responseJSON.getString("id"));
                 if(posting.hasMedia()) {
                     JSONObject mediaDataJSON = new JSONObject(new JSONArray(responseJSON.getString("media")).getJSONObject(0).toString());
-                    posting.setUploadCredentials(mediaDataJSON.getString("id"),mediaDataJSON.getString("uploadToken"));
+                    posting.setUploadCredentials(mediaDataJSON.getString("id"), mediaDataJSON.getString("uploadToken"));
                 }
                 response.body().close();
 
 
                 return posting;
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -213,12 +211,12 @@ public class PostingManager {
         @Override
         protected void onPostExecute(Posting posting) {
             super.onPostExecute(posting);
-            if (posting.hasMedia()) {
-                if (posting.hasUploadCredentials()) {
-                    new UploadMediaToServerTask(posting,curListener).execute();
+            if(posting.hasMedia()) {
+                if(posting.hasUploadCredentials()) {
+                    new UploadMediaToServerTask(posting, curListener).execute();
                 }
                 if(chosenChallenge != null) {
-                    new PostChallengeTask(context,chosenChallenge,posting).execute();
+                    new PostChallengeTask(context, chosenChallenge, posting).execute();
                 }
             }
         }
@@ -234,12 +232,12 @@ public class PostingManager {
         }
     }
 
-    private class PostChallengeTask extends AsyncTask <Void,Void,Void> {
+    private class PostChallengeTask extends AsyncTask<Void, Void, Void> {
         private Context context;
         private Challenge chosenChallenge;
         private Posting posting;
 
-        public PostChallengeTask(Context context,Challenge challenge,Posting posting) {
+        public PostChallengeTask(Context context, Challenge challenge, Posting posting) {
             this.context = context;
             this.chosenChallenge = challenge;
             this.posting = posting;
@@ -250,7 +248,6 @@ public class PostingManager {
             try {
                 OkHttpClient client = new OkHttpClient();
                 JSONObject challengeObject = new JSONObject();
-                Log.d(TAG,"posting ID : "+posting.getRemoteID());
                 challengeObject.accumulate("postingId", posting.getRemoteID())
                         .accumulate("status", Challenge.STATE.WITH_PROOF.toString());
                 Request challengeRequest = new Request.Builder()
@@ -261,10 +258,8 @@ public class PostingManager {
                         .put(RequestBody.create(JSON, challengeObject.toString()))
                         .build();
 
-                Log.d(TAG,"challenge object: "+challengeRequest.body().toString());
                 Response challengeResponse = client.newCall(challengeRequest).execute();
-                Log.d(TAG,challengeResponse.body().string());
-            }catch(Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -276,16 +271,19 @@ public class PostingManager {
         }
     }
 
-    private class FetchPostingsTask extends AsyncTask<Void,Void,ArrayList<Posting>> {
+    private class FetchPostingsTask extends AsyncTask<Void, Void, ArrayList<Posting>> {
         private PostingListener listener;
         private Context context;
 
-        public FetchPostingsTask(Context c) {context = c;}
+        public FetchPostingsTask(Context c) {
+            context = c;
+        }
 
-        public FetchPostingsTask(Context c,PostingListener listener) {
+        public FetchPostingsTask(Context c, PostingListener listener) {
             this.listener = listener;
             context = c;
         }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -304,7 +302,7 @@ public class PostingManager {
                 if(response.isSuccessful()) {
                     String JSONResponse = response.body().string();
                     JSONArray array = new JSONArray(JSONResponse);
-                    responseList = generateFromJSON(context,array);
+                    responseList = generateFromJSON(context, array);
 
                 }
             } catch(Exception e) {
@@ -319,7 +317,6 @@ public class PostingManager {
             if(listener != null) {
                 listener.onPostingListChanged();
             }
-            Log.d(TAG,"onProgressUpdate called, posting saved");
         }
 
         @Override
@@ -336,12 +333,12 @@ public class PostingManager {
             }
         }
 
-        private ArrayList<Posting> generateFromJSON(Context c,JSONArray array) {
+        private ArrayList<Posting> generateFromJSON(Context c, JSONArray array) {
             ArrayList<Posting> responseList = new ArrayList<Posting>();
             try {
-                for(int i=0; i<array.length();i++) {
+                for(int i = 0; i < array.length(); i++) {
                     JSONObject object = array.getJSONObject(i);
-                    Posting tempPost = Posting.fromJSON(c,object);
+                    Posting tempPost = Posting.fromJSON(c, object);
                     responseList.add(tempPost);
                 }
             } catch(JSONException e) {
@@ -361,9 +358,8 @@ public class PostingManager {
             toBeUploadedPosting = posting;
             attachmentFileName = toBeUploadedPosting.getMedia().getFile().getName();
             curListener = listener;
-            if(toBeUploadedPosting.getMediaFile() == null){
+            if(toBeUploadedPosting.getMediaFile() == null) {
                 //TODO:Handle missing file
-                Log.d(TAG,"file not found");
             }
         }
 
@@ -379,7 +375,7 @@ public class PostingManager {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            if(toBeUploadedPosting.getMediaFile() != null && toBeUploadedPosting.getMediaFile().length()>0) {
+            if(toBeUploadedPosting.getMediaFile() != null && toBeUploadedPosting.getMediaFile().length() > 0) {
                 try {
                     OkHttpClient client = new OkHttpClient();
 
@@ -387,7 +383,7 @@ public class PostingManager {
                             .setType(MultipartBody.FORM)
                             .addFormDataPart("id", toBeUploadedPosting.getMediaId())
                             .addFormDataPart("file", toBeUploadedPosting.getMediaFile().getName(),
-                                    RequestBody.create(MediaType.parse("image/jpeg"),toBeUploadedPosting.getMediaFile()))
+                                    RequestBody.create(MediaType.parse("image/jpeg"), toBeUploadedPosting.getMediaFile()))
                             .build();
 
                     Request request = new Request.Builder()
@@ -399,7 +395,6 @@ public class PostingManager {
                     Response response = client.newCall(request).execute();
                     if(!response.isSuccessful()) {
                         //TODO: handle errors
-                        Log.d(TAG,"no success: "+response.code()+" message: "+response.message());
                     } else {
                         //find out the media id to prevent double loading
                         String responseBody = response.body().string();
@@ -410,7 +405,7 @@ public class PostingManager {
                         return true;
                     }
 
-                } catch (Exception e) {
+                } catch(Exception e) {
                     e.printStackTrace();
                     return false;
                 }

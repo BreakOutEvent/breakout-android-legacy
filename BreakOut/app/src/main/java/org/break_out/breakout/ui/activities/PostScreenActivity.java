@@ -184,17 +184,16 @@ public class PostScreenActivity extends BOActivity {
                 if(requestCode == REQUESTCODE_IMAGE) {
                     Uri imageUri = null;
                     if(!fromCamera) {
-                        imageUri = data.getData();
                     /*moveFileToProfilePath(imageUri);*/
                     } else {
                         imageUri = Uri.fromFile(_postMedia.getFile());
                     }
-                    _ivChosenImage.setImageURI(imageUri);
+                    _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
                     MediaManager.getInstance().moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
                         @Override
                         public void onFileMoved(File result) {
                             Uri newUri = Uri.fromFile(result);
-                            _ivChosenImage.setImageURI(newUri);
+                            _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
                         }
                     });
                 }
