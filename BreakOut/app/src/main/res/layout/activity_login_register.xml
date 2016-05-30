@@ -41,14 +41,6 @@
         android:text="@string/button_login"
         app:buttonColor="orange"/>
 
-    <org.break_out.breakout.ui.views.BOFlatButton
-        android:id="@+id/start_button_register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:text="@string/button_start_register"
-        app:buttonColor="white"/>
-
     <TextView
         android:id="@+id/tv_what_is_breakout"
         android:layout_width="match_parent"

@@ -96,7 +96,7 @@ public class AllPostsFragment extends BOFragment {
     private void updateNewPosts(){
         for(Posting p : Posting.listAll(Posting.class)) {
             if(!isInDataList(p)) {
-                _dataList.add(p);
+                _dataList.add(0,p);
             }
         }
         _adapter.notifyDataSetChanged();

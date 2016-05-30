@@ -91,5 +91,16 @@
     <string name="progress_please_wait">Bitte warten...</string>
     <string name="title_activity_maps">Karte</string>
     <string name="choose_challenge">Challenge wählen (optional)</string>
+    <string name="emergency_diplomatic_1">Rettungsdienst des Auswärtigen Amtes informieren:</string>
+    <string name="emergency_last">BreakOut informieren:</string>
+    <string name="emergency_medical_1">Rettungsdienst informieren (Europaweit)</string>
+    <string name="emergency_police_1">Polizei informieren (Europaweit)</string>
+    <string name="emergency_medical_2">Erste Hilfe leisten</string>
+    <string name="emergencytitle_diplomacic">Diplomatischer Notfall im Ausland</string>
+    <string name="emergencytitle_medical">Medizinischer Notfall</string>
+    <string name="emergencytitle_police">Polizeilicher Notfall</string>
+    <string name="emergencytitle_etc">Alle anderen Notfälle/Probleme</string>
+    <string name="emergency_etc_1">Während der 36 Stunden des Events könnt ihr uns unter folgender Nummer rund um die Uhr erreichen:</string>
+    <string name="title_help">Hilfe</string>
 
 </resources>

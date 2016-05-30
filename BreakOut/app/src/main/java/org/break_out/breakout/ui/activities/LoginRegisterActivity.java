@@ -36,7 +36,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
     private BOEditText _etEmail = null;
     private BOEditText _etPassword = null;
     private BOFlatButton _btLogin = null;
-    private BOFlatButton _btRegister = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,13 +55,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             }
         });
 
-        _btRegister = (BOFlatButton) findViewById(R.id.start_button_register);
-        _btRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                register();
-            }
-        });
 
         View vWhatIsBreakout = findViewById(R.id.tv_what_is_breakout);
         vWhatIsBreakout.setOnClickListener(new View.OnClickListener() {
@@ -80,7 +72,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             _etEmail.setState(savedInstanceState.getSerializable(KEY_EMAIL));
             _etPassword.setState(savedInstanceState.getSerializable(KEY_PASSWORD));
             _btLogin.setState(savedInstanceState.getSerializable(KEY_LOGIN));
-            _btRegister.setState(savedInstanceState.getSerializable(KEY_REGISTER));
         }
     }
 
@@ -91,7 +82,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
         outState.putSerializable(KEY_EMAIL, _etEmail.getState());
         outState.putSerializable(KEY_PASSWORD, _etPassword.getState());
         outState.putSerializable(KEY_LOGIN, _btLogin.getState());
-        outState.putSerializable(KEY_REGISTER, _btRegister.getState());
     }
 
     @Override
@@ -119,7 +109,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             showHint();
         } else {
             // Start registration
-            _btRegister.setShowLoadingIndicator(true);
             _btLogin.setEnabled(false);
 
             BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_REGISTER);
@@ -146,7 +135,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
         } else {
             // Start login
             _btLogin.setShowLoadingIndicator(true);
-            _btRegister.setEnabled(false);
 
             BackgroundRunner runner = BackgroundRunner.getRunner(RUNNER_LOGIN);
             runner.setRunnable(new LoginRunnable());
@@ -223,7 +211,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             }
 
             _btLogin.setEnabled(true);
-            _btRegister.setEnabled(true);
             _btLogin.setShowLoadingIndicator(false);
         }
     }
@@ -278,8 +265,6 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             }
 
             _btLogin.setEnabled(true);
-            _btRegister.setEnabled(true);
-            _btRegister.setShowLoadingIndicator(false);
         }
     }
 }

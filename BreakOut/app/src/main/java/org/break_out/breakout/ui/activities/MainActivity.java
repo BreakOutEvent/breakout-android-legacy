@@ -19,6 +19,7 @@ import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.fragments.AllPostsFragment;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
+import org.break_out.breakout.ui.fragments.HelpFragment;
 import org.break_out.breakout.ui.fragments.ProfileFragment;
 
 public class MainActivity extends BOActivity implements UserManager.UserDataChangedListener {
@@ -67,6 +68,9 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                                 break;
                             case R.id.map:
                                 startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+                                break;
+                            case R.id.help:
+                                setCurrentFragment(new HelpFragment());
                         }
                         return true;
                     }

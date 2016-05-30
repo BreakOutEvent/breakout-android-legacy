@@ -221,10 +221,12 @@ public class PostingManager {
                     new UploadMediaToServerTask(posting, curListener, progressDialog).execute();
                 } else {
                     if(chosenChallenge != null) {
-                        new PostChallengeTask(context, chosenChallenge, posting, curListener).execute();
                         if(progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
+                        new PostChallengeTask(context, chosenChallenge, posting, curListener).execute();
+                    }else  {
+                        curListener.onPostSend();
                     }
                 }
             } else {

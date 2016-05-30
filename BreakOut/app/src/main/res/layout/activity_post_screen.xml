@@ -97,6 +97,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingLeft="20dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
                     android:minHeight="50dp"
                     android:visibility="visible"
                     android:background="@color/white">
@@ -120,13 +122,11 @@
                         android:layout_marginStart="20dp"
                         android:layout_marginRight="20dp"
                         android:layout_marginEnd="20dp"
-                        android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
-                        android:maxLines="2"
                         android:textColor="@color/black"
                         android:alpha=".2"
                         android:textSize="15sp"
-                        android:text="please choose a challenge"
+                        android:text="@string/choose_challenge"
                         android:layout_centerInParent="true"/>
 
                 </RelativeLayout>

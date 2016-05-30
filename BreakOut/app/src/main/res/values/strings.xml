@@ -82,6 +82,7 @@
     <string name="info_obtaining_location">Obtaining current location…</string>
     <string name="title_newPost">New post</string>
     <string name="title_allPosts">All posts</string>
+    <string name="title_help">Help</string>
     <string name="hint_postComment">What are you doing?</string>
     <string name="message">Message</string>
     <string name="activate_location_services">Please activate your location services!</string>
@@ -99,4 +100,21 @@
 
     <string name="choose_challenge">Choose challenge (optional)</string>
 
+    <string name="emergencytitle_medical">Medical emergency</string>
+    <string name="emergency_medical_1">Call emergency in europe:</string>
+    <string name="emergency_medical_2">Give first aid</string>
+    <string name="emergency_last">Inform BreakOut:</string>
+
+    <string name="emergencytitle_police">Police emergency</string>
+    <string name="emergency_police_1">Call police in europe:</string>
+    
+    <string name="emergencytitle_diplomacic">Diplomatic emergency</string>
+    <string name="emergency_diplomatic_1">Call emergency service of the Ministry of Foreign Affair</string>
+
+    <string name="emergencytitle_etc">Every other problem/emergency:</string>
+    <string name="emergency_etc_1">You can reach us while the 36 hours of the event around the clock under this number:</string>
+
+    <string name="number_emergency" translatable="false">112</string>
+    <string name="number_breakout" translatable="false">+4981424659110</string>
+    <string name="number_diplomatic" translatable="false">03050002000</string>
 </resources>
