@@ -137,14 +137,14 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
 
                     }
                 } else {
-                    new LoadImageTask(posting.getMedia(), holder.ivPosting, BOMedia.SIZE.MEDIUM).execute();
+                    MediaManager.loadMediaFromServer(posting.getMedia(), holder.ivPosting, BOMedia.SIZE.MEDIUM);
                 }
             }
         }
         holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_account_box_white_24dp));
         if(posting.getProfileImage()!=null) {
             if(!posting.getProfileImage().isDownloaded()) {
-                new LoadImageTask(posting.getProfileImage(), holder.civTeamPic, BOMedia.SIZE.SMALL).execute();
+                MediaManager.loadMediaFromServer(posting.getProfileImage(), holder.civTeamPic, BOMedia.SIZE.SMALL);
             } else {
                 if(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()) != null) {
                     holder.civTeamPic.setImageBitmap(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()));
@@ -222,56 +222,5 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         return responseBuilder.toString();
     }
 
-    private class LoadImageTask extends AsyncTask<Void, Void, File> {
-        private BOMedia downloadingMedia;
-        private BOMedia.SIZE size;
-        private ImageView populateView;
-
-        public LoadImageTask(BOMedia media, ImageView iv, BOMedia.SIZE size) {
-            downloadingMedia = media;
-            populateView = iv;
-        }
-
-        @Override
-        protected File doInBackground(Void... params) {
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder()
-                    .url(downloadingMedia.getUrl())
-                    .build();
-            try {
-                Response response = client.newCall(request).execute();
-                InputStream inputStream = response.body().byteStream();
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                OutputStream outStream = new FileOutputStream(downloadingMedia.getFile());
-                byte[] buffer = new byte[1024];
-                int read;
-                while((read = bufferedInputStream.read(buffer)) >= 0) {
-                    outStream.write(buffer, 0, read);
-                }
-                outStream.flush();
-                outStream.close();
-                bufferedInputStream.close();
-                response.body().close();
-                return downloadingMedia.getFile();
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(File resFile) {
-            super.onPostExecute(resFile);
-            if(resFile != null) {
-                if(resFile.length() > 0) {
-                    downloadingMedia.setIsDownloaded(true);
-                    Bitmap resultBitmap = size == BOMedia.SIZE.SMALL ? MediaManager.decodeSampledBitmapFromFile(downloadingMedia, 50, 50) : MediaManager.decodeSampledBitmapFromFile(downloadingMedia, 200, 200);
-                    populateView.setImageBitmap(resultBitmap);
-                    MediaManager.getInstance().addToCache(downloadingMedia.getUrl(), resultBitmap);
-                } else {
-                }
-            }
-        }
-    }
 
 }

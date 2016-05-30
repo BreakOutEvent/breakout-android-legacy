@@ -194,17 +194,17 @@ public class BOMedia extends SugarRecord {
      * generates BOMedia object from JSON array
      *
      * @param c
-     * @param mediaObject json array representing media
+     * @param mediaArray json array representing media
      * @return
      * @throws JSONException
      */
-    public static BOMedia fromJSON(Context c, JSONArray mediaObject, SIZE size) throws JSONException {
+    public static BOMedia fromJSON(Context c, JSONArray mediaArray, SIZE size) throws JSONException {
         BOMedia media = null;
         MediaManager manager = MediaManager.getInstance();
-        if(!(mediaObject == null)) {
+        if(!(mediaArray == null)) {
             //get the media array , size always 1
-            for(int i = 0; i < mediaObject.length(); i++) {
-                JSONObject curObj = mediaObject.getJSONObject(i);
+            for(int i = 0; i < mediaArray.length(); i++) {
+                JSONObject curObj = mediaArray.getJSONObject(i);
 
                 //fetch data for different image sizes
                 //TODO: fetch best size for current internet connection
@@ -223,6 +223,37 @@ public class BOMedia extends SugarRecord {
                         } else {
                             return MediaManager.getMediaByID(id);
                         }
+                    }
+                }
+            }
+            return media;
+        } else {
+            throw new JSONException("Malformed Media");
+        }
+    }
+
+    public static BOMedia mediumSizeFromJSON(Context c, JSONObject mediaObject, SIZE size) throws JSONException {
+        BOMedia media = null;
+        MediaManager manager = MediaManager.getInstance();
+        if(mediaObject != null) {
+
+            //fetch data for different image sizes
+            //TODO: fetch best size for current internet connection
+            JSONArray sizesArray = mediaObject.getJSONArray(JSONARR_SIZES);
+
+            for(int j = 0; j < sizesArray.length(); j++) {
+                JSONObject currentSize = sizesArray.getJSONObject(j);
+                int id = currentSize.getInt(JSON_ID);
+                ArrayList<BOMedia> mediaList;
+                if(sizesArray.getJSONObject(j).getInt(JSON_SIZE) >= 10000) {
+                    String url = currentSize.getString(JSON_URL);
+                    if(MediaManager.getMediaByID(id) == null) {
+                        media = manager.createExternalMedia(c, TYPE.IMAGE);
+                        media.setRemoteID(id);
+                        media.setURL(url);
+                        return media;
+                    } else {
+                        return MediaManager.getMediaByID(id);
                     }
                 }
             }

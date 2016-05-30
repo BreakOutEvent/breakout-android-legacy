@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.LruCache;
@@ -12,11 +13,19 @@ import android.widget.ImageView;
 
 import org.break_out.breakout.model.BOMedia;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by Maximilian Dühr on 04.05.2016.
@@ -28,14 +37,6 @@ public class MediaManager {
 
 
     private MediaManager() {
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        final int cacheSize = maxMemory / 8;
-        _lruCache = new LruCache<String, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap value) {
-                return value.getByteCount() / 1024;
-            }
-        };
     }
 
     public static MediaManager getInstance() {
@@ -99,14 +100,30 @@ public class MediaManager {
     }
 
     public void addToCache(String key, Bitmap bitmap) {
-        if(_lruCache.get(key) == null) {
-            _lruCache.put(key, bitmap);
+        if(!(key==null || bitmap == null)) {
+            if(getLruCache().get(key) == null) {
+                getLruCache().put(key, bitmap);
+            }
         }
+    }
+
+    public LruCache<String,Bitmap> getLruCache() {
+        if(_lruCache == null) {
+            final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+            final int cacheSize = maxMemory / 8;
+            _lruCache = new LruCache<String, Bitmap>(cacheSize) {
+                @Override
+                protected int sizeOf(String key, Bitmap value) {
+                    return value.getByteCount() / 1024;
+                }
+            };
+        }
+        return _lruCache;
     }
 
     @Nullable
     public Bitmap getFromCache(String key) {
-        return _lruCache.get(key);
+        return getLruCache().get(key);
     }
 
     public BOMedia createExternalMedia(Context c, BOMedia.TYPE type) {
@@ -196,6 +213,40 @@ public class MediaManager {
         }
     }
 
+    public void setSizedImage(BOMedia media, ImageView iv, BOMedia.SIZE size, boolean isSquare) {
+        int width = 100;
+        int height = 100;
+        switch(size) {
+            case SMALL:
+                if(isSquare) {
+                    width = height = 100;
+                } else {
+                    width = 100;
+                    height = 75;
+                }
+                break;
+            case MEDIUM:
+                if(isSquare) {
+                    width = height = 400;
+                } else {
+                    width = 400;
+                    height = 350;
+                }
+                break;
+            case LARGE:
+                if(isSquare) {
+                    width = height = 800;
+                } else {
+                    width = 800;
+                    height = 650;
+                }
+                break;
+
+        }
+        Bitmap mediumBitmap = decodeSampledBitmapFromFile(media,width,height);
+        iv.setImageBitmap(mediumBitmap);
+    }
+
     /**
      * Moves file of incoming post to internal Storage
      *
@@ -262,6 +313,10 @@ public class MediaManager {
         return null;
     }
 
+    public static void loadMediaFromServer(BOMedia media, @Nullable ImageView populateView, BOMedia.SIZE size) {
+        new LoadImageTask(media,populateView,size).execute();
+    }
+
     private static class CutAndPastePostingToInternalRunnable implements Runnable {
         private BOMedia _media;
         private Context _context;
@@ -318,5 +373,60 @@ public class MediaManager {
 
     public interface OnFileMovedListener {
         void onFileMoved(File result);
+    }
+
+    private static class LoadImageTask extends AsyncTask<Void, Void, File> {
+        private BOMedia downloadingMedia;
+        private BOMedia.SIZE size;
+        private ImageView populateView;
+
+        public LoadImageTask(BOMedia media, ImageView iv, BOMedia.SIZE size) {
+            downloadingMedia = media;
+            populateView = iv;
+        }
+
+        @Override
+        protected File doInBackground(Void... params) {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(downloadingMedia.getUrl())
+                    .build();
+            try {
+                Response response = client.newCall(request).execute();
+                InputStream inputStream = response.body().byteStream();
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                OutputStream outStream = new FileOutputStream(downloadingMedia.getFile());
+                byte[] buffer = new byte[1024];
+                int read;
+                while((read = bufferedInputStream.read(buffer)) >= 0) {
+                    outStream.write(buffer, 0, read);
+                }
+                outStream.flush();
+                outStream.close();
+                bufferedInputStream.close();
+                response.body().close();
+                return downloadingMedia.getFile();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(File resFile) {
+            super.onPostExecute(resFile);
+            if(resFile != null) {
+                if(resFile.length() > 0) {
+                    downloadingMedia.setIsDownloaded(true);
+                    Bitmap resultBitmap = size == BOMedia.SIZE.SMALL ? MediaManager.decodeSampledBitmapFromFile(downloadingMedia, 50, 50) : MediaManager.decodeSampledBitmapFromFile(downloadingMedia, 200, 200);
+                    if(populateView != null) {
+                        populateView.setImageBitmap(resultBitmap);
+                    }
+                    MediaManager.getInstance().addToCache(downloadingMedia.getUrl(), resultBitmap);
+                } else {
+                    return;
+                }
+            }
+        }
     }
 }

@@ -30,7 +30,9 @@ import com.bumptech.glide.Glide;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.ui.views.BOSpinner;
@@ -168,6 +170,7 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
                     public void userUpdated() {
                         notifyListenersDone();
                         setShowLoadingIndicator(false);
+
                     }
 
                     @Override
@@ -264,9 +267,10 @@ public class ProfileFragment extends BOFragment implements UserManager.UserDataC
     }
 
     private void refreshProfileImage() {
-        if(_profileImageFile != null) {
-            if(_profileImageFile.length()>0) {
-                _civProfileImage.setImageURI(Uri.fromFile(_profileImageFile));
+        BOMedia image = null;
+        if((image = UserManager.getInstance(getContext()).getCurrentUser().getProfileImage())!=null) {
+            if(image.isDownloaded()) {
+                MediaManager.getInstance().setSizedImage(image,_civProfileImage, BOMedia.SIZE.SMALL,true);
             }
         }
     }

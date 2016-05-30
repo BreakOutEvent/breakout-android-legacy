@@ -11,11 +11,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.fragments.AllPostsFragment;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
@@ -31,6 +34,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
     private TextView _tvDrawerTitle = null;
     private TextView _tvDrawerSubtitle = null;
+    private ImageView _ivProfileImage = null;
 
     private Fragment _currentFragment = null;
     private ProfileFragment.ProfileFragmentListener _profileListener = null;
@@ -43,7 +47,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         setContentView(R.layout.activity_main);
 
         _userManager = UserManager.getInstance(this);
-        _userManager.updateFromServer(this,null);
+
 
         // Set up drawer
         _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -80,6 +84,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         View headerView = navView.getHeaderView(0);
         _tvDrawerTitle = (TextView) headerView.findViewById(R.id.tv_title);
         _tvDrawerSubtitle = (TextView) headerView.findViewById(R.id.tv_subtitle);
+        _ivProfileImage = (ImageView) headerView.findViewById(R.id.profile_image);
         headerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,6 +97,24 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
         _currentFragment = new EarlyBirdWelcomeFragment();
         setCurrentFragment(_currentFragment);
+
+        //load user data
+        _userManager.updateFromServer(this, new UserManager.UserUpdateListener() {
+            @Override
+            public void userUpdated() {
+                User curUser = _userManager.getCurrentUser();
+                if(curUser.getProfileImage().isDownloaded()) {
+                    MediaManager.getInstance().setSizedImage(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM,true);
+                } else {
+                    MediaManager.loadMediaFromServer(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM);
+                }
+            }
+
+            @Override
+            public void updateFailed() {
+
+            }
+        });
     }
 
     @Override

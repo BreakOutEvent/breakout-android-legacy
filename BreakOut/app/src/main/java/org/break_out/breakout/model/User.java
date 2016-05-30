@@ -1,18 +1,17 @@
 package org.break_out.breakout.model;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.secrets.BOSecrets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -76,7 +75,7 @@ public class User implements Serializable {
         public static Role fromString(String enumString) {
             try {
                 return valueOf(enumString);
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 return VISITOR;
             }
         }
@@ -113,6 +112,7 @@ public class User implements Serializable {
         setTShirtSize(original.getTShirtSize());
         setEventCity(original.getEventCity());
         setEventId(original.getEventId());
+        setProfileImage(original.getProfileImage());
 
     }
 
@@ -135,9 +135,13 @@ public class User implements Serializable {
         return _remoteId;
     }
 
-    public int getTeamId() { return _teamID; }
+    public int getTeamId() {
+        return _teamID;
+    }
 
-    public void setTeamId(int teamId) { _teamID = teamId; }
+    public void setTeamId(int teamId) {
+        _teamID = teamId;
+    }
 
     /**
      * Sets an email to this user.
@@ -155,7 +159,9 @@ public class User implements Serializable {
      *
      * @return The email of the user or empty string if the user is {@code VISITOR}
      */
-    public @NonNull String getEmail() {
+    public
+    @NonNull
+    String getEmail() {
         return _email;
     }
 
@@ -175,7 +181,9 @@ public class User implements Serializable {
      *
      * @return The password of the user or empty string if the user is {@code VISITOR}
      */
-    public @NonNull String getPassword() {
+    public
+    @NonNull
+    String getPassword() {
         return _password;
     }
 
@@ -195,7 +203,9 @@ public class User implements Serializable {
      *
      * @return The OAuth access token of the user or empty string if the user is {@code VISITOR}
      */
-    public @NonNull String getAccessToken() {
+    public
+    @NonNull
+    String getAccessToken() {
         return _accessToken;
     }
 
@@ -225,7 +235,7 @@ public class User implements Serializable {
      * @return True if the user's role is at least the role given, false otherwise
      */
     public boolean isAtLeast(Role role) {
-        switch(role) {
+        switch (role) {
             case VISITOR:
                 return true;
             case USER:
@@ -241,7 +251,9 @@ public class User implements Serializable {
         _gender = (gender != null ? gender : "");
     }
 
-    public @NonNull String getGender() {
+    public
+    @NonNull
+    String getGender() {
         return _gender;
     }
 
@@ -249,7 +261,9 @@ public class User implements Serializable {
         _firstName = firstName != null ? firstName : "";
     }
 
-    public @NonNull String getFirstName() {
+    public
+    @NonNull
+    String getFirstName() {
         return _firstName;
     }
 
@@ -257,7 +271,9 @@ public class User implements Serializable {
         _lastName = lastName != null ? lastName : "";
     }
 
-    public @NonNull String getLastName() {
+    public
+    @NonNull
+    String getLastName() {
         return _lastName;
     }
 
@@ -265,7 +281,9 @@ public class User implements Serializable {
         _emergencyNumber = emergencyNumber != null ? emergencyNumber : "";
     }
 
-    public@NonNull  String getEmergencyNumber() {
+    public
+    @NonNull
+    String getEmergencyNumber() {
         return _emergencyNumber;
     }
 
@@ -273,21 +291,28 @@ public class User implements Serializable {
         _hometown = hometown != null ? hometown : "";
     }
 
-    public @NonNull String getHometown() {
+    public
+    @NonNull
+    String getHometown() {
         return _hometown;
     }
 
     public void setEventId(int id) {
         _eventId = id;
-        Log.d(TAG,"set event id to: "+_eventId);
+        Log.d(TAG, "set event id to: " + _eventId);
     }
 
-    public int getEventId() { return _eventId;}
+    public int getEventId() {
+        return _eventId;
+    }
+
     public void setPhoneNumber(@Nullable String phoneNumber) {
         _phoneNumber = phoneNumber != null ? phoneNumber : "";
     }
 
-    public @NonNull String getPhoneNumber() {
+    public
+    @NonNull
+    String getPhoneNumber() {
         return _phoneNumber;
     }
 
@@ -295,7 +320,9 @@ public class User implements Serializable {
         _tShirtSize = tShirtSize != null ? tShirtSize : "";
     }
 
-    public @NonNull String getTShirtSize() {
+    public
+    @NonNull
+    String getTShirtSize() {
         return _tShirtSize;
     }
 
@@ -303,7 +330,9 @@ public class User implements Serializable {
         _birthday = birthday;
     }
 
-    public @Nullable Calendar getBirthday() {
+    public
+    @Nullable
+    Calendar getBirthday() {
         return _birthday;
     }
 
@@ -311,7 +340,9 @@ public class User implements Serializable {
         _eventCity = eventCity != null ? eventCity : "";
     }
 
-    public @NonNull String getEventCity() {
+    public
+    @NonNull
+    String getEventCity() {
         return _eventCity;
     }
 
@@ -349,7 +380,7 @@ public class User implements Serializable {
         try {
             Response response = client.newCall(request).execute();
 
-            if(!response.isSuccessful()) {
+            if (!response.isSuccessful()) {
                 Log.e(TAG, "Registering user failed (response code " + response.code() + ")! Possible reasons: Email format, email already existing, password too short.");
                 Log.e(TAG, "Response: " + response.body().string());
 
@@ -360,7 +391,7 @@ public class User implements Serializable {
 
                 return true;
             }
-        } catch(IOException | JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 
@@ -377,8 +408,8 @@ public class User implements Serializable {
      */
     public boolean loginOnServerSync(Context c) {
         OkHttpClient client = new OkHttpClient();
-        Log.d(TAG,"loginOnServerSync");
-        Log.d(TAG,"set password: "+_password);
+        Log.d(TAG, "loginOnServerSync");
+        Log.d(TAG, "set password: " + _password);
 
         // Build URL
         HttpUrl loginUrl = new HttpUrl.Builder()
@@ -407,7 +438,7 @@ public class User implements Serializable {
             Response loginResponse = client.newCall(loginRequest).execute();
 
             String response = loginResponse.body().string();
-            if(!loginResponse.isSuccessful()) {
+            if (!loginResponse.isSuccessful()) {
                 Log.e(TAG, loginResponse.body().string());
                 return false;
             }
@@ -415,24 +446,32 @@ public class User implements Serializable {
             // Get access token from JSON body and set it to this user
             JSONObject loginResponseJson = new JSONObject(response);
             loginResponse.body().close();
+            Log.d(TAG, "login :\n" + response);
 
+            BOMedia profilePic = BOMedia.mediumSizeFromJSON(c, loginResponseJson.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
+            setProfileImage(profilePic);
             _accessToken = loginResponseJson.getString("access_token");
             _role = Role.USER;
 
-            Log.d(TAG,loginResponseJson.toString());
+            if (getProfileImage() != null) {
+                if (!getProfileImage().isDownloaded()) {
+                    MediaManager.loadMediaFromServer(profilePic, null, BOMedia.SIZE.MEDIUM);
+                }
+            }
 
+            Log.d(TAG, loginResponseJson.toString());
             Log.d(TAG, "OAuth access token: " + _accessToken);
 
             boolean updateSuccessful = updateFromServerSync(c);
-            if(!updateSuccessful) {
+            if (!updateSuccessful) {
                 Log.e(TAG, "Login process failed: Could not finish due to error while updating user.");
                 return false;
             }
 
             return true;
-        } catch(IOException e) {
+        } catch (IOException e) {
             Log.e(TAG, e.getMessage());
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
@@ -448,7 +487,7 @@ public class User implements Serializable {
      * @return If the update was successful or not
      */
     public boolean updateFromServerSync(Context c) {
-        if(_role == Role.VISITOR) {
+        if (_role == Role.VISITOR) {
             Log.e(TAG, "Could not update user because it does not have an account");
             return false;
         }
@@ -467,16 +506,16 @@ public class User implements Serializable {
         try {
             Response updateResponse = client.newCall(updateRequest).execute();
 
-            if(!updateResponse.isSuccessful()) {
+            if (!updateResponse.isSuccessful()) {
                 Log.e(TAG, "Could not update the user from the server (" + updateResponse.code() + ")");
+                loginOnServerSync(c);
                 return false;
             }
 
             JSONObject responseObj = new JSONObject(updateResponse.body().string());
             updateResponse.body().close();
 
-            Log.d(TAG,"response object: "+responseObj.toString());
-
+            Log.d(TAG, "response object: " + responseObj.toString());
 
 
             // Get values
@@ -492,9 +531,10 @@ public class User implements Serializable {
             String hometown = null;
             int teamId = -1;
             int eventId = -1;
+            BOMedia profileImage = UserManager.getInstance(c).getCurrentUser().getProfileImage();
 
             // Get participant values
-            if(!responseObj.isNull("participant")) {
+            if (!responseObj.isNull("participant")) {
                 JSONObject participantObj = responseObj.getJSONObject("participant");
 
                 // The user is a participant
@@ -509,11 +549,15 @@ public class User implements Serializable {
                 // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;
             } else {
-                _role  = Role.USER;
+                _role = Role.USER;
+            }
+
+            if (!responseObj.isNull("profilePic")) {
+                profileImage = BOMedia.mediumSizeFromJSON(c,responseObj.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
             }
 
             // Set user values
-            _remoteId= (remoteId >= 0 ? remoteId : -1);
+            _remoteId = (remoteId >= 0 ? remoteId : -1);
             _firstName = (firstName != null ? firstName : "");
             _lastName = (lastName != null ? lastName : "");
             _email = (email != null ? email : "");
@@ -526,11 +570,12 @@ public class User implements Serializable {
             _hometown = (hometown != null ? hometown : "");
             setTeamId(teamId);
             setEventId(eventId);
+            _profileImage = profileImage;
 
             UserManager.getInstance(c).setCurrentUser(this);
 
             return true;
-        } catch(IOException | JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 
@@ -544,7 +589,7 @@ public class User implements Serializable {
      * @return If the update was successful or not
      */
     public boolean updateOnServerSync() {
-        if(_role == Role.VISITOR) {
+        if (_role == Role.VISITOR) {
             Log.e(TAG, "Could not update user because it is a " + Role.VISITOR.toString());
             return false;
         }
@@ -557,7 +602,7 @@ public class User implements Serializable {
         // Build body
         JSONObject userJSON = toJSON();
 
-        if(userJSON == null) {
+        if (userJSON == null) {
             Log.e(TAG, "Could not create a valid JSON object for this user. The update has been cancelled.");
             return false;
         }
@@ -573,14 +618,14 @@ public class User implements Serializable {
         try {
             Response updateResponse = client.newCall(updateRequest).execute();
 
-            if(!updateResponse.isSuccessful()) {
+            if (!updateResponse.isSuccessful()) {
                 Log.e(TAG, updateResponse.body().string());
                 Log.e(TAG, "The network call for updating the user was not successful (" + updateResponse.code() + ")");
                 return false;
             }
 
             JSONObject responseJson = new JSONObject(updateResponse.body().string());
-            if(responseJson.get("participant") != null && notNullOrEmpty(responseJson.get("participant").toString())) {
+            if (responseJson.get("participant") != null && notNullOrEmpty(responseJson.get("participant").toString())) {
                 // FIXME: Differentiate between participants with/without a team!
                 _role = Role.PARTICIPANT;
             } else {
@@ -590,7 +635,7 @@ public class User implements Serializable {
             Log.d(TAG, "User has been updated");
 
             return true;
-        } catch(IOException | JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 
@@ -613,7 +658,7 @@ public class User implements Serializable {
 
             // Note: The password cannot be changed!
 
-            if(notNullOrEmpty(_emergencyNumber) || notNullOrEmpty(_hometown) || notNullOrEmpty(_phoneNumber) || notNullOrEmpty(_tShirtSize)) {
+            if (notNullOrEmpty(_emergencyNumber) || notNullOrEmpty(_hometown) || notNullOrEmpty(_phoneNumber) || notNullOrEmpty(_tShirtSize)) {
                 JSONObject participantObject = new JSONObject();
 
                 participantObject.put("emergencynumber", notNullOrEmpty(_emergencyNumber) ? _emergencyNumber : "");
@@ -626,7 +671,7 @@ public class User implements Serializable {
             }
 
             return userObj;
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
