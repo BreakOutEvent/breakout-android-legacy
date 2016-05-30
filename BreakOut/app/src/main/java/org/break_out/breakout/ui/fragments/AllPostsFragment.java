@@ -67,8 +67,8 @@ public class AllPostsFragment extends BOFragment {
             }
         });
 
-        /*fetchAllPosts();*/
-        fetchNewPosts();
+        fetchAllPosts();
+        /*fetchNewPosts();*/
         return v;
     }
 
@@ -104,7 +104,7 @@ public class AllPostsFragment extends BOFragment {
 
     private void updatePostList() {
         _dataList.clear();
-        _dataList.addAll(Posting.listAll(Posting.class));
+        _dataList.addAll(Posting.findWithQuery(Posting.class,"Select * FROM Posting ORDER BY _CREATED_TIMESTAMP DESC"));
         _adapter.notifyDataSetChanged();
     }
 
