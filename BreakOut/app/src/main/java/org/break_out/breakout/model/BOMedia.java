@@ -151,7 +151,6 @@ public class BOMedia extends SugarRecord {
         this.save();
     }
 
-
     public void setFile(File file) {
         _mediaFile = file;
         _fileURI = Uri.fromFile(_mediaFile).toString();

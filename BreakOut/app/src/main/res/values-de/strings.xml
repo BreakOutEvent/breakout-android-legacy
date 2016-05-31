@@ -102,5 +102,6 @@
     <string name="emergencytitle_etc">Alle anderen Notfälle/Probleme</string>
     <string name="emergency_etc_1">Während der 36 Stunden des Events könnt ihr uns unter folgender Nummer rund um die Uhr erreichen:</string>
     <string name="title_help">Hilfe</string>
+    <string name="no_older_posts">Es gibt keine älteren Posts</string>
 
 </resources>

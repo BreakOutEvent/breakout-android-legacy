@@ -8,15 +8,22 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.flurry.android.tumblr.Post;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
+import org.break_out.breakout.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +38,11 @@ public class AllPostsFragment extends BOFragment {
     private PostingListAdapter _adapter;
     private ArrayList<Posting> _dataList;
 
+    private PostingManager _postingManager;
+
     private RecyclerView _recyclerView;
+
+    private int lastPostRemoteId = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,17 +51,23 @@ public class AllPostsFragment extends BOFragment {
             _dataList = new ArrayList<>();
         }
         _adapter = new PostingListAdapter(getContext(), _dataList);
-        //Intent downloadAllIntent = new Intent(getContext(), MediaLoaderService.class);
-        //getContext().startService(downloadAllIntent);
+        _adapter.setPositionListener(new PostingListAdapter.OnPositionFromEndReachedListener(1) {
+            @Override
+            public void onOffsetReached() {
+                fetchNewPosts();
+            }
+        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_all_posts, container, false);
 
+        _postingManager = PostingManager.getInstance();
+
         _recyclerView = (RecyclerView) v.findViewById(R.id.allPosts_recyclerView);
         _recyclerView.setAdapter(_adapter);
-        _recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        _recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));;
 
         // Init and populate Toolbar
         Toolbar toolbar = (Toolbar) v.findViewById(R.id.allPosts_toolbar);
@@ -66,9 +83,20 @@ public class AllPostsFragment extends BOFragment {
                 mainActivity.openDrawer();
             }
         });
+        if(_dataList.isEmpty()) {
+            fetchNewPosts();
+        }
 
-        fetchAllPosts();
-        /*fetchNewPosts();*/
+        _postingManager.getPostingsAfterIdFromServer(lastPostRemoteId, new PostingManager.NewPostingFetchedListener() {
+            @Override
+            public void noNewPostings() {
+            }
+
+            @Override
+            public void onPostingListChanged() {
+                fetchNewPosts();
+            }
+        });
         return v;
     }
 
@@ -79,6 +107,7 @@ public class AllPostsFragment extends BOFragment {
             @Override
             public void onPostingListChanged() {
                 updatePostList();
+
             }
         });
     }
@@ -88,15 +117,23 @@ public class AllPostsFragment extends BOFragment {
         m.getAllPosts(getContext(), new PostingManager.PostingListener() {
             @Override
             public void onPostingListChanged() {
-                updateNewPosts();
+                ArrayList<Posting> newPostings = _postingManager.getAfterId(lastPostRemoteId,7);
+                if(!newPostings.isEmpty()) {
+                    lastPostRemoteId = Integer.parseInt(newPostings.get(newPostings.size()-1).getRemoteID());
+                    updateNewPosts(newPostings);
+                } else {
+                    Toast.makeText(getContext(),getString(R.string.no_older_posts),Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }
 
-    private void updateNewPosts(){
-        for(Posting p : Posting.listAll(Posting.class)) {
+    private void updateNewPosts(ArrayList<Posting> newPostings){
+        for(Posting p : newPostings) {
             if(!isInDataList(p)) {
-                _dataList.add(0,p);
+                _dataList.add(p);
+                _adapter.notifyDataSetChanged();
             }
         }
         _adapter.notifyDataSetChanged();
@@ -116,4 +153,6 @@ public class AllPostsFragment extends BOFragment {
         }
         return false;
     }
+
+
 }

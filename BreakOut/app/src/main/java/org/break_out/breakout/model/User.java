@@ -447,9 +447,12 @@ public class User implements Serializable {
             JSONObject loginResponseJson = new JSONObject(response);
             loginResponse.body().close();
             Log.d(TAG, "login :\n" + response);
+            BOMedia profilePic = null;
+            if(!loginResponseJson.isNull("profilePic")) {
+                profilePic = BOMedia.mediumSizeFromJSON(c, loginResponseJson.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
+                setProfileImage(profilePic);
+            }
 
-            BOMedia profilePic = BOMedia.mediumSizeFromJSON(c, loginResponseJson.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
-            setProfileImage(profilePic);
             _accessToken = loginResponseJson.getString("access_token");
             _role = Role.USER;
 

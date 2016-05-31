@@ -17,7 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import okhttp3.MediaType;
@@ -74,6 +74,25 @@ public class PostingManager {
         return returnPosting;
     }
 
+    public ArrayList<Posting> getAfterId(int id,int maxSize) {
+        ArrayList<Posting> allPostings = new ArrayList<Posting>();
+        allPostings.addAll(Posting.listAll(Posting.class));
+
+        ArrayList<Posting> returnList = new ArrayList<>();
+        Posting newestPosting = getNewestPosting();
+        id = id == 0 ? Integer.parseInt(newestPosting.getRemoteID())+1 : id;
+        returnList.addAll(Posting.findWithQuery(Posting.class,"Select * FROM Posting WHERE _REMOTE_ID < "+id+" ORDER BY _REMOTE_ID DESC LIMIT "+maxSize));
+        return returnList;
+    }
+
+    public Posting getNewestPosting() {
+        return getAllPostings().get(0);
+    }
+
+    public  ArrayList<Posting> getAllPostings() {
+        return (ArrayList<Posting>) Posting.findWithQuery(Posting.class,"Select * FROM Posting ORDER BY _CREATED_TIMESTAMP DESC");
+    }
+
     /**
      * get posting from already saved postings by id
      *
@@ -96,8 +115,59 @@ public class PostingManager {
         new FetchPostingsTask(c, postingListener).execute();
     }
 
+    public void getPostingsAfterIdFromServer(int id,@Nullable  NewPostingFetchedListener listener) {
+
+    }
+
     public void resetPostingList() {
         Posting.deleteAll(Posting.class);
+    }
+
+    private class GetPostingsAfterIdTask extends AsyncTask<Void,Void,ArrayList<Integer>> {
+        private int id;
+        private NewPostingFetchedListener listener = null;
+
+        public GetPostingsAfterIdTask(int id, @Nullable NewPostingFetchedListener listener) {
+            this.id = id;
+            this.listener = listener;
+        }
+
+        @Override
+        protected ArrayList<Integer> doInBackground(Void... params) {
+            OkHttpClient client = new OkHttpClient();
+            Request getRequest = new Request.Builder()
+                    .url(Constants.Api.BASE_URL+"/posting/get/since/"+id+"/").build();
+            try {
+                Response response = client.newCall(getRequest).execute();
+                String responseString = response.body().string();
+                if(!responseString.isEmpty()) {
+                    try {
+                        JSONArray array = new JSONArray(responseString);
+                        for(int i = 0; i < array.length(); i++) {
+                            int id = array.getInt(i);
+
+                        }
+                    }catch(JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }catch(IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Integer> postingsIds) {
+            super.onPostExecute(postingsIds);
+            if(postingsIds.isEmpty()) {
+                if(listener!=null) {
+                    listener.noNewPostings();
+                }
+            }
+        }
     }
 
     private class SendPostToServerTask extends AsyncTask<Void, Void, Posting> {
@@ -473,5 +543,10 @@ public class PostingManager {
 
     public interface PostingListener {
         void onPostingListChanged();
+    }
+
+    public static interface NewPostingFetchedListener extends PostingListener {
+
+        public abstract void noNewPostings();
     }
 }

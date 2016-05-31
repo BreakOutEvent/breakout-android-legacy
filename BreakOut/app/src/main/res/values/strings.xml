@@ -117,4 +117,6 @@
     <string name="number_emergency" translatable="false">112</string>
     <string name="number_breakout" translatable="false">+4981424659110</string>
     <string name="number_diplomatic" translatable="false">03050002000</string>
+
+    <string name="no_older_posts">There are no older posts</string>
 </resources>
