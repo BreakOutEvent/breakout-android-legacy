@@ -1,10 +1,9 @@
 package org.break_out.breakout.ui.fragments;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -12,21 +11,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
-
-import com.flurry.android.tumblr.Post;
-import com.orm.query.Condition;
-import com.orm.query.Select;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
-import org.break_out.breakout.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Created by Maximilian Duehr on 21.04.2016.
@@ -41,6 +36,9 @@ public class AllPostsFragment extends BOFragment {
     private PostingManager _postingManager;
 
     private RecyclerView _recyclerView;
+    private SwipeRefreshLayout _swipeLayout;
+    private ProgressBar _progressBar;
+    private RelativeLayout _progressWrapper;
 
     private int lastPostRemoteId = 0;
 
@@ -54,7 +52,7 @@ public class AllPostsFragment extends BOFragment {
         _adapter.setPositionListener(new PostingListAdapter.OnPositionFromEndReachedListener(1) {
             @Override
             public void onOffsetReached() {
-                fetchNewPosts();
+                fetchOlderPostings();
             }
         });
     }
@@ -66,8 +64,21 @@ public class AllPostsFragment extends BOFragment {
         _postingManager = PostingManager.getInstance();
 
         _recyclerView = (RecyclerView) v.findViewById(R.id.allPosts_recyclerView);
+        _progressBar = (ProgressBar) v.findViewById(R.id.allPosts_pb);
+        _progressWrapper = (RelativeLayout) v.findViewById(R.id.allPosts_rl_progressWrapper);
+        _swipeLayout = (SwipeRefreshLayout) v.findViewById(R.id.allPost_swipeRefresh);
+
         _recyclerView.setAdapter(_adapter);
-        _recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));;
+        _recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        _swipeLayout.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
+        _swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshPostings();
+                Log.d(TAG,"onRefresh");
+            }
+        });
 
         // Init and populate Toolbar
         Toolbar toolbar = (Toolbar) v.findViewById(R.id.allPosts_toolbar);
@@ -84,19 +95,9 @@ public class AllPostsFragment extends BOFragment {
             }
         });
         if(_dataList.isEmpty()) {
-            fetchNewPosts();
+            fetchOlderPostings();
+            Log.d(TAG,"datalist was empty");
         }
-
-        _postingManager.getPostingsAfterIdFromServer(lastPostRemoteId, new PostingManager.NewPostingFetchedListener() {
-            @Override
-            public void noNewPostings() {
-            }
-
-            @Override
-            public void onPostingListChanged() {
-                fetchNewPosts();
-            }
-        });
         return v;
     }
 
@@ -109,30 +110,86 @@ public class AllPostsFragment extends BOFragment {
                 updatePostList();
 
             }
-        });
-    }
-
-    private void fetchNewPosts() {
-        PostingManager m = PostingManager.getInstance();
-        m.getAllPosts(getContext(), new PostingManager.PostingListener() {
+        }, new LoadingListener() {
             @Override
-            public void onPostingListChanged() {
-                ArrayList<Posting> newPostings = _postingManager.getAfterId(lastPostRemoteId,7);
-                if(!newPostings.isEmpty()) {
-                    lastPostRemoteId = Integer.parseInt(newPostings.get(newPostings.size()-1).getRemoteID());
-                    updateNewPosts(newPostings);
-                } else {
-                    Toast.makeText(getContext(),getString(R.string.no_older_posts),Toast.LENGTH_SHORT).show();
-                }
+            public void onLoadingTriggered() {
+                _progressWrapper.setVisibility(View.VISIBLE);
+                _progressBar.setVisibility(View.VISIBLE);
+            }
 
+            @Override
+            public void onLoadingDismissed() {
+                _progressWrapper.setVisibility(View.GONE);
+                _progressBar.setVisibility(View.GONE);
             }
         });
     }
 
-    private void updateNewPosts(ArrayList<Posting> newPostings){
+    private void fetchOlderPostings() {
+        PostingManager m = PostingManager.getInstance();
+        m.getAllPosts(getContext(), new PostingManager.PostingListener() {
+            @Override
+            public void onPostingListChanged() {
+                _swipeLayout.setRefreshing(false);
+                ArrayList<Posting> newPostings = _postingManager.getBeforeId(lastPostRemoteId, 7);
+                if (!newPostings.isEmpty()) {
+                    lastPostRemoteId = newPostings.get(newPostings.size() - 1).getRemoteID();
+                    showOlderPosts(newPostings);
+                    _swipeLayout.setRefreshing(false);
+                } else {
+                    Toast.makeText(getContext(), getString(R.string.no_older_postings), Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, new LoadingListener() {
+            @Override
+            public void onLoadingTriggered() {
+                _progressWrapper.setVisibility(View.VISIBLE);
+                _progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onLoadingDismissed() {
+                _progressWrapper.setVisibility(View.GONE);
+                _progressBar.setVisibility(View.GONE);
+            }
+        });
+
+
+    }
+
+    public void refreshPostings() {
+        PostingManager m = PostingManager.getInstance();
+        m.getPostingsAfterIdFromServer(_postingManager.getNewestPosting().getRemoteID(), new PostingManager.NewPostingFetchedListener() {
+            @Override
+            public void noNewPostings() {
+                _swipeLayout.setRefreshing(false);
+                Toast.makeText(getContext(),getString(R.string.no_new_postings),Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPostingListChanged() {
+                updateNewerPosts(_postingManager.getAfterId(_dataList.get(0).getRemoteID()));
+                _swipeLayout.setRefreshing(false);
+                Log.d(TAG,"onPostingListChanged called");
+            }
+        });
+    }
+
+    private void showOlderPosts(ArrayList<Posting> newPostings){
         for(Posting p : newPostings) {
             if(!isInDataList(p)) {
                 _dataList.add(p);
+                _adapter.notifyDataSetChanged();
+            }
+        }
+        _adapter.notifyDataSetChanged();
+    }
+
+    private void updateNewerPosts(ArrayList<Posting> newPostings) {
+        for(Posting p : newPostings) {
+            if(!isInDataList(p)) {
+                _dataList.add(0,p);
                 _adapter.notifyDataSetChanged();
             }
         }
@@ -154,5 +211,10 @@ public class AllPostsFragment extends BOFragment {
         return false;
     }
 
+    public interface LoadingListener {
+        void onLoadingTriggered();
+
+        void onLoadingDismissed();
+    }
 
 }

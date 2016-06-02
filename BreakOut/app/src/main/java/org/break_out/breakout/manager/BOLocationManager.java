@@ -10,6 +10,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -17,9 +18,18 @@ import android.util.Log;
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.LocationService;
 import org.break_out.breakout.R;
+import org.break_out.breakout.constants.Constants;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by Maximilian Dühr on 01.03.2016.
@@ -75,6 +85,25 @@ public class BOLocationManager  {
         return _instance;
     }
 
+    //Location Constructors
+    public static BOLocation createLocation(long timestamp,double latitude,double longitude) {
+        return new BOLocation(timestamp,latitude,longitude);
+    }
+
+    public static BOLocation createLocation(int remoteId,int teamId,int eventId,String teamName,long timestamp,double latitude,double longitude) {
+        if(getLocationById(remoteId)== null) {
+            BOLocation location = createLocation(timestamp,latitude,longitude);
+            location.setRemoteId(remoteId);
+            location.setEventId(eventId);
+            location.setTeamId(teamId);
+            location.setTeamName(teamName);
+            location.save();
+
+            return  location;
+        }
+       else return getLocationById(remoteId);
+    }
+
     /**
      * Start periodically updating the Location
      * @param c Context of the calling Activity
@@ -111,6 +140,18 @@ public class BOLocationManager  {
         }
     }
 
+
+
+    @Nullable
+    public static BOLocation getLocationById(int remoteId) {
+        ArrayList<BOLocation> listWithCorrectId = new ArrayList<>();
+        listWithCorrectId.addAll( BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _REMOTE_ID = "+remoteId+" LIMIT 1"));
+        if(listWithCorrectId.size()>0) {
+            return listWithCorrectId.get(0);
+        }
+        return null;
+    }
+
     /**
      * stop periodically updating the Location
      * @param c context of the calling Activity
@@ -129,6 +170,7 @@ public class BOLocationManager  {
         return _gpsAvailable||_networkAvailable;
 
     }
+
 
     /**
      * get the list of registered listeners
@@ -261,6 +303,10 @@ public class BOLocationManager  {
         c.sendBroadcast(broadcastIntent);
     }
 
+    public static void getAllLocationsFromServer(Context c, @Nullable BOLocationListObtainedListener listener) {
+        new GetAllLocationsFromServerTask(c,listener).execute();
+    }
+
     /**
      * Class to handle LocationRequests one-shot
      */
@@ -310,6 +356,17 @@ public class BOLocationManager  {
         }
     }
 
+    public interface BOLocationListObtainedListener {
+        void onListObtained();
+    }
+
+    public ArrayList<BOLocation> getAllLocationsFromTeam(int teamId) {
+        ArrayList<BOLocation> returnList = new ArrayList<>();
+        returnList.addAll(BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _team_id = "+teamId+" ORDER BY _timestamp DESC"));
+        Log.d(TAG,"user "+teamId+" has "+returnList.size()+" locations");
+        return returnList;
+    }
+
 
     /**
      * Clears the location database
@@ -337,6 +394,65 @@ public class BOLocationManager  {
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG,"providers changed");
             callServiceListeners();
+        }
+    }
+
+    //AsyncTasks
+
+    public static class GetAllLocationsFromServerTask extends AsyncTask<Void,Void,ArrayList<BOLocation>> {
+        private Context context;
+        private BOLocationListObtainedListener listener;
+
+        public GetAllLocationsFromServerTask(Context c, @Nullable  BOLocationListObtainedListener l) {
+            context = c;
+            listener = l;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected ArrayList<BOLocation> doInBackground(Void... params) {
+            int id = UserManager.getInstance(context).getCurrentUser().getEventId()==-1 ? 1 : UserManager.getInstance(context).getCurrentUser().getEventId();
+            ArrayList<BOLocation> resultList = new ArrayList<>();
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(Constants.Api.BASE_URL+"/event/"+UserManager.getInstance(context).getCurrentUser().getEventId()+"/location/")
+                    .build();
+            try {
+                Response response = client.newCall(request).execute();
+                String responseBody = response.body().string();
+                Log.d(TAG,"responseBody: "+responseBody);
+
+                JSONArray responseArray = new JSONArray(responseBody);
+                for(int i = 0; i < responseArray.length(); i++) {
+                    JSONObject curLocationObj = responseArray.getJSONObject(i);
+                    BOLocation newLocation = BOLocation.fromJSON(curLocationObj);
+                    resultList.add(newLocation);
+                    Log.d(TAG,"location added");
+                }
+                return resultList;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<BOLocation> boLocations) {
+            super.onPostExecute(boLocations);
+            if(boLocations != null) {
+                Log.d(TAG,"it worked! "+boLocations.size());
+                if(listener!=null) {
+                    listener.onListObtained();
+                }
+            } else {
+                Log.d(TAG,"it did not work!");
+            }
         }
     }
 }

@@ -17,4 +17,8 @@
     <color name="background_grey">#f2f2f2</color>
 
     <color name="text_dark">#333</color>
+
+    <color name="progress">@color/colorPrimaryDark</color>
+
+    <color name="red">#F00</color>
 </resources>

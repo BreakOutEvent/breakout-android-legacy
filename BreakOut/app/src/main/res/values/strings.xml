@@ -107,7 +107,7 @@
 
     <string name="emergencytitle_police">Police emergency</string>
     <string name="emergency_police_1">Call police in europe:</string>
-    
+
     <string name="emergencytitle_diplomacic">Diplomatic emergency</string>
     <string name="emergency_diplomatic_1">Call emergency service of the Ministry of Foreign Affair</string>
 
@@ -118,5 +118,6 @@
     <string name="number_breakout" translatable="false">+4981424659110</string>
     <string name="number_diplomatic" translatable="false">03050002000</string>
 
-    <string name="no_older_posts">There are no older posts</string>
+    <string name="no_older_postings">There are no older posts</string>
+    <string name="no_new_postings">No new posts</string>
 </resources>

@@ -73,7 +73,7 @@
                         android:layout_width="76dp"
                         android:layout_height="76dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bg_welcome_600dp"/>
+                        android:src="@drawable/placeholder_profile_pic"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"

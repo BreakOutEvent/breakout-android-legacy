@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import okhttp3.OkHttpClient;
@@ -305,12 +306,9 @@ public class MediaManager {
 
     @Nullable
     public static BOMedia getMediaByID(int id) {
-        for(BOMedia m : getSavedMediaList()) {
-            if(m.getRemoteID() == id) {
-                return m;
-            }
-        }
-        return null;
+        List<BOMedia> medias = BOMedia.findWithQuery(BOMedia.class, "SELECT * FROM BO_Media WHERE _REMOTE_ID='" + id + "' LIMIT 1");
+        BOMedia m = medias.size() == 1 ? medias.get(0) : null;
+        return m;
     }
 
     public static void loadMediaFromServer(BOMedia media, @Nullable ImageView populateView, BOMedia.SIZE size) {

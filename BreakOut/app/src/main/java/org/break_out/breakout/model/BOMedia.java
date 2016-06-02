@@ -2,9 +2,11 @@ package org.break_out.breakout.model;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
+import com.wdullaer.materialdatetimepicker.date.SimpleMonthAdapter;
 
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.sync.model.Posting;
@@ -201,7 +203,7 @@ public class BOMedia extends SugarRecord {
         BOMedia media = null;
         MediaManager manager = MediaManager.getInstance();
         if(!(mediaArray == null)) {
-            //get the media array , size always 1
+            //get the media array
             for(int i = 0; i < mediaArray.length(); i++) {
                 JSONObject curObj = mediaArray.getJSONObject(i);
 
@@ -231,30 +233,66 @@ public class BOMedia extends SugarRecord {
         }
     }
 
-    public static BOMedia mediumSizeFromJSON(Context c, JSONObject mediaObject, SIZE size) throws JSONException {
+    public static BOMedia sizedMediaFromJSON(Context c, JSONObject mediaObject, SIZE maxSize) throws JSONException {
         BOMedia media = null;
         MediaManager manager = MediaManager.getInstance();
         if(mediaObject != null) {
-
-            //fetch data for different image sizes
-            //TODO: fetch best size for current internet connection
             JSONArray sizesArray = mediaObject.getJSONArray(JSONARR_SIZES);
-
-            for(int j = 0; j < sizesArray.length(); j++) {
-                JSONObject currentSize = sizesArray.getJSONObject(j);
-                int id = currentSize.getInt(JSON_ID);
-                ArrayList<BOMedia> mediaList;
-                if(sizesArray.getJSONObject(j).getInt(JSON_SIZE) >= 10000) {
-                    String url = currentSize.getString(JSON_URL);
-                    if(MediaManager.getMediaByID(id) == null) {
-                        media = manager.createExternalMedia(c, TYPE.IMAGE);
-                        media.setRemoteID(id);
-                        media.setURL(url);
-                        return media;
-                    } else {
-                        return MediaManager.getMediaByID(id);
+            switch(maxSize) {
+                case SMALL:
+                    Log.d(TAG,"small sized");
+                    for (int j = 0; j < sizesArray.length(); j++) {
+                        JSONObject currentSize = sizesArray.getJSONObject(j);
+                        int id = currentSize.getInt(JSON_ID);
+                        if (sizesArray.getJSONObject(j).getInt(JSON_WIDTH) < 150) {
+                            String url = currentSize.getString(JSON_URL);
+                            if (MediaManager.getMediaByID(id) == null) {
+                                media = manager.createExternalMedia(c, TYPE.IMAGE);
+                                media.setRemoteID(id);
+                                media.setURL(url);
+                                return media;
+                            } else {
+                                return MediaManager.getMediaByID(id);
+                            }
+                        }
                     }
-                }
+                    break;
+                case MEDIUM:
+                    Log.d(TAG,"medium sized");
+                    for (int j = 0; j < sizesArray.length(); j++) {
+                        JSONObject currentSize = sizesArray.getJSONObject(j);
+                        int id = currentSize.getInt(JSON_ID);
+                        if (sizesArray.getJSONObject(j).getInt(JSON_WIDTH) >= 150 || sizesArray.getJSONObject(j).getInt(JSON_WIDTH) <= 400) {
+                            String url = currentSize.getString(JSON_URL);
+                            if (MediaManager.getMediaByID(id) == null) {
+                                media = manager.createExternalMedia(c, TYPE.IMAGE);
+                                media.setRemoteID(id);
+                                media.setURL(url);
+                                return media;
+                            } else {
+                                return MediaManager.getMediaByID(id);
+                            }
+                        }
+                    }
+                    return sizedMediaFromJSON(c, mediaObject, SIZE.SMALL);
+
+                case LARGE:
+                    for (int j = 0; j < sizesArray.length(); j++) {
+                        JSONObject currentSize = sizesArray.getJSONObject(j);
+                        int id = currentSize.getInt(JSON_ID);
+                        if (sizesArray.getJSONObject(j).getInt(JSON_WIDTH) >= 400 || sizesArray.getJSONObject(j).getInt(JSON_WIDTH) <= 1300) {
+                            String url = currentSize.getString(JSON_URL);
+                            if (MediaManager.getMediaByID(id) == null) {
+                                media = manager.createExternalMedia(c, TYPE.IMAGE);
+                                media.setRemoteID(id);
+                                media.setURL(url);
+                                return media;
+                            } else {
+                                return MediaManager.getMediaByID(id);
+                            }
+                        }
+                    }
+                    return sizedMediaFromJSON(c, mediaObject, SIZE.MEDIUM);
             }
             return media;
         } else {

@@ -1,7 +1,9 @@
 package org.break_out.breakout.ui.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.MediaManager;
+import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.sync.model.Posting;
 
@@ -61,12 +64,31 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         return _postingList.size();
     }
 
-    private void populateView(final PostingViewHolder holder, int pos) {
+    private void populateView(final PostingViewHolder holder, final int pos) {
         final Posting posting = _postingList.get(pos);
 
         String teamName = posting.getTeamName();
         holder.tvTeamName.setText(teamName);
         holder.currentPosition = pos;
+
+        holder.tvComments.setText(posting.getComments()+" Kommentare");
+        holder.tvLikes.setText(posting.getLikes()+" Likes");
+        holder.tvComments.setText(posting.getComments()+" Kommentare");
+        if(posting.hasLiked()) {
+            holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red));
+        } else {
+            holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PostingManager m = PostingManager.getInstance();
+                    posting.setHasLiked(true);
+                    posting.save();
+                    m.likePosting(_context,posting);
+                }
+            });
+        }
+
+
 
         List<Address> addressList = null;
         Geocoder coder = new Geocoder(_context);
@@ -184,7 +206,7 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                         .append(" ago");
             }
         } else {
-            responseBuilder.append(c.get(Calendar.DAY_OF_MONTH) + 1)
+            responseBuilder.append(c.get(Calendar.DAY_OF_MONTH))
                     .append(".")
                     .append(c.get(Calendar.MONTH) + 1)
                     .append(".")
@@ -209,6 +231,7 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
 
     public class PostingViewHolder extends RecyclerView.ViewHolder {
         LinearLayout llWrapper;
+        RelativeLayout rlLikeWrapper;
         ImageView ivPosting;
         CircleImageView civTeamPic;
         TextView tvTeamName;
@@ -218,6 +241,10 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         RelativeLayout rlChallenge;
         TextView tvChallenge;
         ImageView ivChallenge;
+        ImageView ivLikes;
+        ImageView ivComments;
+        TextView tvLikes;
+        TextView tvComments;
         int currentPosition;
 
         public PostingViewHolder(View itemView) {
@@ -244,6 +271,11 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             rlChallenge = (RelativeLayout) itemView.findViewById(R.id.post_rl_challengeWrap);
             tvChallenge = (TextView) itemView.findViewById(R.id.post_tv_challenge);
             ivChallenge = (ImageView) itemView.findViewById(R.id.post_iv_trophy);
+            ivLikes = (ImageView) itemView.findViewById(R.id.post_iv_likes);
+            tvLikes = (TextView) itemView.findViewById(R.id.post_tv_likes);
+            ivComments = (ImageView) itemView.findViewById(R.id.post_iv_comments);
+            tvComments = (TextView) itemView.findViewById(R.id.post_tv_comments);
+            rlLikeWrapper = (RelativeLayout) itemView.findViewById(R.id.post_rl_likeWrapper);
         }
     }
 

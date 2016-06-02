@@ -1,6 +1,7 @@
 package org.break_out.breakout.ui.fragments;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -39,6 +40,12 @@ public class EarlyBirdWelcomeFragment extends Fragment {
                 }
             }
         });
+
+        /*int sdkVersion = Build.VERSION.SDK_INT;
+
+        if(sdkVersion>Build.VERSION_CODES.KITKAT) {
+            setHasOptionsMenu(true);
+        }*/
 
         // Init toolbar
         Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);

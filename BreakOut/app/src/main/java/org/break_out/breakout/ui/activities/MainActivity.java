@@ -1,6 +1,7 @@
 package org.break_out.breakout.ui.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -8,6 +9,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -15,11 +18,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.fragments.AllPostsFragment;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
 import org.break_out.breakout.ui.fragments.HelpFragment;
@@ -35,8 +40,10 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
     private TextView _tvDrawerTitle = null;
     private TextView _tvDrawerSubtitle = null;
     private ImageView _ivProfileImage = null;
+    private NavigationView _navView;
 
     private Fragment _currentFragment = null;
+    private boolean _firstFragment = true;
     private ProfileFragment.ProfileFragmentListener _profileListener = null;
 
     @Override
@@ -49,10 +56,11 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         _userManager = UserManager.getInstance(this);
 
 
+
         // Set up drawer
         _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        final NavigationView navView = (NavigationView) findViewById(R.id.navigation_view);
-        navView.setNavigationItemSelectedListener(
+        _navView = (NavigationView) findViewById(R.id.navigation_view);
+        _navView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
@@ -80,8 +88,11 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                     }
                 });
 
+
+
+
         // Set navigation drawer up header
-        View headerView = navView.getHeaderView(0);
+        View headerView = _navView.getHeaderView(0);
         _tvDrawerTitle = (TextView) headerView.findViewById(R.id.tv_title);
         _tvDrawerSubtitle = (TextView) headerView.findViewById(R.id.tv_subtitle);
         _ivProfileImage = (ImageView) headerView.findViewById(R.id.profile_image);
@@ -96,6 +107,7 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         });
 
         _currentFragment = new EarlyBirdWelcomeFragment();
+        getSupportFragmentManager().popBackStack();
         setCurrentFragment(_currentFragment);
 
         //load user data
@@ -103,10 +115,15 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
             @Override
             public void userUpdated() {
                 User curUser = _userManager.getCurrentUser();
-                if(curUser.getProfileImage().isDownloaded()) {
-                    MediaManager.getInstance().setSizedImage(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM,true);
-                } else {
-                    MediaManager.loadMediaFromServer(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM);
+                if(curUser != null) {
+                    if(curUser.getProfileImage()!=null) {
+                        if(curUser.getProfileImage().isDownloaded()) {
+                            Log.d(TAG,"image downloaded");
+                            MediaManager.getInstance().setSizedImage(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM,true);
+                        } else {
+                            MediaManager.loadMediaFromServer(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM);
+                        }
+                    }
                 }
             }
 
@@ -144,9 +161,28 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
         }
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Log.d(TAG,"onPrepareOptionsMenu called. Role : "+UserManager.getInstance(this).getCurrentUser().getRole());
+
+        if(UserManager.getInstance(this).getCurrentUser().isAtLeast(User.Role.PARTICIPANT)) {
+            menu.findItem(R.id.post).setEnabled(true);
+
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     public void openDrawer() {
         closeKeyboard();
         _drawerLayout.openDrawer(GravityCompat.START);
+    }
+
+    private void updateMenu() {
+        Menu menu = _navView.getMenu();
+        MenuItem postItem = menu.findItem(R.id.post);
+        if(UserManager.getInstance(this).getCurrentUser().isAtLeast(User.Role.PARTICIPANT)) {
+            postItem.setEnabled(true);
+        }
     }
 
     public void setCurrentFragment(@Nullable Fragment fragment) {
@@ -158,7 +194,13 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
             final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.fragment_placeholder, fragment, "NewFragmentTag");
-            ft.addToBackStack("NewFragmentTag");
+            if(_firstFragment) {
+                _firstFragment = false;
+
+            } else {
+                ft.addToBackStack("NewFragmentTag");
+
+            }
             ft.commit();
             return;
         }
@@ -171,11 +213,21 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
 
     private void updateDrawer() {
         User user = _userManager.getCurrentUser();
+        updateMenu();
 
         if(!user.getFirstName().equals("") || !user.getLastName().equals("")) {
             _tvDrawerTitle.setText(user.getFirstName() + " " + user.getLastName());
         } else {
             _tvDrawerTitle.setText(user.getRole().toString());
+        }
+
+        if(user.getProfileImage()!=null) {
+            if(!user.getProfileImage().isDownloaded()) {
+                MediaManager.loadMediaFromServer(user.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM);
+            } else {
+                MediaManager.decodeSampledBitmapFromFile(user.getProfileImage(),100,100);
+            }
+
         }
 
         if(!user.getEmail().equals("")) {

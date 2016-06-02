@@ -70,7 +70,7 @@ public class User implements Serializable {
         VISITOR,
         USER,
         PARTICIPANT_WITHOUT_TEAM,
-        PARTICIPANT;
+        PARTICIPANT,SPONSOR;
 
         public static Role fromString(String enumString) {
             try {
@@ -449,7 +449,8 @@ public class User implements Serializable {
             Log.d(TAG, "login :\n" + response);
             BOMedia profilePic = null;
             if(!loginResponseJson.isNull("profilePic")) {
-                profilePic = BOMedia.mediumSizeFromJSON(c, loginResponseJson.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
+                profilePic = BOMedia.sizedMediaFromJSON(c, loginResponseJson.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
+                Log.d(TAG,"profile pic : "+profilePic.getUrl());
                 setProfileImage(profilePic);
             }
 
@@ -458,7 +459,7 @@ public class User implements Serializable {
 
             if (getProfileImage() != null) {
                 if (!getProfileImage().isDownloaded()) {
-                    MediaManager.loadMediaFromServer(profilePic, null, BOMedia.SIZE.MEDIUM);
+                    MediaManager.loadMediaFromServer(getProfileImage(), null, BOMedia.SIZE.MEDIUM);
                 }
             }
 
@@ -556,7 +557,7 @@ public class User implements Serializable {
             }
 
             if (!responseObj.isNull("profilePic")) {
-                profileImage = BOMedia.mediumSizeFromJSON(c,responseObj.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
+                profileImage = BOMedia.sizedMediaFromJSON(c,responseObj.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
             }
 
             // Set user values
