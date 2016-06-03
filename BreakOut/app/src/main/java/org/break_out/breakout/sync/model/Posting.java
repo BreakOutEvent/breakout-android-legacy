@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
-import org.break_out.breakout.BOLocation;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.model.BOMedia;
 import org.json.JSONArray;
@@ -123,7 +123,7 @@ public class Posting extends SugarRecord {
     }
 
     public boolean hasUploadCredentials() {
-        return (_remoteID == -1 && !_uploadToken.isEmpty());
+        return (_remoteID != -1 && !_uploadToken.isEmpty());
     }
 
     public String getUploadToken() {

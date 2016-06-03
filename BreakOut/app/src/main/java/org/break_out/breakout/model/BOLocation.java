@@ -1,4 +1,4 @@
-package org.break_out.breakout;
+package org.break_out.breakout.model;
 
 import android.util.Log;
 
@@ -24,6 +24,8 @@ public class BOLocation extends SugarRecord {
     private int _eventId;
     private String _teamName;
     private Posting _posting;
+    private boolean _isPosted = true;
+    private boolean _duringEvent = false;
 
     public BOLocation() {
     }
@@ -57,6 +59,10 @@ public class BOLocation extends SugarRecord {
 
     public Posting getPosting() { return _posting;}
 
+    public boolean isPosted() {return _isPosted;}
+
+    public boolean isDuringEvent(){ return _duringEvent;}
+
 
     public void setRemoteId(int remoteId) {_remoteId = remoteId; }
 
@@ -71,6 +77,10 @@ public class BOLocation extends SugarRecord {
     public void setLongitude(double longitude) {
         _longitude = longitude;
     }
+
+    public void setIsPosted(boolean isPosted) { _isPosted = isPosted;}
+
+    public void setDuringEvent(boolean isDuringEvent) { _duringEvent = isDuringEvent;}
 
 
 
@@ -89,12 +99,15 @@ public class BOLocation extends SugarRecord {
         long timestamp = object.getLong("date");
         int teamId = object.getInt("teamId");
         int eventId = object.getInt("eventId");
+        boolean duringEvent = object.getBoolean("duringEvent");
         String teamName = object.getString("team");
         Log.d(TAG,"teamId: "+teamId);
 
         TeamManager.getInstance().createTeam(teamId,teamName);
 
         location = BOLocationManager.createLocation(remoteId,teamId,eventId,teamName,timestamp,latitude,longitude);
+        location.setIsPosted(true);
+        location.setDuringEvent(duringEvent);
 
         return location;
     }

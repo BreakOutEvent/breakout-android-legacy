@@ -104,5 +104,6 @@
     <string name="title_help">Hilfe</string>
     <string name="no_older_postings">Es gibt keine älteren Posts</string>
     <string name="no_new_postings">Keine neuen Posts</string>
+    <string name="earlyBird_running_text">Dein Abenteuer hat begonnen. Wir wünschen Dir unvergessliche 36 Stunden!</string>
 
 </resources>

@@ -205,6 +205,10 @@ public class UserManager {
         runner.execute();
     }
 
+    public  boolean isCurrentUserAtLeast(User.Role role) {
+        return getCurrentUser().isAtLeast(role);
+    }
+
     /**
      * <p>
      * Calling this method will result in updating the current user on the server.

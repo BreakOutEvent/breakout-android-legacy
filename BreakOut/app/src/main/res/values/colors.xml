@@ -21,4 +21,9 @@
     <color name="progress">@color/colorPrimaryDark</color>
 
     <color name="red">#F00</color>
+
+    <color name="red_like">#cc1f1f</color>
+
+    <color name="line_ownTeam">#4799FF</color>
+    <color name="line_otherTeam">#774799FF</color>
 </resources>

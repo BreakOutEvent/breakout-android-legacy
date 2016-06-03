@@ -1,22 +1,24 @@
 package org.break_out.breakout.ui.activities;
 
-import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
-import org.break_out.breakout.BOLocation;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.BOLocationManager;
 import org.break_out.breakout.manager.TeamManager;
@@ -27,12 +29,17 @@ import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final String TAG = "MapsActivity";
+    private long currentUserId = -1;
     private GoogleMap mMap;
+    private boolean mapReady = false;
     private FloatingActionButton _floatingActionButton;
+    private ArrayList<BOLocation> savedLocations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mapReady = false;
+        currentUserId = UserManager.getInstance(getApplicationContext()).getCurrentUser().getRemoteId();
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -47,9 +54,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         _floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Funktioniert noch nicht. Update kommt in Kürze",Toast.LENGTH_LONG).show();
+                locate();
             }
         });
+
+        _floatingActionButton.setVisibility(View.GONE);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +67,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
+
+    private void locate() {
+        final BOLocationManager manager = BOLocationManager.getInstance(getApplicationContext());
+        if(manager.locationServicesAvailable()) {
+            if(UserManager.getInstance(getApplicationContext()).getCurrentUser().getRemoteId()!=-1) {
+                manager.getLocation(getApplicationContext(), new BOLocationManager.BOLocationRequestListener() {
+                    @Override
+                    public void onLocationObtained(BOLocation currentLocation) {
+                        final BOLocation obtainedLocation = currentLocation;
+                        obtainedLocation.save();
+                        obtainedLocation.setIsPosted(false);
+                        setMarker(currentLocation);
+                        manager.postUnUploadedLocationsToServer();
+                    }
+                });
+            } else {
+                Toast.makeText(getApplicationContext(),"Du musst eingeloggt sein",Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(),"Bitte aktiviere Ortungsdienste",Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void setMarker(BOLocation location) {
+        if(mapReady) {
+            LatLng newLoc = new LatLng(location.getLatitude(),location.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(newLoc));
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(newLoc,7);
+            mMap.moveCamera(cameraUpdate);
+        }
+    }
+
 
 
     /**
@@ -71,31 +112,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mapReady = true;
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        /*mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
-
-
-        BOLocationManager.getAllLocationsFromServer(this,new BOLocationManager.BOLocationListObtainedListener() {
-            @Override
-            public void onListObtained() {
-                Log.d(TAG,"Map updated! " + BOLocation.listAll(BOLocation.class).size());
-                for(Team t : TeamManager.getInstance().getAllTeams()) {
-                    Log.d(TAG,"team "+t.getRemoteId());
-                    ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
-                    if(currentUserLocationList.size()!=0) {
-                        LatLng firstLatLng = new LatLng(currentUserLocationList.get(0).getLatitude(),currentUserLocationList.get(0).getLongitude());
-                        LatLng lastLatLng = new LatLng(currentUserLocationList.get(currentUserLocationList.size()-1).getLatitude(),currentUserLocationList.get(currentUserLocationList.size()-1).getLongitude());
-                        mMap.addMarker(new MarkerOptions().position(firstLatLng).title(t.getTeamName()));
-                        mMap.addMarker((new MarkerOptions().position(lastLatLng).title(t.getTeamName())));
+        _floatingActionButton.setVisibility(View.VISIBLE);
+        if((savedLocations = BOLocationManager.getAllSavedLocations()).isEmpty()) {
+            BOLocationManager.getAllLocationsFromServer(this, new BOLocationManager.BOLocationListObtainedListener() {
+                @Override
+                public void onListObtained() {
+                    Log.d(TAG, "Map updated! " + BOLocation.listAll(BOLocation.class).size());
+                    for (Team t : TeamManager.getInstance().getAllTeams()) {
+                        Log.d(TAG, "team " + t.getRemoteId());
+                        ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
+                        if (currentUserLocationList.size() != 0) {
+                            addToMap(currentUserLocationList);
+                        }
                     }
                 }
-                Log.d(TAG,"teams : "+TeamManager.getInstance().getAllTeams().size());
-
+            });
+        } else {
+            for (Team t : TeamManager.getInstance().getAllTeams()) {
+                ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
+                if (currentUserLocationList.size() != 0) {
+                    addToMap(currentUserLocationList);
+                }
             }
-        });
+        }
+    }
+
+    private void addToMap(ArrayList<BOLocation> locationList) {
+        Log.d(TAG,"add to map");
+        for(int i = 0; i<locationList.size() && (i+1)<=locationList.size()-1; i++) {
+
+            BOLocation curLoc = locationList.get(i);
+            BOLocation nextLoc = locationList.get(i+1);
+            LatLng l1 = new LatLng(curLoc.getLatitude(), curLoc.getLongitude());
+            LatLng l2 = new LatLng(nextLoc.getLatitude(), nextLoc.getLongitude());
+            if(i == 0) {
+                mMap.addMarker(new MarkerOptions().position(l1).title(curLoc.getTeamName()));
+            }
+            if((i+1) == locationList.size()-1){
+                mMap.addMarker((new MarkerOptions().position(l2).title(nextLoc.getTeamName())));
+            }
+            int color = getResources().getColor(R.color.line_otherTeam);
+            if(nextLoc.getTeamId() == currentUserId) {
+                color = getResources().getColor(R.color.line_ownTeam);
+            }
+            if(curLoc.getTeamId() == nextLoc.getTeamId()) {
+                Polyline line = mMap.addPolyline(new PolylineOptions()
+                        .add(l1,l2)
+                        .width(16)
+                        .color(color));
+            }
+        }
     }
 }

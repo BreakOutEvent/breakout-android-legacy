@@ -45,12 +45,18 @@ public class ChallengeListAdapter extends RecyclerView.Adapter<ChallengeListAdap
         final Challenge curChallenge = _challengeList.get(position);
         holder.tv_title.setText(generateTitle(curChallenge));
         holder.tv_description.setText(curChallenge.getDescription());
-        holder.ll_card.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                _listener.onItemClick(curChallenge.getRemoteID());
-            }
-        });
+
+
+        if(!curChallenge.getState().equals(Challenge.STATE.ACCEPTED)) {
+            holder.ll_card.setVisibility(View.GONE);
+        } else {
+            holder.ll_card.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    _listener.onItemClick(curChallenge.getRemoteID());
+                }
+            });
+        }
 
     }
 

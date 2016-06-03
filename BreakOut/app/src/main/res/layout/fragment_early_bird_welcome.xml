@@ -46,6 +46,7 @@
         android:paddingTop="?attr/actionBarSize">
 
         <TextView
+            android:id="@+id/earlyBird_tv_headline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
@@ -55,6 +56,7 @@
             android:textSize="25sp"/>
 
         <TextView
+            android:id="@+id/earlyBid_tv_content"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="15dp"

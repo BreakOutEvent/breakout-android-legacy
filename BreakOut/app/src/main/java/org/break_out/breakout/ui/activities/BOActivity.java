@@ -1,18 +1,27 @@
 package org.break_out.breakout.ui.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.manager.BOLocationManager;
+import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.BOBackgroundLocatingService;
+import org.break_out.breakout.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +35,8 @@ public abstract class BOActivity extends AppCompatActivity {
 
     private Map<Integer, PermissionListener> _listeners = new HashMap<Integer, PermissionListener>();
     private int _nextRequestCode = 0;
+
+
 
     /**
      * Interface for receiving permission results.
@@ -163,6 +174,18 @@ public abstract class BOActivity extends AppCompatActivity {
             ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(getTitle().toString(), null, ContextCompat.getColor(this, R.color.colorPrimaryDark));
             setTaskDescription(taskDescription);
         }
+
+        getPermissions(new PermissionListener() {
+            @Override
+            public void onPermissionsResult(Map<String, Boolean> result) {
+                boolean permissionGranted = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
+                if(permissionGranted) {
+                    startTrackingService(getApplicationContext());
+                } else {
+                    Toast.makeText(getApplicationContext(), "please enable location services", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     /**
@@ -204,6 +227,30 @@ public abstract class BOActivity extends AppCompatActivity {
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         if(getCurrentFocus() != null) {
             inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+
+    public boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void startTrackingService(Context c) {
+        Log.d(TAG,"startTrackingService method called");
+        Log.d(TAG,"current user role : "+UserManager.getInstance(c).getCurrentUser().getRole());
+        if(UserManager.getInstance(c).getCurrentUser().isAtLeast(User.Role.PARTICIPANT)){
+            if(!isMyServiceRunning(BOBackgroundLocatingService.class)) {
+                Log.d(TAG,"service started");
+                Intent startTrackingIntent = new Intent(getApplicationContext(), BOBackgroundLocatingService.class);
+                startService(startTrackingIntent);
+            } else {
+                Log.d(TAG,"service already running");
+            }
         }
     }
 }

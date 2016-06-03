@@ -12,7 +12,6 @@ import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -26,7 +25,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.break_out.breakout.BOLocation;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.BOLocationManager;
@@ -180,22 +179,27 @@ public class PostScreenActivity extends BOActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == Activity.RESULT_OK) {
             if(requestCode == REQUESTCODE_IMAGE) {
-                boolean fromCamera = data.getData() == null;
-                if(requestCode == REQUESTCODE_IMAGE) {
-                    Uri imageUri = null;
-                    if(!fromCamera) {
-                        imageUri = data.getData();
-                        _ivChosenImage.setImageURI(imageUri);
-                        moveFileToProfilePath(imageUri);
-                    } else {
-                        MediaManager.moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
-                            @Override
-                            public void onFileMoved(File result) {
-                                _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
-                            }
-                        });
+                if(data!=null) {
+                    boolean fromCamera = data.getData() == null;
+                    if(requestCode == REQUESTCODE_IMAGE) {
+                        Uri imageUri = null;
+                        if(!fromCamera) {
+                            imageUri = data.getData();
+                            _ivChosenImage.setImageURI(imageUri);
+                            moveFileToProfilePath(imageUri);
+                        } else {
+                            MediaManager.moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
+                                @Override
+                                public void onFileMoved(File result) {
+                                    _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
+                                }
+                            });
+                        }
                     }
+                } else {
+                    Toast.makeText(getApplicationContext(),"Foto nicht korrekt gespeichert.",Toast.LENGTH_LONG).show();
                 }
+
             } else if(requestCode == REQUESTCODE_CHALLENGE) {
                 int challengeId = data.getIntExtra(ChooseChallengeActivity.RESULT_ID,-1);
                 if(challengeId!=-1) {
@@ -204,7 +208,6 @@ public class PostScreenActivity extends BOActivity {
                     setChosenChallenge(chosenChallenge);
                 }
             }
-
         } else {
             Toast.makeText(this, "Result False", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "result code: " + resultCode);
@@ -407,7 +410,7 @@ public class PostScreenActivity extends BOActivity {
         if(comment.isEmpty() && location == null && (media == null)) {
             return;
         } else {
-
+            Log.d(TAG,"will be send, media=" +media);
             PostingManager m = PostingManager.getInstance();
             m.sendPostingToServer(this, PostingManager.buildPosting(comment, sendLocation, media),_chosenChallenge, new PostingSentListener());
         }

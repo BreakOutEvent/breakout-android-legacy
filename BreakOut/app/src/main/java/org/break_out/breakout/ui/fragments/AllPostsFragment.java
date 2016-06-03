@@ -75,7 +75,11 @@ public class AllPostsFragment extends BOFragment {
         _swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshPostings();
+                if(_dataList.isEmpty()) {
+                    fetchOlderPostings();
+                } else {
+                    refreshPostings();
+                }
                 Log.d(TAG,"onRefresh");
             }
         });
@@ -137,7 +141,7 @@ public class AllPostsFragment extends BOFragment {
                     showOlderPosts(newPostings);
                     _swipeLayout.setRefreshing(false);
                 } else {
-                    Toast.makeText(getContext(), getString(R.string.no_older_postings), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.no_older_postings), Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -160,20 +164,27 @@ public class AllPostsFragment extends BOFragment {
 
     public void refreshPostings() {
         PostingManager m = PostingManager.getInstance();
-        m.getPostingsAfterIdFromServer(_postingManager.getNewestPosting().getRemoteID(), new PostingManager.NewPostingFetchedListener() {
-            @Override
-            public void noNewPostings() {
-                _swipeLayout.setRefreshing(false);
-                Toast.makeText(getContext(),getString(R.string.no_new_postings),Toast.LENGTH_SHORT).show();
-            }
+        if(_postingManager.getNewestPosting() != null) {
+            m.getPostingsAfterIdFromServer(getContext(),_postingManager.getNewestPosting().getRemoteID(), new PostingManager.NewPostingFetchedListener() {
+                @Override
+                public void noNewPostings() {
+                    _swipeLayout.setRefreshing(false);
+                    Toast.makeText(getContext(),getString(R.string.no_new_postings),Toast.LENGTH_SHORT).show();
+                }
 
-            @Override
-            public void onPostingListChanged() {
-                updateNewerPosts(_postingManager.getAfterId(_dataList.get(0).getRemoteID()));
-                _swipeLayout.setRefreshing(false);
-                Log.d(TAG,"onPostingListChanged called");
-            }
-        });
+                @Override
+                public void onPostingListChanged() {
+                    if(!_dataList.isEmpty()) {
+                        updateNewerPosts(_postingManager.getAfterId(_dataList.get(0).getRemoteID()));
+                        _swipeLayout.setRefreshing(false);
+                        Log.d(TAG,"onPostingListChanged called");
+                    }
+                }
+            });
+        } else {
+            Toast.makeText(getContext(),"Etwas ist schief gelaufen. Bitte in Kürze neu versuchen",Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void showOlderPosts(ArrayList<Posting> newPostings){

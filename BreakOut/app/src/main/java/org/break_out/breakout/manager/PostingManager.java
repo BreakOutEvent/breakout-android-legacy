@@ -5,24 +5,23 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import org.break_out.breakout.BOLocation;
-import org.break_out.breakout.R;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.Challenge;
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.activities.PostScreenActivity;
 import org.break_out.breakout.ui.fragments.AllPostsFragment;
+import org.break_out.breakout.ui.fragments.SelectedPostingFragment;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -30,7 +29,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okio.BufferedSink;
 
 
 /**
@@ -47,7 +45,7 @@ public class PostingManager {
     }
 
     public static PostingManager getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new PostingManager();
         }
         return instance;
@@ -82,9 +80,11 @@ public class PostingManager {
     public ArrayList<Posting> getBeforeId(int id, int maxSize) {
         ArrayList<Posting> returnList = new ArrayList<>();
         Posting newestPosting = getNewestPosting();
-        id = id == 0 ? newestPosting.getRemoteID()+1 : id;
-        Log.d(TAG,"get after id: "+id);
-        returnList.addAll(Posting.findWithQuery(Posting.class,"Select * FROM Posting WHERE _REMOTE_ID < "+id+" ORDER BY _REMOTE_ID DESC LIMIT "+maxSize));
+        if (newestPosting != null) {
+            id = id == 0 ? newestPosting.getRemoteID() + 1 : id;
+            Log.d(TAG, "get after id: " + id);
+            returnList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting WHERE _REMOTE_ID < " + id + " ORDER BY _REMOTE_ID DESC LIMIT " + maxSize));
+        }
         return returnList;
     }
 
@@ -94,20 +94,24 @@ public class PostingManager {
         return returnList;
     }
 
-    public void likePosting(Context c,Posting posting) {
-        new LikePostTask(c,posting).execute();
+    public void likePosting(Context c, Posting posting) {
+        new LikePostTask(c, posting).execute();
     }
 
 
     public Posting getNewestPosting() {
-        return getAllPostings().get(0);
+        if (getAllPostings().size() != 0) {
+            return getAllPostings().get(0);
+        } else {
+            return null;
+        }
     }
 
-    public  ArrayList<Posting> getAllPostings() {
+    public ArrayList<Posting> getAllPostings() {
         ArrayList<Posting> postingList = new ArrayList<>();
-        postingList.addAll(Posting.findWithQuery(Posting.class,"Select * FROM Posting ORDER BY _REMOTE_ID DESC"));
-        for(int i = 0 ; i<postingList.size(); i++) {
-            Log.d(TAG,i+". posting in list "+postingList.get(i).getRemoteID());
+        postingList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting ORDER BY _REMOTE_ID DESC"));
+        for (int i = 0; i < postingList.size(); i++) {
+            Log.d(TAG, i + ". posting in list " + postingList.get(i).getRemoteID());
         }
         return postingList;
     }
@@ -121,8 +125,8 @@ public class PostingManager {
     @Nullable
     public Posting getPostingById(int id) {
         ArrayList<Posting> postings = new ArrayList<>();
-        postings.addAll(Posting.findWithQuery(Posting.class,"SELECT * FROM Posting WHERE _REMOTE_ID ="+id+" LIMIT 1"));
-        if(postings.isEmpty()) {
+        postings.addAll(Posting.findWithQuery(Posting.class, "SELECT * FROM Posting WHERE _REMOTE_ID =" + id + " LIMIT 1"));
+        if (postings.isEmpty()) {
             return null;
         } else {
             return postings.get(0);
@@ -133,49 +137,54 @@ public class PostingManager {
         new FetchPostingsTask(c, postingListener, listener).execute();
     }
 
-    public void getPostingsAfterIdFromServer(int id,@Nullable  NewPostingFetchedListener listener) {
-        new GetPostingsAfterIdTask(id,listener).execute();
+    public void getPostingsAfterIdFromServer(Context c, int id, @Nullable NewPostingFetchedListener listener) {
+        new GetPostingsAfterIdTask(c, id, listener).execute();
     }
 
     public void resetPostingList() {
         Posting.deleteAll(Posting.class);
     }
 
-    private class GetPostingsAfterIdTask extends AsyncTask<Void,Void,ArrayList<Integer>> {
+    private class GetPostingsAfterIdTask extends AsyncTask<Void, Void, ArrayList<Integer>> {
         private int id;
         private NewPostingFetchedListener listener = null;
+        private Context c;
 
-        public GetPostingsAfterIdTask(int id, @Nullable NewPostingFetchedListener listener) {
+        public GetPostingsAfterIdTask(Context c,int id, @Nullable NewPostingFetchedListener listener) {
             this.id = id;
             this.listener = listener;
+            this.c = c;
         }
 
         @Override
         protected ArrayList<Integer> doInBackground(Void... params) {
-            OkHttpClient client = new OkHttpClient();
+            ArrayList<Integer> newPostingIds = new ArrayList<>();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .readTimeout(10000,TimeUnit.MILLISECONDS)
+                    .build();
             Request getRequest = new Request.Builder()
-                    .url(Constants.Api.BASE_URL+"/posting/get/since/"+id+"/").build();
-            Log.d(TAG,"posting manager do in background");
+                    .url(Constants.Api.BASE_URL + "/posting/get/since/" + id + "/").build();
+            Log.d(TAG, "posting manager do in background");
             try {
                 Response response = client.newCall(getRequest).execute();
                 String responseString = response.body().string();
-                Log.d(TAG,"response: "+responseString);
-                if(!responseString.isEmpty()) {
+                Log.d(TAG, "response: " + responseString);
+                if (!responseString.isEmpty()) {
                     try {
                         JSONArray array = new JSONArray(responseString);
-                        for(int i = 0; i < array.length(); i++) {
+                        for (int i = 0; i < array.length(); i++) {
                             int id = array.getInt(i);
-
+                            newPostingIds.add(id);
                         }
-                    }catch(JSONException e) {
+                        return newPostingIds;
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
 
-            }catch(IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-
             return null;
         }
 
@@ -187,15 +196,67 @@ public class PostingManager {
                 if (postingsIds.isEmpty()) {
                     if (listener != null) {
                         listener.noNewPostings();
-                    } else {
-                        listener.onPostingListChanged();
                     }
+                }else {
+                    new GetPostingsByIdTask(c,postingsIds,listener).execute();
                 }
             } else {
-                if(listener!=null) {
+                if (listener != null) {
                     listener.noNewPostings();
                 }
             }
+        }
+    }
+
+    private class GetPostingsByIdTask extends AsyncTask<Void,Void,ArrayList<Posting>>{
+        private ArrayList<Integer> idList;
+        private Context c;
+        private NewPostingFetchedListener listener;
+
+        public GetPostingsByIdTask(Context c,ArrayList<Integer> ids,@Nullable NewPostingFetchedListener listener) {
+            idList = ids;
+            this.c = c;
+            this.listener = listener;
+        }
+
+        @Override
+        protected ArrayList<Posting> doInBackground(Void... params) {
+            ArrayList<Posting> postingArrayList = new ArrayList<>();
+            try {
+                for(Integer i : idList) {
+                    OkHttpClient client = new OkHttpClient.Builder()
+                            .readTimeout(5000,TimeUnit.MILLISECONDS)
+                            .writeTimeout(10000,TimeUnit.MILLISECONDS)
+                            .build();
+                    Request request = new Request.Builder()
+                            .url(Constants.Api.BASE_URL+"/posting/"+i+"/")
+                            .build();
+
+                    Response response = client.newCall(request).execute();
+                    String responseString = response.body().string();
+
+                    JSONObject postingObject = new JSONObject(responseString);
+
+                    Posting newPosting = Posting.fromJSON(c,postingObject);
+                    newPosting.save();
+                    postingArrayList.add(newPosting);
+                }
+                return postingArrayList;
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Posting> postings) {
+            super.onPostExecute(postings);
+            if(postings.isEmpty()){
+                listener.noNewPostings();
+            } else {
+                listener.onPostingListChanged();
+            }
+
         }
     }
 
@@ -219,7 +280,9 @@ public class PostingManager {
             progressDialog = new ProgressDialog(context);
             progressDialog.setCancelable(false);
             progressDialog.setMessage("creating Posting...");
-            progressDialog.show();
+            if(!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
         }
 
         @Override
@@ -268,13 +331,15 @@ public class PostingManager {
 
                 posting.setUploadCredentials(mediaObject.getString("id"), mediaObject.getString("uploadToken"));*/
 
-                OkHttpClient client = new OkHttpClient();
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .writeTimeout(10000,TimeUnit.MILLISECONDS)
+                        .build();
 
                 JSONObject requestObject = new JSONObject();
                 requestObject.accumulate("text", posting.getText())
                         .accumulate("date", posting.getCreatedTimestamp())
                         .accumulate("uploadMediaTypes", new JSONArray().put("image"));
-                if(posting.getLocation() != null) {
+                if (posting.getLocation() != null) {
                     requestObject.accumulate("postingLocation", new JSONObject()
                             .accumulate("latitude", posting.getLocation().getLatitude())
                             .accumulate("longitude", posting.getLocation().getLongitude()));
@@ -295,14 +360,15 @@ public class PostingManager {
                 JSONObject responseJSON = new JSONObject(responseBody);
                 Log.d(TAG, responseJSON.toString());
                 posting.setRemoteID(responseJSON.getInt("id"));
-                if(posting.hasMedia()) {
+                if (posting.hasMedia()) {
                     JSONObject mediaDataJSON = new JSONObject(new JSONArray(responseJSON.getString("media")).getJSONObject(0).toString());
                     posting.setUploadCredentials(mediaDataJSON.getString("id"), mediaDataJSON.getString("uploadToken"));
+                    Log.d(TAG,"credentials: "+posting.getUploadToken()+" "+posting.getMediaId());
                 }
                 response.body().close();
 
                 return posting;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -311,43 +377,45 @@ public class PostingManager {
         @Override
         protected void onPostExecute(Posting posting) {
             super.onPostExecute(posting);
-            if(posting!=null) {
-                if(posting.hasMedia()) {
-                    if(posting.hasUploadCredentials()) {
-                        if(chosenChallenge != null) {
+            if (posting != null) {
+                if (posting.hasMedia()) {
+                    if (posting.hasUploadCredentials()) {
+                        if (chosenChallenge != null) {
                             new PostChallengeTask(context, chosenChallenge, posting, null).execute();
                         }
                         new UploadMediaToServerTask(posting, curListener, progressDialog).execute();
                     } else {
-                        if(chosenChallenge != null) {
-                            if(progressDialog.isShowing()) {
+                        if (chosenChallenge != null) {
+                            if (progressDialog.isShowing()) {
                                 progressDialog.dismiss();
                             }
                             new PostChallengeTask(context, chosenChallenge, posting, curListener).execute();
-                        }else  {
+                        } else {
                             curListener.onPostSend();
                         }
                     }
                 } else {
-                    if(chosenChallenge != null) {
+                    if (chosenChallenge != null) {
                         new PostChallengeTask(context, chosenChallenge, posting, curListener).execute();
-                        if(progressDialog.isShowing()) {
+                        if (progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
                     } else {
                         curListener.onPostSend();
-                        if(progressDialog.isShowing()) {
+                        if (progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
                     }
                 }
             } else {
-                Toast.makeText(context,"something went wrong",Toast.LENGTH_SHORT).show();
-                if(progressDialog.isShowing()) {
+                Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show();
+                if (progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
                 curListener.onPostSend();
-
+            }
+            if(progressDialog.isShowing()) {
+                progressDialog.dismiss();
             }
         }
 
@@ -378,7 +446,10 @@ public class PostingManager {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                OkHttpClient client = new OkHttpClient();
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .writeTimeout(10000,TimeUnit.MILLISECONDS)
+                        .readTimeout(5000,TimeUnit.MILLISECONDS)
+                        .build();
                 JSONObject challengeObject = new JSONObject();
                 challengeObject.accumulate("postingId", posting.getRemoteID())
                         .accumulate("status", Challenge.STATE.WITH_PROOF.toString());
@@ -391,7 +462,7 @@ public class PostingManager {
                         .build();
 
                 Response challengeResponse = client.newCall(challengeRequest).execute();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -400,9 +471,10 @@ public class PostingManager {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if(listener != null) {
+            if (listener != null) {
                 listener.onPostSend();
             }
+            BOLocationManager.getInstance(context).postUnUploadedLocationsToServer();
         }
     }
 
@@ -424,7 +496,7 @@ public class PostingManager {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if(loadingListener!=null) {
+            if (loadingListener != null) {
                 loadingListener.onLoadingTriggered();
             }
         }
@@ -432,19 +504,21 @@ public class PostingManager {
         @Override
         protected ArrayList<Posting> doInBackground(Void... params) {
             ArrayList<Posting> responseList = new ArrayList<>();
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .readTimeout(10000, TimeUnit.MILLISECONDS)
+                    .build();
             Request request = new Request.Builder()
                     .url(Constants.Api.POSTINGLIST_URL)
                     .addHeader("Accept", "application/json;")
                     .build();
             try {
                 Response response = client.newCall(request).execute();
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     String JSONResponse = response.body().string();
                     JSONArray array = new JSONArray(JSONResponse);
                     responseList = generateFromJSON(context, array);
                 }
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return responseList;
@@ -453,7 +527,7 @@ public class PostingManager {
         @Override
         protected void onProgressUpdate(Void... values) {
             super.onProgressUpdate(values);
-            if(listener != null) {
+            if (listener != null) {
                 listener.onPostingListChanged();
             }
         }
@@ -461,17 +535,17 @@ public class PostingManager {
         @Override
         protected void onPostExecute(ArrayList<Posting> responseList) {
             super.onPostExecute(responseList);
-            Log.d(TAG,"responseList size: "+responseList.size());
-            for(Posting p : responseList) {
-                if(getPostingById(p.getRemoteID()) == null) {
-                    Log.d(TAG,"new posting");
+            Log.d(TAG, "responseList size: " + responseList.size());
+            for (Posting p : responseList) {
+                if (getPostingById(p.getRemoteID()) == null) {
+                    Log.d(TAG, "new posting");
                     p.save();
                 }
             }
-            if(listener != null) {
+            if (listener != null) {
                 listener.onPostingListChanged();
             }
-            if(loadingListener!=null) {
+            if (loadingListener != null) {
                 loadingListener.onLoadingDismissed();
             }
         }
@@ -479,12 +553,12 @@ public class PostingManager {
         private ArrayList<Posting> generateFromJSON(Context c, JSONArray array) {
             ArrayList<Posting> responseList = new ArrayList<Posting>();
             try {
-                for(int i = 0; i < array.length(); i++) {
+                for (int i = 0; i < array.length(); i++) {
                     JSONObject object = array.getJSONObject(i);
                     Posting tempPost = Posting.fromJSON(c, object);
                     responseList.add(tempPost);
                 }
-            } catch(JSONException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
 
@@ -502,7 +576,7 @@ public class PostingManager {
             toBeUploadedPosting = posting;
             attachmentFileName = toBeUploadedPosting.getMedia().getFile().getName();
             curListener = listener;
-            if(toBeUploadedPosting.getMediaFile() == null) {
+            if (toBeUploadedPosting.getMediaFile() == null) {
                 //TODO:Handle missing file
             }
             this.dialog = dialog;
@@ -511,8 +585,11 @@ public class PostingManager {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if(dialog != null) {
+            if (dialog != null) {
                 dialog.setMessage("uploading Media...");
+                if(!dialog.isShowing()) {
+                    dialog.show();
+                }
             }
         }
 
@@ -523,9 +600,13 @@ public class PostingManager {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            if(toBeUploadedPosting.getMediaFile() != null && toBeUploadedPosting.getMediaFile().length() > 0) {
+            if (toBeUploadedPosting.getMediaFile() != null && toBeUploadedPosting.getMediaFile().length() > 0) {
+                Log.d(TAG,"post media task called");
                 try {
-                    OkHttpClient client = new OkHttpClient();
+                    OkHttpClient client = new OkHttpClient.Builder()
+                            .writeTimeout(10000,TimeUnit.MILLISECONDS)
+                            .readTimeout(5000,TimeUnit.MILLISECONDS)
+                            .build();
 
                     RequestBody requestBody = new MultipartBody.Builder()
                             .setType(MultipartBody.FORM)
@@ -541,24 +622,16 @@ public class PostingManager {
                             .build();
 
                     Response response = client.newCall(request).execute();
-                    if(!response.isSuccessful()) {
+                    if (!response.isSuccessful()) {
                         //TODO: handle errors
                     } else {
                         //find out the media id to prevent double loading
                         String responseBody = response.body().string();
                         Log.d(TAG, "response : " + responseBody);
-                        try {
-                            JSONObject responseObject = new JSONObject(responseBody);
-                            JSONArray mediaArray = responseObject.getJSONArray("media");
-                            toBeUploadedPosting.getMedia().setRemoteID(mediaArray.getJSONObject(0).getInt("id"));
-                            toBeUploadedPosting.getMedia().setIsDownloaded(true);
-                        } catch(JSONException e) {
-                            e.printStackTrace();
-                        }
                         return true;
                     }
 
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     return false;
                 }
@@ -569,28 +642,32 @@ public class PostingManager {
         @Override
         protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
-            if(result) {
+            if (result) {
                 curListener.onPostSend();
             }
-            if(dialog != null) {
-                if(dialog.isShowing()) {
+            if (dialog != null) {
+                if (dialog.isShowing()) {
                     dialog.dismiss();
                 }
             }
         }
     }
 
-    public class LikePostTask extends AsyncTask<Void,Void,Boolean> {
+    public class LikePostTask extends AsyncTask<Void, Void, Boolean> {
         private Context c;
         private Posting p;
-        public LikePostTask(Context c,Posting p) {
+
+        public LikePostTask(Context c, Posting p) {
             this.c = c;
             this.p = p;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .writeTimeout(10000, TimeUnit.MILLISECONDS)
+                    .readTimeout(5000, TimeUnit.MILLISECONDS)
+                    .build();
             try {
                 Request likeRequest = new Request.Builder().url(Constants.Api.BASE_URL + "/posting/" + p.getRemoteID() + "/like/")
                         .addHeader("Authorization", "Bearer " + UserManager.getInstance(c).getCurrentUser().getAccessToken())
@@ -598,8 +675,8 @@ public class PostingManager {
                         .build();
                 Response response = client.newCall(likeRequest).execute();
                 String responseString = response.body().string();
-                Log.d(TAG,responseString);
-            }catch (Exception e) {
+                Log.d(TAG, responseString);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -610,8 +687,52 @@ public class PostingManager {
         void onPostingListChanged();
     }
 
-    public static interface NewPostingFetchedListener extends PostingListener {
+    public interface NewPostingFetchedListener extends PostingListener {
+        void noNewPostings();
+    }
 
-        public abstract void noNewPostings();
+    private class GetCommentsForPostingTask extends AsyncTask<Void,Void,JSONArray>
+    {
+        private CommentListener listener;
+        private int postingId;
+
+        public GetCommentsForPostingTask(int postingId,@Nullable CommentListener listener) {
+            this.postingId = postingId;
+            this.listener = listener;
+        }
+
+        @Override
+        protected JSONArray doInBackground(Void... params) {
+            try {
+                String url = Constants.Api.BASE_URL+"/posting/"+postingId+"/";
+
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .readTimeout(5000,TimeUnit.MILLISECONDS)
+                        .writeTimeout(10000,TimeUnit.MILLISECONDS)
+                        .build();
+                Request request = new Request.Builder().url(url).build();
+                Response  response = client.newCall(request).execute();
+                return new JSONArray(response.body().string());
+
+
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONArray array) {
+            super.onPostExecute(array);
+            if(listener!=null) {
+                for(int i = 0; i<array.length(); i++) {
+
+                }
+            }
+        }
+    }
+
+    public interface CommentListener {
+        void commentsObtained(ArrayList<SelectedPostingFragment.Comment> obtainedComments);
     }
 }

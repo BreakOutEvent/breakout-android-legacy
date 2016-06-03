@@ -1,9 +1,7 @@
 package org.break_out.breakout.ui.adapters;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.break_out.breakout.BOLocation;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.PostingManager;
@@ -75,15 +73,22 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         holder.tvLikes.setText(posting.getLikes()+" Likes");
         holder.tvComments.setText(posting.getComments()+" Kommentare");
         if(posting.hasLiked()) {
-            holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red));
+            holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
+            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
         } else {
             holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     PostingManager m = PostingManager.getInstance();
-                    posting.setHasLiked(true);
-                    posting.save();
-                    m.likePosting(_context,posting);
+                    if(!posting.hasLiked()) {
+                        posting.setHasLiked(true);
+                        posting.save();
+                        posting.setLikes(posting.getLikes()+1);
+                        holder.tvLikes.setText(posting.getLikes()+" Likes");
+                        holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
+                        holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
+                        m.likePosting(_context,posting);
+                    }
                 }
             });
         }
@@ -161,6 +166,10 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
 
         holder.tvTeamLocation.setText(posting.getLocationName());
         holder.tvTeamName.setText(teamName);
+    }
+
+    private void setLiked() {
+
     }
 
     private void setLocation(TextView textView, Address currentAddress) {

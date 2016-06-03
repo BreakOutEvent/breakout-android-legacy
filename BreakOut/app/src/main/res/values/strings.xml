@@ -120,4 +120,7 @@
 
     <string name="no_older_postings">There are no older posts</string>
     <string name="no_new_postings">No new posts</string>
+    
+    <string name="earlyBird_running_title" translatable="false">BreakOut 2016</string>
+    <string name="earlyBird_running_text">Yout adventure has started. We wish you unforgettable 36 hours!</string>
 </resources>

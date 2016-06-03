@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,20 +14,23 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.break_out.breakout.BOLocation;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.LocationService;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.model.Team;
+import org.break_out.breakout.model.User;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -97,6 +99,7 @@ public class BOLocationManager  {
             location.setEventId(eventId);
             location.setTeamId(teamId);
             location.setTeamName(teamName);
+            location.setIsPosted(true);
             location.save();
 
             return  location;
@@ -152,6 +155,13 @@ public class BOLocationManager  {
         return null;
     }
 
+    public static ArrayList<BOLocation> getAllSavedLocations() {
+        ArrayList<BOLocation> resultList = new ArrayList<>();
+        for(Team t : TeamManager.getInstance().getAllTeams()) {
+            resultList.addAll(getAllLocationsFromTeam(t.getRemoteId()));
+        }
+        return resultList;
+    }
     /**
      * stop periodically updating the Location
      * @param c context of the calling Activity
@@ -260,6 +270,19 @@ public class BOLocationManager  {
         _gpsAvailable = _locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
+
+    public static ArrayList<BOLocation> getUnUploadedBOLocations() {
+        ArrayList<BOLocation> resultList = new ArrayList<>();
+        resultList.addAll(BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _is_posted = 0 "));
+        Log.d(TAG,"unuploaded posts: "+resultList.size());
+        return resultList;
+    }
+
+    public void postUnUploadedLocationsToServer() {
+        if(!getUnUploadedBOLocations().isEmpty()) {
+            new PostMultipleLocationsToServerTask(_context, getUnUploadedBOLocations()).execute();
+        }
+    }
     /**
      * Class to handle LocationListener calls
      */
@@ -267,7 +290,7 @@ public class BOLocationManager  {
 
         @Override
         public void onLocationChanged(Location location) {
-            BOLocation boLocation = new BOLocation(System.currentTimeMillis(),location.getLatitude(),location.getLongitude());
+            BOLocation boLocation = new BOLocation(System.currentTimeMillis()/1000,location.getLatitude(),location.getLongitude());
             boLocation.save();
             broadcastLocationListUpdated(_context);
             onLocationObtained(boLocation);
@@ -360,9 +383,9 @@ public class BOLocationManager  {
         void onListObtained();
     }
 
-    public ArrayList<BOLocation> getAllLocationsFromTeam(int teamId) {
+    public static ArrayList<BOLocation> getAllLocationsFromTeam(int teamId) {
         ArrayList<BOLocation> returnList = new ArrayList<>();
-        returnList.addAll(BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _team_id = "+teamId+" ORDER BY _timestamp DESC"));
+        returnList.addAll(BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _team_id = "+teamId+" AND _during_event = 1 ORDER BY _timestamp DESC"));
         Log.d(TAG,"user "+teamId+" has "+returnList.size()+" locations");
         return returnList;
     }
@@ -417,7 +440,10 @@ public class BOLocationManager  {
         protected ArrayList<BOLocation> doInBackground(Void... params) {
             int id = UserManager.getInstance(context).getCurrentUser().getEventId()==-1 ? 1 : UserManager.getInstance(context).getCurrentUser().getEventId();
             ArrayList<BOLocation> resultList = new ArrayList<>();
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .writeTimeout(10000,TimeUnit.MILLISECONDS)
+                    .readTimeout(10000,TimeUnit.MILLISECONDS)
+                    .build();
             Request request = new Request.Builder()
                     .url(Constants.Api.BASE_URL+"/event/"+UserManager.getInstance(context).getCurrentUser().getEventId()+"/location/")
                     .build();
@@ -454,5 +480,126 @@ public class BOLocationManager  {
                 Log.d(TAG,"it did not work!");
             }
         }
+    }
+
+
+    public void postLocationToServer(Context c,BOLocation location,@Nullable  LocationPostedListener listener) {
+        if(c!=null && location!=null){
+            new PostLocationToServerTask(c,location,listener).execute();
+        }
+    }
+
+
+    private class PostLocationToServerTask extends AsyncTask<Void,Void,Boolean> {
+        private BOLocation location;
+        private Context c;
+        private LocationPostedListener listener;
+
+        public PostLocationToServerTask(Context c, BOLocation location,LocationPostedListener listener) {
+            this.location = location;
+            this.c = c;
+            this.listener = listener;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            UserManager userManager = UserManager.getInstance(c);
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .writeTimeout(10000, TimeUnit.MILLISECONDS)
+                    .readTimeout(5000,TimeUnit.MILLISECONDS)
+                    .build();
+            int teamId = userManager.getCurrentUser().getTeamId();
+            int eventId = userManager.getCurrentUser().getEventId();
+
+            String url = Constants.Api.BASE_URL+"/event/"+eventId+"/team/"+teamId+"/location/";
+            double lat = location.getLatitude();
+            double lng = location.getLongitude();
+            long timestamp = location.getTimestamp();
+
+            try {
+                Request request = new Request.Builder()
+                        .addHeader("Authorization", "Bearer " + UserManager.getInstance(c).getCurrentUser().getAccessToken())
+                        .url(url)
+                        .post(RequestBody.create(PostingManager.JSON,new JSONObject().put("latitude",lat).accumulate("longitude",lng).accumulate("date",timestamp).toString())).build();
+
+                Response res = client.newCall(request).execute();
+                String resultString = res.body().string();
+                Log.d(TAG,"result location post: "+resultString);
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if(listener!=null){
+                listener.onLcoationPosted();
+            }
+        }
+    }
+
+    private class PostMultipleLocationsToServerTask extends AsyncTask<Void,Void,Void> {
+        private Context c;
+        private ArrayList<BOLocation> locations;
+
+        public PostMultipleLocationsToServerTask(Context c, ArrayList<BOLocation> locations) {
+            this.c = c;
+            this.locations = locations;
+        }
+        @Override
+        protected Void doInBackground(Void... params) {
+            User curUser = UserManager.getInstance(c).getCurrentUser();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .writeTimeout(10000,TimeUnit.MILLISECONDS)
+                    .build();
+
+            Request.Builder requestBuilder = new Request.Builder()
+                    .addHeader("Authorization", "Bearer " + UserManager.getInstance(c).getCurrentUser().getAccessToken())
+                    .url(Constants.Api.BASE_URL+"/event/"+curUser.getEventId()+"/team/"+curUser.getTeamId()+"/location/multiple/");
+            JSONArray requestArray = new JSONArray();
+            try {
+                for(BOLocation l : locations){
+                    JSONObject newObject = new JSONObject();
+                    newObject.put("date",l.getTimestamp());
+                    newObject.put("latitude",l.getLatitude());
+                    newObject.put("longitude",l.getLongitude());
+                    requestArray.put(newObject);
+                }
+                requestBuilder.post(RequestBody.create(PostingManager.JSON,requestArray.toString()));
+                Request request = requestBuilder.build();
+
+                Response response = client.newCall(request).execute();
+                String responseString = response.body().string();
+
+                Log.d(TAG,"response: "+responseString);
+                JSONArray responseArray = new JSONArray(responseString);
+
+                for(BOLocation l : locations) {
+                    l.delete();
+                }
+
+                for(int i = 0 ; i < responseArray.length(); i++) {
+                    JSONObject curObj = responseArray.getJSONObject(i);
+                    BOLocation.fromJSON(curObj).save();
+                }
+
+
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
+
+    public interface LocationPostedListener{
+        void onLcoationPosted();
     }
 }

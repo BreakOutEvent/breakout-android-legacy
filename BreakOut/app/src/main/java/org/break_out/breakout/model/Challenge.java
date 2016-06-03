@@ -23,14 +23,14 @@ public class Challenge extends SugarRecord {
     private int _sponsorID;
     private String _teamName;
     private String _description;
-    private String _status;
+    private STATE _status;
     private boolean _isSponsorHidden = false;
     private int _amount;
     private JSONObject _contract;
     private JSONObject _unregisteredSponsor;
     private int _postingID;
 
-    public Challenge(int remoteID,int eventID, int teamID,int sponsorID,String teamName,String description,String status,boolean isSponsorHidden,int amount,JSONObject contract,JSONObject unregisteredSponsor) {
+    public Challenge(int remoteID,int eventID, int teamID,int sponsorID,String teamName,String description,STATE status,boolean isSponsorHidden,int amount,JSONObject contract,JSONObject unregisteredSponsor) {
         _remoteID = remoteID;
         _eventID = eventID;
         _teamID = teamID;
@@ -55,6 +55,7 @@ public class Challenge extends SugarRecord {
     public int getAmount() { return _amount;}
     public JSONObject getContract() { return _contract;}
     public JSONObject getUnregisteredSponsor() { return _unregisteredSponsor;}
+    public STATE getState(){return _status;}
 
     public void setPostingID(int postingID) {_postingID = postingID;}
 
@@ -96,7 +97,7 @@ public class Challenge extends SugarRecord {
             String uploadToken = contractObject.getString("uploadToken");
             JSONArray sizesArray = contractObject.getJSONArray("sizes");
 
-            return new Challenge(remoteID,eventID,teamID,sponsorID,teamName,description,status,sponsorIsHidden,amount,contractObject,unregisteredSponsorObject);
+            return new Challenge(remoteID,eventID,teamID,sponsorID,teamName,description,STATE.fromString(status),sponsorIsHidden,amount,contractObject,unregisteredSponsorObject);
         } catch(JSONException e) {
             e.printStackTrace();
         }
@@ -104,6 +105,15 @@ public class Challenge extends SugarRecord {
     }
 
     public enum STATE{
-        PROPOSED,WITH_PROOF;
+        WITHDRAWN,PROPOSED,ACCEPTED,WITH_PROOF;
+
+        public static STATE fromString(String input) {
+            for(STATE s : STATE.values()) {
+                if(s.toString().equals(input)) {
+                    return s;
+                }
+            }
+            return WITHDRAWN;
+        }
     }
 }

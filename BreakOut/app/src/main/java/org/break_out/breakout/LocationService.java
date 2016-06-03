@@ -9,6 +9,7 @@ import android.util.Log;
 import com.orm.SugarContext;
 
 import org.break_out.breakout.manager.BOLocationManager;
+import org.break_out.breakout.model.BOLocation;
 
 /**
  * Created by Maximilian Dühr on 01.03.2016.
@@ -31,8 +32,6 @@ public class LocationService extends Service {
         } catch(Exception e) {
             e.printStackTrace();
         }
-
-        //Toast.makeText(this,"Location obtained!",Toast.LENGTH_SHORT).show();
 
         _locationManager = BOLocationManager.getInstance(this);
         BOLocation lastLocation =_locationManager.getLocation(this, new BOLocationManager.BOLocationRequestListener(){

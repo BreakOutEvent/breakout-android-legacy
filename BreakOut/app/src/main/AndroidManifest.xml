@@ -25,7 +25,7 @@
             android:value="breakout.db" />
         <meta-data
             android:name="VERSION"
-            android:value="3" />
+            android:value="7" />
         <meta-data
             android:name="QUERY_LOG"
             android:value="true" />
@@ -34,10 +34,12 @@
             android:value="org.break_out.breakout" />
 
         <!-- Services -->
+        <service android:name=".model.BOBackgroundLocatingService"/>
         <service android:name=".sync.service.UploadService" />
         <service android:name=".sync.service.DownloadService" />
         <service android:name=".sync.service.UpdateService" />
         <service android:name=".LocationService" />
+
 
         <!-- Activities -->
         <activity
@@ -95,7 +97,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".ui.activities.ChooseChallengeActivity"/>
+        <activity android:name=".ui.activities.ChooseChallengeActivity" />
         <activity
             android:name=".ui.activities.MapsActivity"
             android:label="@string/title_activity_maps">

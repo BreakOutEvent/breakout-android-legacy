@@ -1,7 +1,6 @@
 package org.break_out.breakout.ui.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -18,13 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.break_out.breakout.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.BOBackgroundLocatingService;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.fragments.AllPostsFragment;
 import org.break_out.breakout.ui.fragments.EarlyBirdWelcomeFragment;
 import org.break_out.breakout.ui.fragments.HelpFragment;
@@ -49,13 +47,12 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        startTrackingService(getApplicationContext());
 
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
         _userManager = UserManager.getInstance(this);
-
-
 
         // Set up drawer
         _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -120,11 +117,13 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                         if(curUser.getProfileImage().isDownloaded()) {
                             Log.d(TAG,"image downloaded");
                             MediaManager.getInstance().setSizedImage(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM,true);
+
                         } else {
                             MediaManager.loadMediaFromServer(curUser.getProfileImage(),_ivProfileImage, BOMedia.SIZE.MEDIUM);
                         }
                     }
                 }
+                startTrackingService(getApplicationContext());
             }
 
             @Override
