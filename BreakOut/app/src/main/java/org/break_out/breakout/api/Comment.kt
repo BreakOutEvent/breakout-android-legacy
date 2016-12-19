@@ -1,8 +1,8 @@
 package org.break_out.breakout.api
 
-class Comment {
-    var id: Int? = null
-    var text: String? = null
-    var date: Int? = null
-    var user: User? = null
-}
+class Comment(
+        val id: Int,
+        val text: String,
+        val date: Int,
+        val user: User?
+)
