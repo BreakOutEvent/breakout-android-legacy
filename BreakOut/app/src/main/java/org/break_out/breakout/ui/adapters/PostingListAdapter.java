@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.break_out.breakout.api.NewPosting;
 import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.MediaManager;
@@ -35,11 +36,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.PostingViewHolder> {
     private static final String TAG = "PostingListAdapter";
 
-    private static ArrayList<Posting> _postingList;
+    private static ArrayList<NewPosting> _postingList;
     private Context _context;
     private static OnPositionFromEndReachedListener _listener;
 
-    public PostingListAdapter(Context context, ArrayList<Posting> postingList) {
+    public PostingListAdapter(Context context, ArrayList<NewPosting> postingList) {
         _postingList = postingList;
         _context = context;
     }
@@ -63,122 +64,130 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     }
 
     private void populateView(final PostingViewHolder holder, final int pos) {
-        final Posting posting = _postingList.get(pos);
 
-        String teamName = posting.getTeamName();
+        final NewPosting posting = _postingList.get(pos);
+
+        String teamName = posting.getUser().getParticipant().getTeamName();
         holder.tvTeamName.setText(teamName);
+
         holder.currentPosition = pos;
 
         holder.tvComments.setText(posting.getComments()+" Kommentare");
         holder.tvLikes.setText(posting.getLikes()+" Likes");
         holder.tvComments.setText(posting.getComments()+" Kommentare");
-        if(posting.hasLiked()) {
-            holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
-            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
-        } else {
-            holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    PostingManager m = PostingManager.getInstance();
-                    if(!posting.hasLiked()) {
-                        posting.setHasLiked(true);
-                        posting.save();
-                        posting.setLikes(posting.getLikes()+1);
-                        holder.tvLikes.setText(posting.getLikes()+" Likes");
-                        holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
-                        holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
-                        m.likePosting(_context,posting);
-                    }
-                }
-            });
+//        if(posting.hasLiked()) {
+//            holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
+//            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
+//        } else {
+//            holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    PostingManager m = PostingManager.getInstance();
+//                    if(!posting.hasLiked()) {
+//                        posting.setHasLiked(true);
+//                        posting.save();
+//                        posting.setLikes(posting.getLikes()+1);
+//                        holder.tvLikes.setText(posting.getLikes()+" Likes");
+//                        holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
+//                        holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
+//                        m.likePosting(_context,posting);
+//                    }
+//                }
+//            });
+//        }
+
+
+
+//        List<Address> addressList = null;
+//        Geocoder coder = new Geocoder(_context);
+
+
+        if (posting.getPostingLocation() != null) {
+//            try {
+//                addressList = coder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            if (addressList != null) {
+//                if (addressList.size() > 0) {
+//                    setLocation(holder.tvTeamLocation, addressList.get(0));
+//                }
+//
+//            }
+            setLocation(holder.tvTeamLocation, posting.getPostingLocation().getLatitude() + " "+ posting.getPostingLocation().getLongitude());
         }
 
-
-
-        List<Address> addressList = null;
-        Geocoder coder = new Geocoder(_context);
-        BOLocation location = posting.getLocation();
-        if (location != null) {
-            try {
-                addressList = coder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (addressList != null) {
-                if (addressList.size() > 0) {
-                    setLocation(holder.tvTeamLocation, addressList.get(0));
-                }
-
-            }
+        if(posting.getDate() != null) {
+            holder.tvTime.setText("Somewhere somewhen");
         }
-
-        if (posting.getCreatedTimestamp() != 0L) {
-            holder.tvTime.setText(timeBuilder(posting.getCreatedTimestamp()));
-        }
+//        if (posting.getCreatedTimestamp() != 0L) {
+//            holder.tvTime.setText(timeBuilder(posting.getCreatedTimestamp()));
+//        }
 
         if (!posting.getText().isEmpty()) {
             holder.tvComment.setText(posting.getText());
         }
 
-        if (!posting.hasMedia()) {
-            holder.ivPosting.setVisibility(View.GONE);
-        } else {
-            holder.ivPosting.setVisibility(View.VISIBLE);
-            holder.ivPosting.setImageDrawable(_context.getResources().getDrawable(R.drawable.bg_welcome_600dp));
-            if (posting.getMedia() != null) {
-                if (posting.getMedia().isDownloaded()) {
-                    if (MediaManager.getInstance().getFromCache(posting.getMedia().getUrl()) != null) {
-                        holder.ivPosting.setImageBitmap(MediaManager.getInstance().getFromCache(posting.getMedia().getUrl()));
-                    } else {
-                        Bitmap imageBitmap = MediaManager.decodeSampledBitmapFromFile(posting.getMedia(), 250, 250);
-                        MediaManager.getInstance().addToCache(posting.getMedia().getUrl(), imageBitmap);
-                        holder.ivPosting.setImageBitmap(imageBitmap);
+//        if (!posting.hasMedia()) {
+//            holder.ivPosting.setVisibility(View.GONE);
+//        } else {
+//            holder.ivPosting.setVisibility(View.VISIBLE);
+//            holder.ivPosting.setImageDrawable(_context.getResources().getDrawable(R.drawable.bg_welcome_600dp));
+//            if (posting.getMedia() != null) {
+//                if (posting.getMedia().isDownloaded()) {
+//                    if (MediaManager.getInstance().getFromCache(posting.getMedia().getUrl()) != null) {
+//                        holder.ivPosting.setImageBitmap(MediaManager.getInstance().getFromCache(posting.getMedia().getUrl()));
+//                    } else {
+//                        Bitmap imageBitmap = MediaManager.decodeSampledBitmapFromFile(posting.getMedia(), 250, 250);
+//                        MediaManager.getInstance().addToCache(posting.getMedia().getUrl(), imageBitmap);
+//                        holder.ivPosting.setImageBitmap(imageBitmap);
+//
+//                    }
+//                } else {
+//                    MediaManager.loadMediaFromServer(posting.getMedia(), holder.ivPosting, BOMedia.SIZE.MEDIUM);
+//                }
+//            }
+//        }
 
-                    }
-                } else {
-                    MediaManager.loadMediaFromServer(posting.getMedia(), holder.ivPosting, BOMedia.SIZE.MEDIUM);
-                }
-            }
-        }
-        holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_account_box_white_24dp));
-        if (posting.getProfileImage() != null) {
-            if (!posting.getProfileImage().isDownloaded()) {
-                MediaManager.loadMediaFromServer(posting.getProfileImage(), holder.civTeamPic, BOMedia.SIZE.SMALL);
-            } else {
-                if (MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()) != null) {
-                    holder.civTeamPic.setImageBitmap(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()));
-                } else {
-                    Bitmap profileImageBitmap = MediaManager.decodeSampledBitmapFromFile(posting.getProfileImage(), 75, 75);
-                    MediaManager.getInstance().addToCache(posting.getProfileImage().getUrl(), profileImageBitmap);
-                    holder.civTeamPic.setImageBitmap(profileImageBitmap);
-                }
-            }
-        } else {
-            holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.placeholder_profile_pic));
-        }
-
-        if (posting.getProvenChallengeId() != -1) {
-            holder.rlChallenge.setVisibility(View.VISIBLE);
-            holder.tvChallenge.setText(posting.getChallengeDescription());
-        } else {
-            holder.rlChallenge.setVisibility(View.GONE);
-        }
-
-        holder.tvTeamLocation.setText(posting.getLocationName());
-        holder.tvTeamName.setText(teamName);
+//        holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_account_box_white_24dp));
+//        if (posting.getProfileImage() != null) {
+//            if (!posting.getProfileImage().isDownloaded()) {
+//                MediaManager.loadMediaFromServer(posting.getProfileImage(), holder.civTeamPic, BOMedia.SIZE.SMALL);
+//            } else {
+//                if (MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()) != null) {
+//                    holder.civTeamPic.setImageBitmap(MediaManager.getInstance().getFromCache(posting.getProfileImage().getUrl()));
+//                } else {
+//                    Bitmap profileImageBitmap = MediaManager.decodeSampledBitmapFromFile(posting.getProfileImage(), 75, 75);
+//                    MediaManager.getInstance().addToCache(posting.getProfileImage().getUrl(), profileImageBitmap);
+//                    holder.civTeamPic.setImageBitmap(profileImageBitmap);
+//                }
+//            }
+//        } else {
+//            holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.placeholder_profile_pic));
+//        }
+//
+//        if (posting.getProvenChallengeId() != -1) {
+//            holder.rlChallenge.setVisibility(View.VISIBLE);
+//            holder.tvChallenge.setText(posting.getChallengeDescription());
+//        } else {
+//            holder.rlChallenge.setVisibility(View.GONE);
+//        }
+//
+//        holder.tvTeamLocation.setText(posting.getLocationName());
+//        holder.tvTeamName.setText(teamName);
     }
 
     private void setLiked() {
 
     }
 
-    private void setLocation(TextView textView, Address currentAddress) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(currentAddress.getLocality())
-                .append(", ")
-                .append(currentAddress.getCountryName());
-        String location = builder.toString();
-        textView.setText(location);
+    private void setLocation(TextView textView, String address) {
+//        StringBuilder builder = new StringBuilder();
+//        builder.append(currentAddress.getLocality())
+//                .append(", ")
+//                .append(currentAddress.getCountryName());
+//        String location = builder.toString();
+        textView.setText(address);
     }
 
     private String timeBuilder(long timestamp) {
