@@ -49,7 +49,7 @@ public class AllPostsFragment extends BOFragment {
     private RelativeLayout _progressWrapper;
 
     private int currentOffset = 0;
-    private final int FETCH_LIMIT = 50;
+    private final int FETCH_LIMIT = 10;
 
     private BreakoutClient client = this.createBreakoutClient(); // TODO: Dependency InjectioN!
 
@@ -69,13 +69,16 @@ public class AllPostsFragment extends BOFragment {
             _dataList = new ArrayList<>();
         }
         _adapter = new PostingListAdapter(getContext(), _dataList);
-//        _adapter.setPositionListener(new PostingListAdapter.OnPositionFromEndReachedListener(1) {
-//            @Override
-//            public void onOffsetReached() {
-//                fetchOlderPostings();
-//            }
-//        });
+        getNextPostings();
+        _adapter.setPositionListener(new PostingListAdapter.OnPositionFromEndReachedListener(1) {
+            @Override
+            public void onOffsetReached() {
+                getNextPostings();
+            }
+        });
+    }
 
+    private void getNextPostings() {
         client.getAllPostings(currentOffset, FETCH_LIMIT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -83,19 +86,21 @@ public class AllPostsFragment extends BOFragment {
                     @Override
                     public void call(List<NewPosting> newPostings) {
                         Log.d(TAG, "Received a new list of postings");
-                        if(newPostings.size() == 0) {
+                        if (newPostings.size() == 0) {
                             Log.i(TAG, "List of size was zero");
                         }
-                        for(NewPosting np: newPostings) {
+                        for (NewPosting np : newPostings) {
                             _dataList.add(np);
-                            _adapter.notifyDataSetChanged();
                         }
+                        currentOffset += FETCH_LIMIT;
+                        _adapter.notifyDataSetChanged();
+                        _swipeLayout.setRefreshing(false);
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         Log.e(TAG, "Something went wrong whilst fetching posts from API");
-                        throw new RuntimeException(throwable);
+                        throw new RuntimeException(throwable); // TODO: Improve error handling
                     }
                 });
     }
@@ -115,17 +120,17 @@ public class AllPostsFragment extends BOFragment {
         _recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         _swipeLayout.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
-//        _swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//                if (_dataList.isEmpty()) {
-//                    fetchOlderPostings();
-//                } else {
-//                    refreshPostings();
-//                }
-//                Log.d(TAG, "onRefresh");
-//            }
-//        });
+
+        _swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                    currentOffset = 0;
+                    _dataList.clear();
+                    _adapter.notifyDataSetChanged();
+                    getNextPostings();
+                    Log.d(TAG, "onRefresh: Resetting offset and loading postings from server");
+            }
+        });
 
         // Init and populate Toolbar
         Toolbar toolbar = (Toolbar) v.findViewById(R.id.allPosts_toolbar);
@@ -141,134 +146,6 @@ public class AllPostsFragment extends BOFragment {
                 mainActivity.openDrawer();
             }
         });
-        if (_dataList.isEmpty()) {
-//            fetchOlderPostings();
-            Log.d(TAG, "datalist was empty");
-        }
         return v;
     }
-
-//    private void fetchAllPosts() {
-//        PostingManager m = PostingManager.getInstance();
-//        m.resetPostingList();
-//        m.getAllPosts(getContext(), new PostingManager.PostingListener() {
-//            @Override
-//            public void onPostingListChanged() {
-//                updatePostList();
-//
-//            }
-//        }, new LoadingListener() {
-//            @Override
-//            public void onLoadingTriggered() {
-//                _progressWrapper.setVisibility(View.VISIBLE);
-//                _progressBar.setVisibility(View.VISIBLE);
-//            }
-//
-//            @Override
-//            public void onLoadingDismissed() {
-//                _progressWrapper.setVisibility(View.GONE);
-//                _progressBar.setVisibility(View.GONE);
-//            }
-//        });
-//    }
-//
-//    private void fetchOlderPostings() {
-//        PostingManager m = PostingManager.getInstance();
-//        m.getAllPosts(getContext(), new PostingManager.PostingListener() {
-//            @Override
-//            public void onPostingListChanged() {
-//                _swipeLayout.setRefreshing(false);
-//                ArrayList<Posting> newPostings = _postingManager.getBeforeId(lastPostRemoteId, 7);
-//                if (!newPostings.isEmpty()) {
-//                    lastPostRemoteId = newPostings.get(newPostings.size() - 1).getRemoteID();
-//                    showOlderPosts(newPostings);
-//                    _swipeLayout.setRefreshing(false);
-//                } else {
-//                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.no_older_postings), Toast.LENGTH_SHORT).show();
-//                }
-//
-//            }
-//        }, new LoadingListener() {
-//            @Override
-//            public void onLoadingTriggered() {
-//                _progressWrapper.setVisibility(View.VISIBLE);
-//                _progressBar.setVisibility(View.VISIBLE);
-//            }
-//
-//            @Override
-//            public void onLoadingDismissed() {
-//                _progressWrapper.setVisibility(View.GONE);
-//                _progressBar.setVisibility(View.GONE);
-//            }
-//        });
-
-//
-//    }
-
-//    public void refreshPostings() {
-//        PostingManager m = PostingManager.getInstance();
-//        if (_postingManager.getNewestPosting() != null) {
-//            m.getPostingsAfterIdFromServer(getContext(), _postingManager.getNewestPosting().getRemoteID(), new PostingManager.NewPostingFetchedListener() {
-//                @Override
-//                public void noNewPostings() {
-//                    _swipeLayout.setRefreshing(false);
-//                    Toast.makeText(getContext(), getString(R.string.no_new_postings), Toast.LENGTH_SHORT).show();
-//                }
-//
-//                @Override
-//                public void onPostingListChanged() {
-//                    if (!_dataList.isEmpty()) {
-//                        updateNewerPosts(_postingManager.getAfterId(_dataList.get(0).getRemoteID()));
-//                        _swipeLayout.setRefreshing(false);
-//                        Log.d(TAG, "onPostingListChanged called");
-//                    }
-//                }
-//            });
-//        } else {
-//            Toast.makeText(getContext(), "Etwas ist schief gelaufen. Bitte in Kürze neu versuchen", Toast.LENGTH_SHORT).show();
-//        }
-//
-//    }
-
-//    private void showOlderPosts(ArrayList<Posting> newPostings) {
-//        for (Posting p : newPostings) {
-//            if (!isInDataList(p)) {
-//                _dataList.add(p);
-//                _adapter.notifyDataSetChanged();
-//            }
-//        }
-//        _adapter.notifyDataSetChanged();
-//    }
-
-//    private void updateNewerPosts(ArrayList<Posting> newPostings) {
-//        for (Posting p : newPostings) {
-//            if (!isInDataList(p)) {
-//                _dataList.add(0, p);
-//                _adapter.notifyDataSetChanged();
-//            }
-//        }
-//        _adapter.notifyDataSetChanged();
-//    }
-
-//    private void updatePostList() {
-//        _dataList.clear();
-//        _dataList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting ORDER BY _CREATED_TIMESTAMP DESC"));
-//        _adapter.notifyDataSetChanged();
-//    }
-//
-//    private boolean isInDataList(Posting posting) {
-//        for (Posting p : _dataList) {
-//            if (p.getRemoteID() == posting.getRemoteID()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
-    public interface LoadingListener {
-        void onLoadingTriggered();
-
-        void onLoadingDismissed();
-    }
-
 }

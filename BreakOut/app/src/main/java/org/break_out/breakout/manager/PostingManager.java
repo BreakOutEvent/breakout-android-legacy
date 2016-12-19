@@ -14,6 +14,7 @@ import org.break_out.breakout.model.Challenge;
 import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.activities.PostScreenActivity;
 import org.break_out.breakout.ui.fragments.AllPostsFragment;
+import org.break_out.breakout.ui.fragments.LoadingListener;
 import org.break_out.breakout.ui.fragments.SelectedPostingFragment;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -133,7 +134,7 @@ public class PostingManager {
         }
     }
 
-    public void getAllPosts(Context c, @Nullable PostingListener postingListener, @Nullable AllPostsFragment.LoadingListener listener) {
+    public void getAllPosts(Context c, @Nullable PostingListener postingListener, @Nullable LoadingListener listener) {
         new FetchPostingsTask(c, postingListener, listener).execute();
     }
 
@@ -481,13 +482,13 @@ public class PostingManager {
     private class FetchPostingsTask extends AsyncTask<Void, Void, ArrayList<Posting>> {
         private PostingListener listener;
         private Context context;
-        private AllPostsFragment.LoadingListener loadingListener;
+        private LoadingListener loadingListener;
 
         public FetchPostingsTask(Context c) {
             context = c;
         }
 
-        public FetchPostingsTask(Context c, PostingListener listener, @Nullable AllPostsFragment.LoadingListener loadingListener) {
+        public FetchPostingsTask(Context c, PostingListener listener, @Nullable LoadingListener loadingListener) {
             this.listener = listener;
             context = c;
             this.loadingListener = loadingListener;
