@@ -58,6 +58,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:9.0.1'
     compile 'com.google.android.gms:play-services-maps:9.0.1'
     compile 'com.google.maps.android:android-maps-utils:0.4'
+
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 repositories {

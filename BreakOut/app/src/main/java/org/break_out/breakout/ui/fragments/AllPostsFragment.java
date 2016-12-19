@@ -13,13 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.api.BreakoutClient;
 import org.break_out.breakout.api.NewPosting;
 import org.break_out.breakout.manager.PostingManager;
-import org.break_out.breakout.sync.model.Posting;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
 
@@ -41,7 +39,7 @@ public class AllPostsFragment extends BOFragment {
     private static final String TAG = "AllPostsFragment";
 
     private PostingListAdapter _adapter;
-    private ArrayList<Posting> _dataList;
+    private ArrayList<NewPosting> _dataList;
 
     private PostingManager _postingManager;
 
@@ -49,8 +47,6 @@ public class AllPostsFragment extends BOFragment {
     private SwipeRefreshLayout _swipeLayout;
     private ProgressBar _progressBar;
     private RelativeLayout _progressWrapper;
-
-    private int lastPostRemoteId = 0;
 
     private int currentOffset = 0;
     private final int FETCH_LIMIT = 50;
@@ -87,8 +83,11 @@ public class AllPostsFragment extends BOFragment {
                     @Override
                     public void call(List<NewPosting> newPostings) {
                         Log.d(TAG, "Received a new list of postings");
+                        if(newPostings.size() == 0) {
+                            Log.i(TAG, "List of size was zero");
+                        }
                         for(NewPosting np: newPostings) {
-                            _dataList.add(np.transformToPosting());
+                            _dataList.add(np);
                             _adapter.notifyDataSetChanged();
                         }
                     }
@@ -206,65 +205,65 @@ public class AllPostsFragment extends BOFragment {
 //
 //    }
 
-    public void refreshPostings() {
-        PostingManager m = PostingManager.getInstance();
-        if (_postingManager.getNewestPosting() != null) {
-            m.getPostingsAfterIdFromServer(getContext(), _postingManager.getNewestPosting().getRemoteID(), new PostingManager.NewPostingFetchedListener() {
-                @Override
-                public void noNewPostings() {
-                    _swipeLayout.setRefreshing(false);
-                    Toast.makeText(getContext(), getString(R.string.no_new_postings), Toast.LENGTH_SHORT).show();
-                }
+//    public void refreshPostings() {
+//        PostingManager m = PostingManager.getInstance();
+//        if (_postingManager.getNewestPosting() != null) {
+//            m.getPostingsAfterIdFromServer(getContext(), _postingManager.getNewestPosting().getRemoteID(), new PostingManager.NewPostingFetchedListener() {
+//                @Override
+//                public void noNewPostings() {
+//                    _swipeLayout.setRefreshing(false);
+//                    Toast.makeText(getContext(), getString(R.string.no_new_postings), Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void onPostingListChanged() {
+//                    if (!_dataList.isEmpty()) {
+//                        updateNewerPosts(_postingManager.getAfterId(_dataList.get(0).getRemoteID()));
+//                        _swipeLayout.setRefreshing(false);
+//                        Log.d(TAG, "onPostingListChanged called");
+//                    }
+//                }
+//            });
+//        } else {
+//            Toast.makeText(getContext(), "Etwas ist schief gelaufen. Bitte in Kürze neu versuchen", Toast.LENGTH_SHORT).show();
+//        }
+//
+//    }
 
-                @Override
-                public void onPostingListChanged() {
-                    if (!_dataList.isEmpty()) {
-                        updateNewerPosts(_postingManager.getAfterId(_dataList.get(0).getRemoteID()));
-                        _swipeLayout.setRefreshing(false);
-                        Log.d(TAG, "onPostingListChanged called");
-                    }
-                }
-            });
-        } else {
-            Toast.makeText(getContext(), "Etwas ist schief gelaufen. Bitte in Kürze neu versuchen", Toast.LENGTH_SHORT).show();
-        }
+//    private void showOlderPosts(ArrayList<Posting> newPostings) {
+//        for (Posting p : newPostings) {
+//            if (!isInDataList(p)) {
+//                _dataList.add(p);
+//                _adapter.notifyDataSetChanged();
+//            }
+//        }
+//        _adapter.notifyDataSetChanged();
+//    }
 
-    }
+//    private void updateNewerPosts(ArrayList<Posting> newPostings) {
+//        for (Posting p : newPostings) {
+//            if (!isInDataList(p)) {
+//                _dataList.add(0, p);
+//                _adapter.notifyDataSetChanged();
+//            }
+//        }
+//        _adapter.notifyDataSetChanged();
+//    }
 
-    private void showOlderPosts(ArrayList<Posting> newPostings) {
-        for (Posting p : newPostings) {
-            if (!isInDataList(p)) {
-                _dataList.add(p);
-                _adapter.notifyDataSetChanged();
-            }
-        }
-        _adapter.notifyDataSetChanged();
-    }
-
-    private void updateNewerPosts(ArrayList<Posting> newPostings) {
-        for (Posting p : newPostings) {
-            if (!isInDataList(p)) {
-                _dataList.add(0, p);
-                _adapter.notifyDataSetChanged();
-            }
-        }
-        _adapter.notifyDataSetChanged();
-    }
-
-    private void updatePostList() {
-        _dataList.clear();
-        _dataList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting ORDER BY _CREATED_TIMESTAMP DESC"));
-        _adapter.notifyDataSetChanged();
-    }
-
-    private boolean isInDataList(Posting posting) {
-        for (Posting p : _dataList) {
-            if (p.getRemoteID() == posting.getRemoteID()) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    private void updatePostList() {
+//        _dataList.clear();
+//        _dataList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting ORDER BY _CREATED_TIMESTAMP DESC"));
+//        _adapter.notifyDataSetChanged();
+//    }
+//
+//    private boolean isInDataList(Posting posting) {
+//        for (Posting p : _dataList) {
+//            if (p.getRemoteID() == posting.getRemoteID()) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public interface LoadingListener {
         void onLoadingTriggered();
