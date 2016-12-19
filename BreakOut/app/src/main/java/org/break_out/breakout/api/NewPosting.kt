@@ -15,9 +15,15 @@ class NewPosting(
         val comments: List<Comment> = listOf(),
         val media: List<Medium> = listOf(),
         val hashtags: List<Any> = listOf(),
+        val proof: Proof?,
         val likes: Int = 0,
-        val hasLiked: Boolean = false,
-        val proves: Any?)
+        val hasLiked: Boolean = false)
+
+class Proof(
+        val status: String,
+        val amount: Double = 0.0,
+        val description: String = ""
+)
 
 fun NewPosting.transfromToPosting(): Posting {
 

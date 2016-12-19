@@ -10,5 +10,5 @@ class ProfilePic {
     var id: Int? = null
     var type: String? = null
     var uploadToken: Any? = null
-    var sizes: List<Any>? = null
+    var sizes: List<Size> = listOf()
 }
