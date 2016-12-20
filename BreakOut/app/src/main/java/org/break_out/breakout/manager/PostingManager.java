@@ -51,221 +51,17 @@ public class PostingManager {
         return instance;
     }
 
-    public static Posting buildPosting(String message) {
-        return new Posting(message, null, null);
-    }
-
-    public static Posting buildPosting(String message, BOLocation location) {
-        return new Posting(message, location, null);
-    }
-
     public static Posting buildPosting(String message, BOLocation location, BOMedia media) {
         return new Posting(message, location, media);
-    }
-
-    public static Posting buildPosting(String message, BOMedia media) {
-        return new Posting(message, null, media);
     }
 
     public void sendPostingToServer(Context c, Posting p, @Nullable Challenge chosenChallenge, PostScreenActivity.PostingSentListener listener) {
         new SendPostToServerTask(c, p, chosenChallenge, listener).execute();
     }
 
-    public static Posting buildRemotPosting(String username, String message, BOLocation location, BOMedia media) {
-        Posting returnPosting = buildPosting(message, location, media);
-        returnPosting.setUsername(username);
-        return returnPosting;
-    }
-
-    // TODO: Can be removed
-    public ArrayList<Posting> getBeforeId(int id, int maxSize) {
-        ArrayList<Posting> returnList = new ArrayList<>();
-        Posting newestPosting = getNewestPosting();
-        if (newestPosting != null) {
-            id = id == 0 ? newestPosting.getRemoteID() + 1 : id;
-            Log.d(TAG, "get after id: " + id);
-            returnList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting WHERE _REMOTE_ID < " + id + " ORDER BY _REMOTE_ID DESC LIMIT " + maxSize));
-        }
-        return returnList;
-    }
-
-    // TODO: Can be removed
-    public ArrayList<Posting> getAfterId(int id) {
-        ArrayList<Posting> returnList = new ArrayList<>();
-        returnList.addAll(Posting.findWithQuery(Posting.class, "SELECT * FROM Posting WHERE _REMOTE_ID > " + id + " ORDER BY _REMOTE_ID ASC"));
-        return returnList;
-    }
-
     // TODO: Use Retrofit
     public void likePosting(Context c, Posting posting) {
         new LikePostTask(c, posting).execute();
-    }
-
-    // TODO: Can be removed
-    public Posting getNewestPosting() {
-        if (getAllPostings().size() != 0) {
-            return getAllPostings().get(0);
-        } else {
-            return null;
-        }
-    }
-
-    // TODO: Can be removed
-    public ArrayList<Posting> getAllPostings() {
-        ArrayList<Posting> postingList = new ArrayList<>();
-        postingList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting ORDER BY _REMOTE_ID DESC"));
-        for (int i = 0; i < postingList.size(); i++) {
-            Log.d(TAG, i + ". posting in list " + postingList.get(i).getRemoteID());
-        }
-        return postingList;
-    }
-
-    /**
-     * get posting from already saved postings by id
-     *
-     * @param id remoteID of the posting
-     * @return posting with matching remote ID or null
-     */
-    @Nullable
-    // TODO: Use Retrofit
-    public Posting getPostingById(int id) {
-        ArrayList<Posting> postings = new ArrayList<>();
-        postings.addAll(Posting.findWithQuery(Posting.class, "SELECT * FROM Posting WHERE _REMOTE_ID =" + id + " LIMIT 1"));
-        if (postings.isEmpty()) {
-            return null;
-        } else {
-            return postings.get(0);
-        }
-    }
-
-    // TODO: Can be removed
-    public void getAllPosts(Context c, @Nullable PostingListener postingListener, @Nullable LoadingListener listener) {
-        new FetchPostingsTask(c, postingListener, listener).execute();
-    }
-
-    // TODO: Can be removed
-    public void getPostingsAfterIdFromServer(Context c, int id, @Nullable NewPostingFetchedListener listener) {
-        new GetPostingsAfterIdTask(c, id, listener).execute();
-    }
-
-    // TODO: Can be removed
-    public void resetPostingList() {
-        Posting.deleteAll(Posting.class);
-    }
-
-    private class GetPostingsAfterIdTask extends AsyncTask<Void, Void, ArrayList<Integer>> {
-        private int id;
-        private NewPostingFetchedListener listener = null;
-        private Context c;
-
-        public GetPostingsAfterIdTask(Context c,int id, @Nullable NewPostingFetchedListener listener) {
-            this.id = id;
-            this.listener = listener;
-            this.c = c;
-        }
-
-        @Override
-        protected ArrayList<Integer> doInBackground(Void... params) {
-            ArrayList<Integer> newPostingIds = new ArrayList<>();
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .readTimeout(10000,TimeUnit.MILLISECONDS)
-                    .build();
-            Request getRequest = new Request.Builder()
-                    .url(Constants.Api.BASE_URL + "/posting/get/since/" + id + "/").build();
-            Log.d(TAG, "posting manager do in background");
-            try {
-                Response response = client.newCall(getRequest).execute();
-                String responseString = response.body().string();
-                Log.d(TAG, "response: " + responseString);
-                if (!responseString.isEmpty()) {
-                    try {
-                        JSONArray array = new JSONArray(responseString);
-                        for (int i = 0; i < array.length(); i++) {
-                            int id = array.getInt(i);
-                            newPostingIds.add(id);
-                        }
-                        return newPostingIds;
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Integer> postingsIds) {
-            super.onPostExecute(postingsIds);
-            Log.d(TAG, "onPostExecute called!");
-            if (postingsIds != null) {
-                if (postingsIds.isEmpty()) {
-                    if (listener != null) {
-                        listener.noNewPostings();
-                    }
-                }else {
-                    new GetPostingsByIdTask(c,postingsIds,listener).execute();
-                }
-            } else {
-                if (listener != null) {
-                    listener.noNewPostings();
-                }
-            }
-        }
-    }
-
-    private class GetPostingsByIdTask extends AsyncTask<Void,Void,ArrayList<Posting>>{
-        private ArrayList<Integer> idList;
-        private Context c;
-        private NewPostingFetchedListener listener;
-
-        public GetPostingsByIdTask(Context c,ArrayList<Integer> ids,@Nullable NewPostingFetchedListener listener) {
-            idList = ids;
-            this.c = c;
-            this.listener = listener;
-        }
-
-        @Override
-        protected ArrayList<Posting> doInBackground(Void... params) {
-            ArrayList<Posting> postingArrayList = new ArrayList<>();
-            try {
-                for(Integer i : idList) {
-                    OkHttpClient client = new OkHttpClient.Builder()
-                            .readTimeout(5000,TimeUnit.MILLISECONDS)
-                            .writeTimeout(10000,TimeUnit.MILLISECONDS)
-                            .build();
-                    Request request = new Request.Builder()
-                            .url(Constants.Api.BASE_URL+"/posting/"+i+"/")
-                            .build();
-
-                    Response response = client.newCall(request).execute();
-                    String responseString = response.body().string();
-
-                    JSONObject postingObject = new JSONObject(responseString);
-
-                    Posting newPosting = Posting.fromJSON(c,postingObject);
-                    newPosting.save();
-                    postingArrayList.add(newPosting);
-                }
-                return postingArrayList;
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Posting> postings) {
-            super.onPostExecute(postings);
-            if(postings.isEmpty()){
-                listener.noNewPostings();
-            } else {
-                listener.onPostingListChanged();
-            }
-
-        }
     }
 
     // TODO: Use Retrofit
@@ -297,48 +93,6 @@ public class PostingManager {
         @Override
         protected Posting doInBackground(Void... params) {
             try {
-                /*URL targetUrl = new URL(Constants.Api.BASE_URL + "/posting/");
-                HttpsURLConnection connection = (HttpsURLConnection) targetUrl.openConnection();
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(10000);
-                connection.setRequestMethod("POST");*/
-                //connection.setRequestProperty("Accept", "*/*");
-                /*connection.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setRequestProperty("Authorization", "Bearer " + UserManager.getInstance(context).getCurrentUser().getAccessToken());
-                connection.setRequestProperty("Connection", "close");
-                connection.setDoInput(true);
-                connection.setDoOutput(true);
-
-                NameValuePair<String> postingPair = new NameValuePair<>("text", posting.getText());
-                NameValuePair<BOLocation> locationPair = new NameValuePair<>("postingLocation", posting.getLocation());
-                NameValuePair<String> mediaPair = new NameValuePair<>("uploadMediaTypes", "image");
-
-                OutputStream outputStream = connection.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(outputStream, "UTF-8"));
-                StringBuilder requestBuilder = new StringBuilder();
-                JSONObject testObject = new JSONObject();
-                testObject.accumulate(postingPair.name, postingPair.value);
-                testObject.accumulate("date", System.currentTimeMillis() + "");
-                testObject.accumulate(mediaPair.name, new JSONArray().put(mediaPair.value));
-                writer.write(testObject.toString());
-                writer.flush();
-                writer.close();
-
-
-                int responseCode = connection.getResponseCode();
-                BufferedReader inputReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String result = "";
-                StringBuilder responseBuilder = new StringBuilder();
-                while ((result = inputReader.readLine()) != null) {
-                    responseBuilder.append(result);
-                }
-                connection.connect();
-                JSONObject responseObject = new JSONObject(responseBuilder.toString());
-                JSONObject mediaObject = new JSONObject(new JSONArray(responseObject.getString("media")).getJSONObject(0).toString());
-
-                posting.setUploadCredentials(mediaObject.getString("id"), mediaObject.getString("uploadToken"));*/
 
                 OkHttpClient client = new OkHttpClient.Builder()
                         .writeTimeout(10000,TimeUnit.MILLISECONDS)
@@ -427,16 +181,6 @@ public class PostingManager {
                 progressDialog.dismiss();
             }
         }
-
-        private class NameValuePair<T> {
-            String name;
-            T value;
-
-            public NameValuePair(String name, T value) {
-                this.name = name;
-                this.value = value;
-            }
-        }
     }
 
     // TODO: Use Retrofit
@@ -471,7 +215,7 @@ public class PostingManager {
                         .put(RequestBody.create(JSON, challengeObject.toString()))
                         .build();
 
-                Response challengeResponse = client.newCall(challengeRequest).execute();
+                client.newCall(challengeRequest).execute();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -485,95 +229,6 @@ public class PostingManager {
                 listener.onPostSend();
             }
             BOLocationManager.getInstance(context).postUnUploadedLocationsToServer();
-        }
-    }
-
-    // TODO: Use Retrofit
-    private class FetchPostingsTask extends AsyncTask<Void, Void, ArrayList<Posting>> {
-        private PostingListener listener;
-        private Context context;
-        private LoadingListener loadingListener;
-
-        public FetchPostingsTask(Context c) {
-            context = c;
-        }
-
-        public FetchPostingsTask(Context c, PostingListener listener, @Nullable LoadingListener loadingListener) {
-            this.listener = listener;
-            context = c;
-            this.loadingListener = loadingListener;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (loadingListener != null) {
-                loadingListener.onLoadingTriggered();
-            }
-        }
-
-        @Override
-        protected ArrayList<Posting> doInBackground(Void... params) {
-            ArrayList<Posting> responseList = new ArrayList<>();
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .readTimeout(10000, TimeUnit.MILLISECONDS)
-                    .build();
-            Request request = new Request.Builder()
-                    .url(Constants.Api.POSTINGLIST_URL)
-                    .addHeader("Accept", "application/json;")
-                    .build();
-            try {
-                Response response = client.newCall(request).execute();
-                if (response.isSuccessful()) {
-                    String JSONResponse = response.body().string();
-                    JSONArray array = new JSONArray(JSONResponse);
-                    responseList = generateFromJSON(context, array);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return responseList;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-            if (listener != null) {
-                listener.onPostingListChanged();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Posting> responseList) {
-            super.onPostExecute(responseList);
-            Log.d(TAG, "responseList size: " + responseList.size());
-            for (Posting p : responseList) {
-                if (getPostingById(p.getRemoteID()) == null) {
-                    Log.d(TAG, "new posting");
-                    p.save();
-                }
-            }
-            if (listener != null) {
-                listener.onPostingListChanged();
-            }
-            if (loadingListener != null) {
-                loadingListener.onLoadingDismissed();
-            }
-        }
-
-        private ArrayList<Posting> generateFromJSON(Context c, JSONArray array) {
-            ArrayList<Posting> responseList = new ArrayList<Posting>();
-            try {
-                for (int i = 0; i < array.length(); i++) {
-                    JSONObject object = array.getJSONObject(i);
-                    Posting tempPost = Posting.fromJSON(c, object);
-                    responseList.add(tempPost);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return responseList;
         }
     }
 
@@ -702,51 +357,5 @@ public class PostingManager {
 
     public interface NewPostingFetchedListener extends PostingListener {
         void noNewPostings();
-    }
-
-    // TODO: Use Retrofit
-    private class GetCommentsForPostingTask extends AsyncTask<Void,Void,JSONArray>
-    {
-        private CommentListener listener;
-        private int postingId;
-
-        public GetCommentsForPostingTask(int postingId,@Nullable CommentListener listener) {
-            this.postingId = postingId;
-            this.listener = listener;
-        }
-
-        @Override
-        protected JSONArray doInBackground(Void... params) {
-            try {
-                String url = Constants.Api.BASE_URL+"/posting/"+postingId+"/";
-
-                OkHttpClient client = new OkHttpClient.Builder()
-                        .readTimeout(5000,TimeUnit.MILLISECONDS)
-                        .writeTimeout(10000,TimeUnit.MILLISECONDS)
-                        .build();
-                Request request = new Request.Builder().url(url).build();
-                Response  response = client.newCall(request).execute();
-                return new JSONArray(response.body().string());
-
-
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONArray array) {
-            super.onPostExecute(array);
-            if(listener!=null) {
-                for(int i = 0; i<array.length(); i++) {
-
-                }
-            }
-        }
-    }
-
-    public interface CommentListener {
-        void commentsObtained(ArrayList<SelectedPostingFragment.Comment> obtainedComments);
     }
 }
