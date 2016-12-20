@@ -16,21 +16,14 @@ import android.widget.RelativeLayout;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.api.BreakoutApiService;
-import org.break_out.breakout.api.BreakoutClient;
 import org.break_out.breakout.api.NewPosting;
-import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Maximilian Duehr on 21.04.2016.
@@ -50,18 +43,18 @@ public class AllPostsFragment extends BOFragment {
     private int currentOffset = 0;
     private final int FETCH_LIMIT = 10;
 
-    private BreakoutClient client;
+    private BreakoutApiService service;
 
     // TODO: Dependency Injection!
-    private BreakoutClient createBreakoutClient() {
+    private BreakoutApiService createBreakoutClient() {
         BreakoutApiService service = new BreakoutApiService(this.getActivity());
-        return service.createBreakoutClient();
+        return service;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        client = this.createBreakoutClient(); // TODO: Dependency InjectioN!
+        service = this.createBreakoutClient(); // TODO: Dependency InjectioN!
         if (_dataList == null) {
             _dataList = new ArrayList<>();
         }
@@ -76,9 +69,7 @@ public class AllPostsFragment extends BOFragment {
     }
 
     private void getNextPostings() {
-        client.getAllPostings(currentOffset, FETCH_LIMIT)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        service.getPostings(currentOffset, FETCH_LIMIT)
                 .subscribe(new Action1<List<NewPosting>>() {
                     @Override
                     public void call(List<NewPosting> newPostings) {

@@ -48,18 +48,12 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     private Context _context;
     private static OnPositionFromEndReachedListener _listener;
 
-    private BreakoutClient client;// TODO: Dependency InjectioN!
-
-    // TODO: Dependency Injection!
-    private BreakoutClient createBreakoutClient() {
-        BreakoutApiService service = new BreakoutApiService(_context);
-        return service.createBreakoutClient();
-    }
+    BreakoutApiService apiService;
 
     public PostingListAdapter(Context context, ArrayList<NewPosting> postingList) {
         _postingList = postingList;
         _context = context;
-        client = createBreakoutClient();
+        apiService = new BreakoutApiService(_context);
     }
 
     @Override
@@ -112,40 +106,39 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         }
 
         // Add likes + listener for likes to view!
-        if (posting.getHasLiked()) {
+        if (posting.getHasLiked()) { // TODO: This does not work
             holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
             holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
         } else {
+            //TODO: Fix this color, it is to bright compared to the default font color!
+            holder.tvLikes.setTextColor(_context.getResources().getColor(android.R.color.darker_gray));
+            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_black_18dp));
+
             holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.background_grey));
                     String accessToken = UserManager.getInstance(_context).getCurrentUser().getAccessToken();
-                    if (accessToken.isEmpty()) {
-                        Log.w(TAG, "Empty acccess token. Cannot like posting");
-                        // TOOD: Implement fallback!
-                    } else {
-                        // TODO: Make this beautiful again!
-                        client.likePosting("Bearer "+accessToken, posting.getId(), new Like(System.currentTimeMillis() / 1000))
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Action1<ResponseBody>() {
-                                    @Override
-                                    public void call(ResponseBody responseBody) {
-                                        holder.tvLikes.setText(posting.getLikes() + 1 + " Likes");
-                                        holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
-                                        holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
-                                    }
-                                }, new Action1<Throwable>() {
-                                    @Override
-                                    public void call(Throwable throwable) {
-                                        Log.e(TAG, "Could not like post");
-                                        Log.e(TAG, throwable.getLocalizedMessage());
-                                        // TODO: Handle error!
-                                    }
-                                });
-                    }
+
+
+                    // TODO: Make this beautiful again!
+
+                    apiService.likePosting(posting.getId())
+                            .subscribe(new Action1<ResponseBody>() {
+                                @Override
+                                public void call(ResponseBody responseBody) {
+                                    holder.tvLikes.setText(posting.getLikes() + 1 + " Likes");
+                                    holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
+                                    holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
+                                }
+                            }, new Action1<Throwable>() {
+                                @Override
+                                public void call(Throwable throwable) {
+                                    Log.e(TAG, "Could not like post");
+                                    Log.e(TAG, throwable.getLocalizedMessage());
+                                    // TODO: Handle error! (E.g. Auth Errors)
+                                }
+                            });
 
 
                 }

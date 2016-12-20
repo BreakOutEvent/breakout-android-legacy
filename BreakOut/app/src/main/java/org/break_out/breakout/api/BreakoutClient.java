@@ -20,11 +20,11 @@ public interface BreakoutClient {
 
     @GET("posting/")
     Observable<List<NewPosting>> getAllPostings(@Query("offset") int offset,
-                                                @Query("limit") int limit);
+                                                @Query("limit") int limit,
+                                                @Query("userid") int userIdHasLiked);
 
     @POST("posting/{postingId}/like/")
-    Observable<ResponseBody> likePosting(@Header("Authorization") String auth,
-                                         @Path("postingId") int postingId,
+    Observable<ResponseBody> likePosting(@Path("postingId") int postingId,
                                          @Body Like like);
 
 }

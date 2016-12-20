@@ -7,10 +7,14 @@ import java.io.IOException
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import okhttp3.ResponseBody
 import org.break_out.breakout.manager.UserManager
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import rx.Observable
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 
 /**
  * Created by florianschmidt on 20/12/2016.
@@ -27,30 +31,59 @@ class BreakoutApiService {
         this.userManager = UserManager.getInstance(this.context)
     }
 
-    public fun createBreakoutClient(): BreakoutClient {
+    private fun createBreakoutClient(accessToken: String? = null): BreakoutClient {
         return Retrofit.Builder()
                 .baseUrl("https://backend.break-out.org") // TODO: Fetch this from config!
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .client(createOkHttpClient())
+                .client(createOkHttpClient(accessToken))
                 .build()
                 .create(BreakoutClient::class.java)
     }
 
-    private fun createOkHttpClient(): OkHttpClient {
+    private fun createOkHttpClient(accessToken: String?): OkHttpClient {
 
-        val accessToken = userManager.currentUser.accessToken
+        val builder = OkHttpClient.Builder()
+        if (!accessToken.isNullOrEmpty()) {
+            builder.addInterceptor(authInterceptor(accessToken!!))
+        }
 
-        return OkHttpClient.Builder()
-                .addInterceptor { requestChain ->
-                    val originalRequest = requestChain.request()
-                    val request = originalRequest.newBuilder()
-                            .header("User-Agent", "Breakout")
-                            .build()
+        builder.addNetworkInterceptor(StethoInterceptor())
+                .addInterceptor(userAgentInterceptor())
 
-                    return@addInterceptor requestChain.proceed(request)
-                }
-                .addNetworkInterceptor(StethoInterceptor())
+        return builder.build()
+    }
+
+    private fun authInterceptor(accessToken: String) = Interceptor {
+        val request = it.request().newBuilder()
+                .header("Authorization", "Bearer $accessToken")
                 .build()
+        return@Interceptor it.proceed(request)
+    }
+
+    private fun userAgentInterceptor() = Interceptor {
+        val request = it.request().newBuilder()
+                .header("User-Agent", "BreakoutAndroidApp")
+                .build()
+        return@Interceptor it.proceed(request)
+    }
+
+    fun likePosting(postingId: Integer): Observable<ResponseBody> {
+        val currentTimeInSeconds = System.currentTimeMillis() / 1000
+        val like = Like(currentTimeInSeconds)
+        val accessToken = UserManager.getInstance(context).currentUser.accessToken
+        return createBreakoutClient(accessToken)
+                .likePosting(postingId.toInt(), like)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getPostings(offset: Int, limit: Int): Observable<List<NewPosting>> {
+        val accessToken = UserManager.getInstance(context).currentUser.accessToken
+        val userId = UserManager.getInstance(context).currentUser.remoteId
+        return createBreakoutClient(accessToken)
+                .getAllPostings(offset, limit, userId.toInt())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
     }
 }
