@@ -77,6 +77,7 @@ public class PostingManager {
         return returnPosting;
     }
 
+    // TODO: Can be removed
     public ArrayList<Posting> getBeforeId(int id, int maxSize) {
         ArrayList<Posting> returnList = new ArrayList<>();
         Posting newestPosting = getNewestPosting();
@@ -88,17 +89,19 @@ public class PostingManager {
         return returnList;
     }
 
+    // TODO: Can be removed
     public ArrayList<Posting> getAfterId(int id) {
         ArrayList<Posting> returnList = new ArrayList<>();
         returnList.addAll(Posting.findWithQuery(Posting.class, "SELECT * FROM Posting WHERE _REMOTE_ID > " + id + " ORDER BY _REMOTE_ID ASC"));
         return returnList;
     }
 
+    // TODO: Use Retrofit
     public void likePosting(Context c, Posting posting) {
         new LikePostTask(c, posting).execute();
     }
 
-
+    // TODO: Can be removed
     public Posting getNewestPosting() {
         if (getAllPostings().size() != 0) {
             return getAllPostings().get(0);
@@ -107,6 +110,7 @@ public class PostingManager {
         }
     }
 
+    // TODO: Can be removed
     public ArrayList<Posting> getAllPostings() {
         ArrayList<Posting> postingList = new ArrayList<>();
         postingList.addAll(Posting.findWithQuery(Posting.class, "Select * FROM Posting ORDER BY _REMOTE_ID DESC"));
@@ -123,6 +127,7 @@ public class PostingManager {
      * @return posting with matching remote ID or null
      */
     @Nullable
+    // TODO: Use Retrofit
     public Posting getPostingById(int id) {
         ArrayList<Posting> postings = new ArrayList<>();
         postings.addAll(Posting.findWithQuery(Posting.class, "SELECT * FROM Posting WHERE _REMOTE_ID =" + id + " LIMIT 1"));
@@ -133,14 +138,17 @@ public class PostingManager {
         }
     }
 
+    // TODO: Can be removed
     public void getAllPosts(Context c, @Nullable PostingListener postingListener, @Nullable LoadingListener listener) {
         new FetchPostingsTask(c, postingListener, listener).execute();
     }
 
+    // TODO: Can be removed
     public void getPostingsAfterIdFromServer(Context c, int id, @Nullable NewPostingFetchedListener listener) {
         new GetPostingsAfterIdTask(c, id, listener).execute();
     }
 
+    // TODO: Can be removed
     public void resetPostingList() {
         Posting.deleteAll(Posting.class);
     }
@@ -260,6 +268,7 @@ public class PostingManager {
         }
     }
 
+    // TODO: Use Retrofit
     private class SendPostToServerTask extends AsyncTask<Void, Void, Posting> {
         private Posting posting;
         private Context context;
@@ -430,6 +439,7 @@ public class PostingManager {
         }
     }
 
+    // TODO: Use Retrofit
     private class PostChallengeTask extends AsyncTask<Void, Void, Void> {
         private Context context;
         private Challenge chosenChallenge;
@@ -478,6 +488,7 @@ public class PostingManager {
         }
     }
 
+    // TODO: Use Retrofit
     private class FetchPostingsTask extends AsyncTask<Void, Void, ArrayList<Posting>> {
         private PostingListener listener;
         private Context context;
@@ -566,6 +577,7 @@ public class PostingManager {
         }
     }
 
+    // TODO: Maybe use Retrofit?
     private class UploadMediaToServerTask extends AsyncTask<Void, Integer, Boolean> {
         Posting toBeUploadedPosting;
         String attachmentFileName = "";
@@ -653,6 +665,7 @@ public class PostingManager {
         }
     }
 
+    // TODO: Use Retrofit
     public class LikePostTask extends AsyncTask<Void, Void, Boolean> {
         private Context c;
         private Posting p;
@@ -691,6 +704,7 @@ public class PostingManager {
         void noNewPostings();
     }
 
+    // TODO: Use Retrofit
     private class GetCommentsForPostingTask extends AsyncTask<Void,Void,JSONArray>
     {
         private CommentListener listener;
