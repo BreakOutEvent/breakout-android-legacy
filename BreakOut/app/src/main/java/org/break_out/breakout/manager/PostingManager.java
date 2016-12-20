@@ -95,7 +95,6 @@ public class PostingManager {
             try {
 
                 OkHttpClient client = new OkHttpClient.Builder()
-                        .writeTimeout(10000,TimeUnit.MILLISECONDS)
                         .build();
 
                 JSONObject requestObject = new JSONObject();
@@ -201,8 +200,6 @@ public class PostingManager {
         protected Void doInBackground(Void... params) {
             try {
                 OkHttpClient client = new OkHttpClient.Builder()
-                        .writeTimeout(10000,TimeUnit.MILLISECONDS)
-                        .readTimeout(5000,TimeUnit.MILLISECONDS)
                         .build();
                 JSONObject challengeObject = new JSONObject();
                 challengeObject.accumulate("postingId", posting.getRemoteID())
@@ -271,8 +268,6 @@ public class PostingManager {
                 Log.d(TAG,"post media task called");
                 try {
                     OkHttpClient client = new OkHttpClient.Builder()
-                            .writeTimeout(10000,TimeUnit.MILLISECONDS)
-                            .readTimeout(5000,TimeUnit.MILLISECONDS)
                             .build();
 
                     RequestBody requestBody = new MultipartBody.Builder()
@@ -333,8 +328,6 @@ public class PostingManager {
         @Override
         protected Boolean doInBackground(Void... params) {
             OkHttpClient client = new OkHttpClient.Builder()
-                    .writeTimeout(10000, TimeUnit.MILLISECONDS)
-                    .readTimeout(5000, TimeUnit.MILLISECONDS)
                     .build();
             try {
                 Request likeRequest = new Request.Builder().url(Constants.Api.BASE_URL + "/posting/" + p.getRemoteID() + "/like/")

@@ -441,8 +441,6 @@ public class BOLocationManager  {
             int id = UserManager.getInstance(context).getCurrentUser().getEventId()==-1 ? 1 : UserManager.getInstance(context).getCurrentUser().getEventId();
             ArrayList<BOLocation> resultList = new ArrayList<>();
             OkHttpClient client = new OkHttpClient.Builder()
-                    .writeTimeout(10000,TimeUnit.MILLISECONDS)
-                    .readTimeout(10000,TimeUnit.MILLISECONDS)
                     .build();
             Request request = new Request.Builder()
                     .url(Constants.Api.BASE_URL+"/event/"+UserManager.getInstance(context).getCurrentUser().getEventId()+"/location/")
@@ -510,8 +508,6 @@ public class BOLocationManager  {
         protected Boolean doInBackground(Void... params) {
             UserManager userManager = UserManager.getInstance(c);
             OkHttpClient client = new OkHttpClient.Builder()
-                    .writeTimeout(10000, TimeUnit.MILLISECONDS)
-                    .readTimeout(5000,TimeUnit.MILLISECONDS)
                     .build();
             int teamId = userManager.getCurrentUser().getTeamId();
             int eventId = userManager.getCurrentUser().getEventId();
@@ -557,7 +553,6 @@ public class BOLocationManager  {
         protected Void doInBackground(Void... params) {
             User curUser = UserManager.getInstance(c).getCurrentUser();
             OkHttpClient client = new OkHttpClient.Builder()
-                    .writeTimeout(10000,TimeUnit.MILLISECONDS)
                     .build();
 
             Request.Builder requestBuilder = new Request.Builder()
