@@ -8,7 +8,6 @@ import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
 import org.break_out.breakout.manager.MediaManager;
-import org.break_out.breakout.sync.model.Posting;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

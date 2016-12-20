@@ -1,4 +1,4 @@
-package org.break_out.breakout.sync.model;
+package org.break_out.breakout.model;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -6,9 +6,7 @@ import android.support.annotation.Nullable;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
-import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.manager.MediaManager;
-import org.break_out.breakout.model.BOMedia;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

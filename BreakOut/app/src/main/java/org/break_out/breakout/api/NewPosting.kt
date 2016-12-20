@@ -4,7 +4,7 @@ package org.break_out.breakout.api
  * Created by florianschmidt on 07/12/2016.
  */
 import org.break_out.breakout.model.BOLocation
-import org.break_out.breakout.sync.model.Posting
+import org.break_out.breakout.model.Posting
 
 class NewPosting(
         val id: Int,

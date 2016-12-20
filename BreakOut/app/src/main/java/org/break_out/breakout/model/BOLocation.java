@@ -6,7 +6,6 @@ import com.orm.SugarRecord;
 
 import org.break_out.breakout.manager.BOLocationManager;
 import org.break_out.breakout.manager.TeamManager;
-import org.break_out.breakout.sync.model.Posting;
 import org.json.JSONException;
 import org.json.JSONObject;
 

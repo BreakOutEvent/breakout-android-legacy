@@ -36,7 +36,6 @@ import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.Challenge;
 import org.break_out.breakout.model.User;
-import org.break_out.breakout.sync.BOSyncController;
 import org.break_out.breakout.ui.views.BOEditText;
 import org.break_out.breakout.util.BackgroundRunner;
 
@@ -75,7 +74,6 @@ public class PostScreenActivity extends BOActivity {
     private BOMedia _postMedia;
 
     private BOLocationManager _locationManager;
-    private BOSyncController _syncController;
 
     private UserManager _userManager;
     private User _currentUser;
@@ -93,7 +91,6 @@ public class PostScreenActivity extends BOActivity {
         instance = this;
         _challenges = new ArrayList<>();
 
-        _syncController = BOSyncController.getInstance(this);
         _locationManager = BOLocationManager.getInstance(this);
         _userManager = UserManager.getInstance(this);
 
