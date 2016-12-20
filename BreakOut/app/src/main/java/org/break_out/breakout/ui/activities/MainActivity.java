@@ -20,7 +20,6 @@ import android.widget.Toast;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
-import org.break_out.breakout.model.BOBackgroundLocatingService;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.User;
 import org.break_out.breakout.ui.fragments.AllPostsFragment;

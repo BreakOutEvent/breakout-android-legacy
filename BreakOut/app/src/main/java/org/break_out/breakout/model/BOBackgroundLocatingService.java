@@ -19,6 +19,7 @@ import org.break_out.breakout.manager.BOLocationManager;
 import java.io.FileDescriptor;
 
 public class BOBackgroundLocatingService extends Service {
+    //TODO: More battery-friendly location tracking
     private static boolean isRunning = false;
     private static final String TAG = "BOBckgrndLcatingService";
     private static BOLocationManager _boLocationManager;

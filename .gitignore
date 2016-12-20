@@ -35,3 +35,4 @@ local.properties
 # Ignore secret files
 BOSecrets.java
 BreakOut/app/src/release/res/values/google_maps_api.xml
+BreakOut/app/src/main/java/org/break_out/breakout/secrets.zip
