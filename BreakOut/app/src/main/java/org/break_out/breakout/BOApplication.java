@@ -2,6 +2,7 @@ package org.break_out.breakout;
 
 import android.app.Application;
 
+import com.facebook.stetho.Stetho;
 import com.orm.SugarApp;
 
 import org.break_out.breakout.secrets.BOSecrets;
@@ -16,7 +17,7 @@ public class BOApplication extends SugarApp {
         super.onCreate();
 
         BOSecrets secrets = new BOSecrets();
-
+        Stetho.initializeWithDefaults(this);
         // Enable to get error logs
 
         // Configure Flurry
