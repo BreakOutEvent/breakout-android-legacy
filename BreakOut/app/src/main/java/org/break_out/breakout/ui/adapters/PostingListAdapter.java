@@ -17,17 +17,26 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import org.break_out.breakout.api.BreakoutApiService;
+import org.break_out.breakout.api.BreakoutClient;
+import org.break_out.breakout.api.Like;
 import org.break_out.breakout.api.Medium;
 import org.break_out.breakout.api.NewPosting;
 import org.break_out.breakout.api.PostingLocation;
 import org.break_out.breakout.api.Size;
 import org.break_out.breakout.R;
+import org.break_out.breakout.manager.UserManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.ResponseBody;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Maximilian Duehr on 21.04.2016.
@@ -39,9 +48,18 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     private Context _context;
     private static OnPositionFromEndReachedListener _listener;
 
+    private BreakoutClient client;// TODO: Dependency InjectioN!
+
+    // TODO: Dependency Injection!
+    private BreakoutClient createBreakoutClient() {
+        BreakoutApiService service = new BreakoutApiService(_context);
+        return service.createBreakoutClient();
+    }
+
     public PostingListAdapter(Context context, ArrayList<NewPosting> postingList) {
         _postingList = postingList;
         _context = context;
+        client = createBreakoutClient();
     }
 
     @Override
@@ -101,11 +119,35 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    holder.tvLikes.setText(posting.getLikes() + " Likes");
-                    holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
-                    holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
-                    Log.w(TAG, "Displaying like to user, but not implemented yet");
-                    // TODO: Send like to server
+
+                    holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.background_grey));
+                    String accessToken = UserManager.getInstance(_context).getCurrentUser().getAccessToken();
+                    if (accessToken.isEmpty()) {
+                        Log.w(TAG, "Empty acccess token. Cannot like posting");
+                        // TOOD: Implement fallback!
+                    } else {
+                        // TODO: Make this beautiful again!
+                        client.likePosting("Bearer "+accessToken, posting.getId(), new Like(System.currentTimeMillis() / 1000))
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Action1<ResponseBody>() {
+                                    @Override
+                                    public void call(ResponseBody responseBody) {
+                                        holder.tvLikes.setText(posting.getLikes() + 1 + " Likes");
+                                        holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
+                                        holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
+                                    }
+                                }, new Action1<Throwable>() {
+                                    @Override
+                                    public void call(Throwable throwable) {
+                                        Log.e(TAG, "Could not like post");
+                                        Log.e(TAG, throwable.getLocalizedMessage());
+                                        // TODO: Handle error!
+                                    }
+                                });
+                    }
+
+
                 }
             });
         }

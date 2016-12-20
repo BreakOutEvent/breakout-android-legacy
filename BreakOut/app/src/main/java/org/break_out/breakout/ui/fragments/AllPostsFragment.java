@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import org.break_out.breakout.R;
+import org.break_out.breakout.api.BreakoutApiService;
 import org.break_out.breakout.api.BreakoutClient;
 import org.break_out.breakout.api.NewPosting;
 import org.break_out.breakout.manager.PostingManager;
@@ -41,8 +42,6 @@ public class AllPostsFragment extends BOFragment {
     private PostingListAdapter _adapter;
     private ArrayList<NewPosting> _dataList;
 
-    private PostingManager _postingManager;
-
     private RecyclerView _recyclerView;
     private SwipeRefreshLayout _swipeLayout;
     private ProgressBar _progressBar;
@@ -51,20 +50,18 @@ public class AllPostsFragment extends BOFragment {
     private int currentOffset = 0;
     private final int FETCH_LIMIT = 10;
 
-    private BreakoutClient client = this.createBreakoutClient(); // TODO: Dependency InjectioN!
+    private BreakoutClient client;
 
+    // TODO: Dependency Injection!
     private BreakoutClient createBreakoutClient() {
-        return new Retrofit.Builder()
-                .baseUrl("https://backend.break-out.org") // TODO: Fetch this from config!
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build()
-                .create(BreakoutClient.class);
+        BreakoutApiService service = new BreakoutApiService(this.getActivity());
+        return service.createBreakoutClient();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        client = this.createBreakoutClient(); // TODO: Dependency InjectioN!
         if (_dataList == null) {
             _dataList = new ArrayList<>();
         }
@@ -109,8 +106,6 @@ public class AllPostsFragment extends BOFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_all_posts, container, false);
 
-        _postingManager = PostingManager.getInstance();
-
         _recyclerView = (RecyclerView) v.findViewById(R.id.allPosts_recyclerView);
         _progressBar = (ProgressBar) v.findViewById(R.id.allPosts_pb);
         _progressWrapper = (RelativeLayout) v.findViewById(R.id.allPosts_rl_progressWrapper);
@@ -124,11 +119,11 @@ public class AllPostsFragment extends BOFragment {
         _swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                    currentOffset = 0;
-                    _dataList.clear();
-                    _adapter.notifyDataSetChanged();
-                    getNextPostings();
-                    Log.d(TAG, "onRefresh: Resetting offset and loading postings from server");
+                currentOffset = 0;
+                _dataList.clear();
+                _adapter.notifyDataSetChanged();
+                getNextPostings();
+                Log.d(TAG, "onRefresh: Resetting offset and loading postings from server");
             }
         });
 
