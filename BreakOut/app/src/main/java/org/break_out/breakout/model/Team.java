@@ -2,8 +2,6 @@ package org.break_out.breakout.model;
 
 import android.content.Context;
 
-import com.orm.SugarRecord;
-
 import org.break_out.breakout.manager.TeamManager;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,15 +9,16 @@ import org.json.JSONObject;
 /**
  * Created by Maximilian Dühr on 01.06.2016.
  */
-public class Team extends SugarRecord {
+public class Team {
     private int _remoteId;
     private String _teamName;
     private int _donateSum;
     private BOMedia _profileImage;
 
-    public Team() {}
+    public Team() {
+    }
 
-    public Team(int remoteId,String teamName) {
+    public Team(int remoteId, String teamName) {
         _remoteId = remoteId;
         _teamName = teamName;
     }
@@ -53,10 +52,10 @@ public class Team extends SugarRecord {
         int teamId = teamObject.getInt("id");
         String name = teamObject.getString("name");
         JSONObject profilePictureObject = teamObject.getJSONObject("profilePic");
-        BOMedia pictureObject = BOMedia.sizedMediaFromJSON(c,profilePictureObject, BOMedia.SIZE.LARGE);
+        BOMedia pictureObject = BOMedia.sizedMediaFromJSON(c, profilePictureObject, BOMedia.SIZE.LARGE);
         int distance = teamObject.getJSONObject("distance").getInt("actual_distance");
         Team t = null;
-        if((t = TeamManager.getInstance().getTeamById(teamId))==null){
+        if((t = TeamManager.getInstance().getTeamById(teamId)) == null) {
             t = new Team();
         }
         return t;

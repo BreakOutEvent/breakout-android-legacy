@@ -43,7 +43,6 @@ public class BOBackgroundLocatingService extends Service {
         public void onLocationChanged(Location location) {
             BOLocation loc = BOLocationManager.createLocation(System.currentTimeMillis()/1000,location.getLatitude(),location.getLongitude());
             loc.setIsPosted(false);
-            loc.save();
         }
 
         @Override

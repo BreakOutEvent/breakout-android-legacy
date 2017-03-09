@@ -14,10 +14,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.LocationService;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.model.Team;
 import org.break_out.breakout.model.User;
 import org.json.JSONArray;
@@ -26,7 +26,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -36,10 +35,10 @@ import okhttp3.Response;
 /**
  * Created by Maximilian Dühr on 01.03.2016.
  */
-public class BOLocationManager  {
+public class BOLocationManager {
     private static final String TAG = "BOLocationManager";
     private static final int MIN_DISTANCE = 5;
-    private static final int TEN_MINUTES = 1*1000*60*10;
+    private static final int TEN_MINUTES = 1 * 1000 * 60 * 10;
     private static final int ALARM_INTERVAL = TEN_MINUTES;
     private static final int REQUESTCODE_ALARMINTENT = 0;
     private static boolean _isLocating;
@@ -49,6 +48,7 @@ public class BOLocationManager  {
     private static LocationManager _locationManager;
     private static ArrayList<BOLocationListener> _listenerList = new ArrayList<>();
     private static ArrayList<BOLocationServiceListener> _statusListenerList = new ArrayList<>();
+    private static ArrayList<BOLocation> _locations;
     private static BOLocationManager _instance;
 
     private static SharedPreferences _preferences;
@@ -61,15 +61,15 @@ public class BOLocationManager  {
         _listenerList = new ArrayList<>();
         _statusListenerList = new ArrayList<>();
         _context = c;
+        _locations = new ArrayList<>();
 
-        //TODO:REMOVE
-        _preferences = _context.getSharedPreferences(_context.getString(R.string.PREFERENCES_GLOBAL),Context.MODE_PRIVATE);
+        _preferences = _context.getSharedPreferences(_context.getString(R.string.PREFERENCES_GLOBAL), Context.MODE_PRIVATE);
 
         updateAvailableLocationServices();
         BOLocationListener persistentLocationListener = new BOLocationListener() {
             @Override
             public void onLocationObtained(BOLocation currentLocation) {
-                BOLocation.save(currentLocation);
+                _locations.add(currentLocation);
             }
         };
 
@@ -77,6 +77,7 @@ public class BOLocationManager  {
 
     /**
      * get the instance from BOLocationManager
+     *
      * @param c Context of the calling Activity
      * @return
      */
@@ -88,37 +89,38 @@ public class BOLocationManager  {
     }
 
     //Location Constructors
-    public static BOLocation createLocation(long timestamp,double latitude,double longitude) {
-        return new BOLocation(timestamp,latitude,longitude);
+    public static BOLocation createLocation(long timestamp, double latitude, double longitude) {
+        return new BOLocation(timestamp, latitude, longitude);
     }
 
-    public static BOLocation createLocation(int remoteId,int teamId,int eventId,String teamName,long timestamp,double latitude,double longitude) {
-        if(getLocationById(remoteId)== null) {
-            BOLocation location = createLocation(timestamp,latitude,longitude);
+    public static BOLocation createLocation(int remoteId, int teamId, int eventId, String teamName, long timestamp, double latitude, double longitude) {
+        if(getLocationById(remoteId) == null) {
+            BOLocation location = createLocation(timestamp, latitude, longitude);
             location.setRemoteId(remoteId);
             location.setEventId(eventId);
             location.setTeamId(teamId);
             location.setTeamName(teamName);
             location.setIsPosted(true);
-            location.save();
-
-            return  location;
-        }
-       else return getLocationById(remoteId);
+            if(!_locations.contains(location)){
+                _locations.add(location);
+            }
+            return location;
+        } else return getLocationById(remoteId);
     }
 
     /**
      * Start periodically updating the Location
+     *
      * @param c Context of the calling Activity
      */
     public void startUpdateLocationPeriodically(Context c) {
 
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(c.getString(R.string.intentaction_locationservice));
-        broadcastIntent.putExtra(BOLocationBroadcastReceiver.KEY_EXTRA,BOLocationBroadcastReceiver.KEY_START);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(c,REQUESTCODE_ALARMINTENT,broadcastIntent,0);
+        broadcastIntent.putExtra(BOLocationBroadcastReceiver.KEY_EXTRA, BOLocationBroadcastReceiver.KEY_START);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(c, REQUESTCODE_ALARMINTENT, broadcastIntent, 0);
         c.sendBroadcast(broadcastIntent);
-        _alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,0,_preferences.getInt("interval",TEN_MINUTES)*1000,pendingIntent);
+        _alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, _preferences.getInt("interval", TEN_MINUTES) * 1000, pendingIntent);
     }
 
     /**
@@ -127,7 +129,7 @@ public class BOLocationManager  {
     private static void callServiceListeners() {
         for(BOLocationServiceListener listener : _statusListenerList) {
             listener.onServiceStatusChanged();
-            Log.d(TAG,"listener called");
+            Log.d(TAG, "listener called");
         }
     }
 
@@ -144,13 +146,12 @@ public class BOLocationManager  {
     }
 
 
-
     @Nullable
     public static BOLocation getLocationById(int remoteId) {
-        ArrayList<BOLocation> listWithCorrectId = new ArrayList<>();
-        listWithCorrectId.addAll( BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _REMOTE_ID = "+remoteId+" LIMIT 1"));
-        if(listWithCorrectId.size()>0) {
-            return listWithCorrectId.get(0);
+        for(BOLocation l : _locations){
+            if(l.getRemoteId() == remoteId){
+                return l;
+            }
         }
         return null;
     }
@@ -162,28 +163,31 @@ public class BOLocationManager  {
         }
         return resultList;
     }
+
     /**
      * stop periodically updating the Location
+     *
      * @param c context of the calling Activity
      */
     public void stopUpdateLocationPeriodically(Context c) {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(c.getString(R.string.intentaction_locationservice));
-        broadcastIntent.putExtra(BOLocationBroadcastReceiver.KEY_EXTRA,BOLocationBroadcastReceiver.KEY_STOP);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(c,REQUESTCODE_ALARMINTENT,broadcastIntent,0);
+        broadcastIntent.putExtra(BOLocationBroadcastReceiver.KEY_EXTRA, BOLocationBroadcastReceiver.KEY_STOP);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(c, REQUESTCODE_ALARMINTENT, broadcastIntent, 0);
         c.sendBroadcast(broadcastIntent);
         _alarmManager.cancel(pendingIntent);
     }
 
     public boolean locationServicesAvailable() {
         updateAvailableLocationServices();
-        return _gpsAvailable||_networkAvailable;
+        return _gpsAvailable || _networkAvailable;
 
     }
 
 
     /**
      * get the list of registered listeners
+     *
      * @return
      */
     private ArrayList<BOLocationListener> getListenerList() {
@@ -200,28 +204,21 @@ public class BOLocationManager  {
      * a listener to handle the result
      * and return the last known location
      * or null if there is none
-     * @param c context of the calling activity
+     *
+     * @param c        context of the calling activity
      * @param listener LocationListener to asynchronous handle the result of the call
      * @return current last known location or null if there is none
      */
     @Nullable
     public BOLocation getLocation(Context c, BOLocationRequestListener listener) {
-        requestObtainingLocation(c,listener);
-        return BOLocation.last(BOLocation.class);
-    }
-
-    /**
-     * Get the last known Location
-     * @return the last known Location as BOLocation object or null if there is none
-     */
-    @Nullable
-    public BOLocation getLastKnownLocation() {
-        return BOLocation.last(BOLocation.class);
+        requestObtainingLocation(c, listener);
+        return _locations.get(_locations.size()-1);
     }
 
     /**
      * Request the System to obtain the current Location and fire the given Listener
-     * @param c Context of the calling Activity
+     *
+     * @param c                 Context of the calling Activity
      * @param _locationListener Listener that fires when a new Location is available
      */
     private void requestObtainingLocation(Context c, BOLocationRequestListener _locationListener) {
@@ -249,6 +246,7 @@ public class BOLocationManager  {
 
     /**
      * Remove listener from LocationManager
+     *
      * @param listener
      */
     public void stopListeningForChanges(BOLocationRequestListener listener) {
@@ -265,7 +263,7 @@ public class BOLocationManager  {
      * Check which location services are active and store that information in the corresponding variables
      */
     private void updateAvailableLocationServices() {
-        Log.d(TAG,"provider updated");
+        Log.d(TAG, "provider updated");
         _networkAvailable = _locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         _gpsAvailable = _locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
@@ -273,8 +271,8 @@ public class BOLocationManager  {
 
     public static ArrayList<BOLocation> getUnUploadedBOLocations() {
         ArrayList<BOLocation> resultList = new ArrayList<>();
-        resultList.addAll(BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _is_posted = 0 "));
-        Log.d(TAG,"unuploaded posts: "+resultList.size());
+        //TODO Maybe save states in Service class?
+        Log.d(TAG, "unuploaded posts: " + resultList.size());
         return resultList;
     }
 
@@ -283,6 +281,7 @@ public class BOLocationManager  {
             new PostMultipleLocationsToServerTask(_context, getUnUploadedBOLocations()).execute();
         }
     }
+
     /**
      * Class to handle LocationListener calls
      */
@@ -290,8 +289,8 @@ public class BOLocationManager  {
 
         @Override
         public void onLocationChanged(Location location) {
-            BOLocation boLocation = new BOLocation(System.currentTimeMillis()/1000,location.getLatitude(),location.getLongitude());
-            boLocation.save();
+            BOLocation boLocation = new BOLocation(System.currentTimeMillis() / 1000, location.getLatitude(), location.getLongitude());
+            _locations.add(boLocation);
             broadcastLocationListUpdated(_context);
             onLocationObtained(boLocation);
         }
@@ -304,7 +303,7 @@ public class BOLocationManager  {
 
         @Override
         public final void onProviderEnabled(String provider) {
-            Log.d(TAG,"provider: "+provider);
+            Log.d(TAG, "provider: " + provider);
             //TODO
         }
 
@@ -318,6 +317,7 @@ public class BOLocationManager  {
 
     /**
      * Send broadcast to show that there is a new location stored
+     *
      * @param c
      */
     private static void broadcastLocationListUpdated(Context c) {
@@ -327,13 +327,13 @@ public class BOLocationManager  {
     }
 
     public static void getAllLocationsFromServer(Context c, @Nullable BOLocationListObtainedListener listener) {
-        new GetAllLocationsFromServerTask(c,listener).execute();
+        new GetAllLocationsFromServerTask(c, listener).execute();
     }
 
     /**
      * Class to handle LocationRequests one-shot
      */
-    public static abstract class BOLocationRequestListener extends BOLocationListener{
+    public static abstract class BOLocationRequestListener extends BOLocationListener {
         @Override
         public void onLocationChanged(Location location) {
             super.onLocationChanged(location);
@@ -366,7 +366,7 @@ public class BOLocationManager  {
         public void onReceive(Context context, Intent intent) {
             boLocationServiceIntent = new Intent(context, LocationService.class);
             if(intent.getExtras() != null) {
-                String intentExtra = intent.getExtras().getString(KEY_EXTRA)== null ? "" : intent.getExtras().getString(KEY_EXTRA);
+                String intentExtra = intent.getExtras().getString(KEY_EXTRA) == null ? "" : intent.getExtras().getString(KEY_EXTRA);
 
                 if(!intentExtra.isEmpty()) {
                     if(intentExtra.equals(KEY_START)) {
@@ -385,48 +385,36 @@ public class BOLocationManager  {
 
     public static ArrayList<BOLocation> getAllLocationsFromTeam(int teamId) {
         ArrayList<BOLocation> returnList = new ArrayList<>();
-        returnList.addAll(BOLocation.findWithQuery(BOLocation.class,"SELECT * FROM BO_Location WHERE _team_id = "+teamId+" AND _during_event = 1 ORDER BY _timestamp DESC"));
-        Log.d(TAG,"user "+teamId+" has "+returnList.size()+" locations");
+        for(BOLocation l : _locations){
+            if(l.getTeamId() == teamId){
+                returnList.add(l);
+            }
+        }
+        Log.d(TAG, "user " + teamId + " has " + returnList.size() + " locations");
         return returnList;
     }
 
 
-    /**
-     * Clears the location database
-     */
-    public static void deleteLocationHistory() {
-        BOLocation.deleteAll(BOLocation.class);
-    }
-
-    /**
-     * Updates the visible representation of the Location database
-     */
-    public static ArrayList<BOLocation> getLocationHistory() {
-        ArrayList<BOLocation> resultList = new ArrayList<>();
-        resultList.addAll(BOLocation.listAll(BOLocation.class));
-        return resultList;
-    }
-
     public static final class BOLocationServiceBroadcastReceiver extends BroadcastReceiver {
 
         public BOLocationServiceBroadcastReceiver() {
-            //empoty constructor
+            //emppty constructor
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG,"providers changed");
+            Log.d(TAG, "providers changed");
             callServiceListeners();
         }
     }
 
     //AsyncTasks
 
-    public static class GetAllLocationsFromServerTask extends AsyncTask<Void,Void,ArrayList<BOLocation>> {
+    public static class GetAllLocationsFromServerTask extends AsyncTask<Void, Void, ArrayList<BOLocation>> {
         private Context context;
         private BOLocationListObtainedListener listener;
 
-        public GetAllLocationsFromServerTask(Context c, @Nullable  BOLocationListObtainedListener l) {
+        public GetAllLocationsFromServerTask(Context c, @Nullable BOLocationListObtainedListener l) {
             context = c;
             listener = l;
         }
@@ -438,29 +426,29 @@ public class BOLocationManager  {
 
         @Override
         protected ArrayList<BOLocation> doInBackground(Void... params) {
-            int id = UserManager.getInstance(context).getCurrentUser().getEventId()==-1 ? 1 : UserManager.getInstance(context).getCurrentUser().getEventId();
+            int id = UserManager.getInstance(context).getCurrentUser().getEventId() == -1 ? 1 : UserManager.getInstance(context).getCurrentUser().getEventId();
             ArrayList<BOLocation> resultList = new ArrayList<>();
             OkHttpClient client = new OkHttpClient.Builder()
                     .build();
             Request request = new Request.Builder()
-                    .url(Constants.Api.BASE_URL+"/event/"+UserManager.getInstance(context).getCurrentUser().getEventId()+"/location/")
+                    .url(Constants.Api.BASE_URL + "/event/" + UserManager.getInstance(context).getCurrentUser().getEventId() + "/location/")
                     .build();
             try {
                 Response response = client.newCall(request).execute();
                 String responseBody = response.body().string();
-                Log.d(TAG,"responseBody: "+responseBody);
+                Log.d(TAG, "responseBody: " + responseBody);
 
                 JSONArray responseArray = new JSONArray(responseBody);
                 for(int i = 0; i < responseArray.length(); i++) {
                     JSONObject curLocationObj = responseArray.getJSONObject(i);
                     BOLocation newLocation = BOLocation.fromJSON(curLocationObj);
                     resultList.add(newLocation);
-                    Log.d(TAG,"location added");
+                    Log.d(TAG, "location added");
                 }
                 return resultList;
-            } catch (IOException e) {
+            } catch(IOException e) {
                 e.printStackTrace();
-            } catch (JSONException e) {
+            } catch(JSONException e) {
                 e.printStackTrace();
             }
             return null;
@@ -470,30 +458,30 @@ public class BOLocationManager  {
         protected void onPostExecute(ArrayList<BOLocation> boLocations) {
             super.onPostExecute(boLocations);
             if(boLocations != null) {
-                Log.d(TAG,"it worked! "+boLocations.size());
-                if(listener!=null) {
+                Log.d(TAG, "it worked! " + boLocations.size());
+                if(listener != null) {
                     listener.onListObtained();
                 }
             } else {
-                Log.d(TAG,"it did not work!");
+                Log.d(TAG, "it did not work!");
             }
         }
     }
 
 
-    public void postLocationToServer(Context c,BOLocation location,@Nullable  LocationPostedListener listener) {
-        if(c!=null && location!=null){
-            new PostLocationToServerTask(c,location,listener).execute();
+    public void postLocationToServer(Context c, BOLocation location, @Nullable LocationPostedListener listener) {
+        if(c != null && location != null) {
+            new PostLocationToServerTask(c, location, listener).execute();
         }
     }
 
 
-    private class PostLocationToServerTask extends AsyncTask<Void,Void,Boolean> {
+    private class PostLocationToServerTask extends AsyncTask<Void, Void, Boolean> {
         private BOLocation location;
         private Context c;
         private LocationPostedListener listener;
 
-        public PostLocationToServerTask(Context c, BOLocation location,LocationPostedListener listener) {
+        public PostLocationToServerTask(Context c, BOLocation location, LocationPostedListener listener) {
             this.location = location;
             this.c = c;
             this.listener = listener;
@@ -512,7 +500,7 @@ public class BOLocationManager  {
             int teamId = userManager.getCurrentUser().getTeamId();
             int eventId = userManager.getCurrentUser().getEventId();
 
-            String url = Constants.Api.BASE_URL+"/event/"+eventId+"/team/"+teamId+"/location/";
+            String url = Constants.Api.BASE_URL + "/event/" + eventId + "/team/" + teamId + "/location/";
             double lat = location.getLatitude();
             double lng = location.getLongitude();
             long timestamp = location.getTimestamp();
@@ -521,12 +509,12 @@ public class BOLocationManager  {
                 Request request = new Request.Builder()
                         .addHeader("Authorization", "Bearer " + UserManager.getInstance(c).getCurrentUser().getAccessToken())
                         .url(url)
-                        .post(RequestBody.create(PostingManager.JSON,new JSONObject().put("latitude",lat).accumulate("longitude",lng).accumulate("date",timestamp).toString())).build();
+                        .post(RequestBody.create(PostingManager.JSON, new JSONObject().put("latitude", lat).accumulate("longitude", lng).accumulate("date", timestamp).toString())).build();
 
                 Response res = client.newCall(request).execute();
                 String resultString = res.body().string();
-                Log.d(TAG,"result location post: "+resultString);
-            }catch(Exception e) {
+                Log.d(TAG, "result location post: " + resultString);
+            } catch(Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -535,13 +523,13 @@ public class BOLocationManager  {
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            if(listener!=null){
+            if(listener != null) {
                 listener.onLcoationPosted();
             }
         }
     }
 
-    private class PostMultipleLocationsToServerTask extends AsyncTask<Void,Void,Void> {
+    private class PostMultipleLocationsToServerTask extends AsyncTask<Void, Void, Void> {
         private Context c;
         private ArrayList<BOLocation> locations;
 
@@ -549,6 +537,7 @@ public class BOLocationManager  {
             this.c = c;
             this.locations = locations;
         }
+
         @Override
         protected Void doInBackground(Void... params) {
             User curUser = UserManager.getInstance(c).getCurrentUser();
@@ -557,36 +546,38 @@ public class BOLocationManager  {
 
             Request.Builder requestBuilder = new Request.Builder()
                     .addHeader("Authorization", "Bearer " + UserManager.getInstance(c).getCurrentUser().getAccessToken())
-                    .url(Constants.Api.BASE_URL+"/event/"+curUser.getEventId()+"/team/"+curUser.getTeamId()+"/location/multiple/");
+                    .url(Constants.Api.BASE_URL + "/event/" + curUser.getEventId() + "/team/" + curUser.getTeamId() + "/location/multiple/");
             JSONArray requestArray = new JSONArray();
             try {
-                for(BOLocation l : locations){
+                for(BOLocation l : locations) {
                     JSONObject newObject = new JSONObject();
-                    newObject.put("date",l.getTimestamp());
-                    newObject.put("latitude",l.getLatitude());
-                    newObject.put("longitude",l.getLongitude());
+                    newObject.put("date", l.getTimestamp());
+                    newObject.put("latitude", l.getLatitude());
+                    newObject.put("longitude", l.getLongitude());
                     requestArray.put(newObject);
                 }
-                requestBuilder.post(RequestBody.create(PostingManager.JSON,requestArray.toString()));
+                requestBuilder.post(RequestBody.create(PostingManager.JSON, requestArray.toString()));
                 Request request = requestBuilder.build();
 
                 Response response = client.newCall(request).execute();
                 String responseString = response.body().string();
 
-                Log.d(TAG,"response: "+responseString);
+                Log.d(TAG, "response: " + responseString);
                 JSONArray responseArray = new JSONArray(responseString);
 
-                for(BOLocation l : locations) {
-                    l.delete();
-                }
 
-                for(int i = 0 ; i < responseArray.length(); i++) {
+                for(BOLocation l : locations) {
+                    if(_locations.contains(l))
+                        _locations.remove(l);
+                }
+                /*
+                for(int i = 0; i < responseArray.length(); i++) {
                     JSONObject curObj = responseArray.getJSONObject(i);
                     BOLocation.fromJSON(curObj).save();
-                }
+                }*/
 
 
-            }catch(Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
 
@@ -594,7 +585,7 @@ public class BOLocationManager  {
         }
     }
 
-    public interface LocationPostedListener{
+    public interface LocationPostedListener {
         void onLcoationPosted();
     }
 }

@@ -49,7 +49,7 @@ public class MediaManager {
 
     public static ArrayList<BOMedia> getSavedMediaList() {
         ArrayList<BOMedia> resultList = new ArrayList<>();
-        resultList.addAll(BOMedia.listAll(BOMedia.class));
+        //TODO: handle media with Picasso
         return resultList;
     }
 
@@ -150,7 +150,7 @@ public class MediaManager {
         } else {
             resultMedia.setSaveState(BOMedia.SAVESTATE.SAVED);
         }
-        resultMedia.save();
+        //TODO: save media or use picasso(?)
         return resultMedia;
     }
 
@@ -176,7 +176,7 @@ public class MediaManager {
         } else {
             resultMedia.setSaveState(BOMedia.SAVESTATE.SAVED);
         }
-        resultMedia.save();
+        //TODO save media or use picasso
         return resultMedia;
     }
 
@@ -306,9 +306,8 @@ public class MediaManager {
 
     @Nullable
     public static BOMedia getMediaByID(int id) {
-        List<BOMedia> medias = BOMedia.findWithQuery(BOMedia.class, "SELECT * FROM BO_Media WHERE _REMOTE_ID='" + id + "' LIMIT 1");
-        BOMedia m = medias.size() == 1 ? medias.get(0) : null;
-        return m;
+        //TODO
+        return null;
     }
 
     public static void loadMediaFromServer(BOMedia media, @Nullable ImageView populateView, BOMedia.SIZE size) {
@@ -349,7 +348,7 @@ public class MediaManager {
                 //establish new reference
                 _media.setFile(toFile);
                 _media.setSaveState(BOMedia.SAVESTATE.SAVED);
-                _media.save();
+                //TODO handle media with picasso
 
                 //delete old reference
                 fromFile.delete();

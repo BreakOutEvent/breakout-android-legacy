@@ -3,9 +3,6 @@ package org.break_out.breakout.model;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.orm.SugarRecord;
-import com.orm.dsl.Ignore;
-
 import org.break_out.breakout.manager.MediaManager;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,20 +10,11 @@ import org.json.JSONObject;
 
 import java.io.File;
 
-import okhttp3.MediaType;
-
 /**
  * Created by Tino on 14.12.2015.
  */
 
-public class Posting extends SugarRecord {
-
-    @Ignore
-    private static final String TAG = "Posting";
-
-    @Ignore
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
+public class Posting {
     /**
      * Stores the timestamp of creation <b>in seconds</b>.
      */
@@ -63,10 +51,10 @@ public class Posting extends SugarRecord {
     public Posting(String message, @Nullable BOLocation location, @Nullable BOMedia media) {
         this();
         _hasMedia = media != null;
-        if (_hasMedia) {
+        if(_hasMedia) {
             _linkedMedia = media;
         }
-        if (location != null) {
+        if(location != null) {
             _location = location;
         }
         _text = message;
@@ -75,10 +63,10 @@ public class Posting extends SugarRecord {
     public Posting(String teamName, String message, @Nullable BOLocation location, @Nullable BOMedia media) {
         this();
         _hasMedia = media != null;
-        if (_hasMedia) {
+        if(_hasMedia) {
             _linkedMedia = media;
         }
-        if (location != null) {
+        if(location != null) {
             _location = location;
         }
         _text = message;
@@ -168,7 +156,9 @@ public class Posting extends SugarRecord {
         return _profileImageId;
     }
 
-    public boolean hasLiked() {return _hasliked;}
+    public boolean hasLiked() {
+        return _hasliked;
+    }
 
     public String getLocationName() {
         return _locationName;
@@ -255,10 +245,10 @@ public class Posting extends SugarRecord {
         BOLocation location = null;
         JSONArray mediaArray;
         BOMedia correlatingMedia = null;
-        if ((mediaArray = object.getJSONArray("media")).length() > 0) {
+        if((mediaArray = object.getJSONArray("media")).length() > 0) {
             String type = mediaArray.getJSONObject(0).getString("type");
             int mediaID = mediaArray.getJSONObject(0).getInt("id");
-            if (MediaManager.getMediaByID(mediaID) == null) {
+            if(MediaManager.getMediaByID(mediaID) == null) {
                 correlatingMedia = BOMedia.fromJSON(c, mediaArray, BOMedia.SIZE.MEDIUM);
             } else {
                 correlatingMedia = MediaManager.getMediaByID(mediaID);
@@ -282,23 +272,23 @@ public class Posting extends SugarRecord {
         returnPosting.setLikes(likes);
         returnPosting.setCommentCout(commentArray.length());
         try {
-            if (!object.isNull("postingLocation")) {
+            if(!object.isNull("postingLocation")) {
                 locationObject = object.getJSONObject("postingLocation");
                 long latitude = locationObject.getLong("latitude");
                 long longitude = locationObject.getLong("longitude");
                 JSONObject locationDataObject = locationObject.getJSONObject("locationData");
                 StringBuilder localityStringBuilder = new StringBuilder();
-                if (!locationDataObject.isNull("LOCALITY")) {
+                if(!locationDataObject.isNull("LOCALITY")) {
                     localityStringBuilder.append(locationDataObject.getString("LOCALITY"))
                             .append(", ");
                 }
-                if (!locationDataObject.isNull("COUNTRY")) {
+                if(!locationDataObject.isNull("COUNTRY")) {
                     localityStringBuilder.append(locationDataObject.getString("COUNTRY"));
                 }
                 String locationName = localityStringBuilder.toString();
                 returnPosting.setLocationName(locationName);
                 location = new BOLocation();
-                if (!(latitude == 0 || longitude == 0)) {
+                if(!(latitude == 0 || longitude == 0)) {
                     location.setLatitude(latitude);
                     location.setLongitude(longitude);
                 } else {
@@ -306,16 +296,16 @@ public class Posting extends SugarRecord {
                 }
             }
 
-        } catch (JSONException e) {
+        } catch(JSONException e) {
             e.printStackTrace();
         }
 
-        if (correlatingMedia != null) {
+        if(correlatingMedia != null) {
             correlatingMedia.setPosting(returnPosting);
             returnPosting.setLinkedMedia(correlatingMedia);
         }
 
-        if (proveObject != null) {
+        if(proveObject != null) {
             returnPosting.setChallengeId(proveObject.getInt("id"));
             returnPosting.setChallengeDescription(proveObject.getString("description"));
         }
@@ -327,16 +317,16 @@ public class Posting extends SugarRecord {
         BOMedia smallMedia = null;
         try {
             JSONArray sizesArray = object.getJSONArray("sizes");
-            for (int i = 0; i < sizesArray.length(); i++) {
+            for(int i = 0; i < sizesArray.length(); i++) {
                 JSONObject sizeObject = sizesArray.getJSONObject(i);
-                if (sizeObject.get("type").equals(BOMedia.TYPE.IMAGE.toString())) {
+                if(sizeObject.get("type").equals(BOMedia.TYPE.IMAGE.toString())) {
                     smallMedia = MediaManager.createInternalMedia(c, BOMedia.TYPE.IMAGE);
                     smallMedia.setURL(sizeObject.getString("url"));
                     smallMedia.setIsDownloaded(false);
                     return smallMedia;
                 }
             }
-        } catch (JSONException e) {
+        } catch(JSONException e) {
             e.printStackTrace();
         }
         return smallMedia;

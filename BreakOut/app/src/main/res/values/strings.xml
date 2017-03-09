@@ -89,8 +89,6 @@
 
     <string name="toast_login_first">You have to log in first!</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="title_activity_maps">Map</string>
 
     <string name="from">from</string>
@@ -121,6 +119,6 @@
     <string name="no_older_postings">There are no older posts</string>
     <string name="no_new_postings">No new posts</string>
     
-    <string name="earlyBird_running_title" translatable="false">BreakOut 2016</string>
-    <string name="earlyBird_running_text">Yout adventure has started. We wish you unforgettable 36 hours!</string>
+    <string name="earlyBird_running_title" translatable="false">BreakOut 2017</string>
+    <string name="earlyBird_running_text">Your adventure has started. We wish you unforgettable 36 hours!</string>
 </resources>

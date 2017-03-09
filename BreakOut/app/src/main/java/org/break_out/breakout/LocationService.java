@@ -6,8 +6,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.orm.SugarContext;
-
 import org.break_out.breakout.manager.BOLocationManager;
 import org.break_out.breakout.model.BOLocation;
 
@@ -21,20 +19,15 @@ public class LocationService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG,"OnBind");
+        Log.d(TAG, "OnBind");
         return null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        try{
-            SugarContext.init(this);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
 
         _locationManager = BOLocationManager.getInstance(this);
-        BOLocation lastLocation =_locationManager.getLocation(this, new BOLocationManager.BOLocationRequestListener(){
+        BOLocation lastLocation = _locationManager.getLocation(this, new BOLocationManager.BOLocationRequestListener() {
             @Override
             public void onLocationObtained(BOLocation currentLocation) {
                 _locationManager.stopListeningForChanges(this);
@@ -45,8 +38,7 @@ public class LocationService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG,"onDestroy");
-        SugarContext.terminate();
+        Log.d(TAG, "onDestroy");
         super.onDestroy();
     }
 }

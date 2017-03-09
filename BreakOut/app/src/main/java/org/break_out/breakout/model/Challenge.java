@@ -3,8 +3,6 @@ package org.break_out.breakout.model;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.orm.SugarRecord;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,7 +12,7 @@ import java.util.ArrayList;
 /**
  * Created by Maximilian Duehr on 24.05.2016.
  */
-public class Challenge extends SugarRecord {
+public class Challenge {
     private static final String TAG = "Challenge";
 
     private int _remoteID;
@@ -30,7 +28,7 @@ public class Challenge extends SugarRecord {
     private JSONObject _unregisteredSponsor;
     private int _postingID;
 
-    public Challenge(int remoteID,int eventID, int teamID,int sponsorID,String teamName,String description,STATE status,boolean isSponsorHidden,int amount,JSONObject contract,JSONObject unregisteredSponsor) {
+    public Challenge(int remoteID, int eventID, int teamID, int sponsorID, String teamName, String description, STATE status, boolean isSponsorHidden, int amount, JSONObject contract, JSONObject unregisteredSponsor) {
         _remoteID = remoteID;
         _eventID = eventID;
         _teamID = teamID;
@@ -44,32 +42,64 @@ public class Challenge extends SugarRecord {
         _unregisteredSponsor = unregisteredSponsor;
     }
 
-    public Challenge(){}
+    public Challenge() {
+    }
 
-    public int getRemoteID() { return _remoteID;}
-    public int getEventID() { return _eventID;}
-    public int teamID() { return _teamID;}
-    public String getTeamName() { return _teamName;}
-    public String getDescription() { return _description;}
-    public boolean isSponsorHidden() { return _isSponsorHidden;}
-    public int getAmount() { return _amount;}
-    public JSONObject getContract() { return _contract;}
-    public JSONObject getUnregisteredSponsor() { return _unregisteredSponsor;}
-    public STATE getState(){return _status;}
+    public int getRemoteID() {
+        return _remoteID;
+    }
 
-    public void setPostingID(int postingID) {_postingID = postingID;}
+    public int getEventID() {
+        return _eventID;
+    }
+
+    public int teamID() {
+        return _teamID;
+    }
+
+    public String getTeamName() {
+        return _teamName;
+    }
+
+    public String getDescription() {
+        return _description;
+    }
+
+    public boolean isSponsorHidden() {
+        return _isSponsorHidden;
+    }
+
+    public int getAmount() {
+        return _amount;
+    }
+
+    public JSONObject getContract() {
+        return _contract;
+    }
+
+    public JSONObject getUnregisteredSponsor() {
+        return _unregisteredSponsor;
+    }
+
+    public STATE getState() {
+        return _status;
+    }
+
+    public void setPostingID(int postingID) {
+        _postingID = postingID;
+    }
 
 
     @Nullable
     public static ArrayList<Challenge> fromJSON(JSONArray jsonArray) {
         ArrayList<Challenge> resultList = new ArrayList<>();
         try {
-            for(int i=0; i<jsonArray.length();i++)  {
+            for(int i = 0; i < jsonArray.length(); i++) {
                 Challenge newChallenge = fromJSON(jsonArray.getJSONObject(i));
                 resultList.add(newChallenge);
             }
             return resultList;
-        }catch(JSONException e) {
+        } catch(JSONException e) {
             e.printStackTrace();
         }
         return null;
@@ -78,8 +108,8 @@ public class Challenge extends SugarRecord {
     @Nullable
     public static Challenge fromJSON(JSONObject object) {
         try {
-            Log.d(TAG,object.getString("unregisteredSponsor"));
-            Log.d(TAG,"equals: "+object.getString("unregisteredSponsor").equals("null"));
+            Log.d(TAG, object.getString("unregisteredSponsor"));
+            Log.d(TAG, "equals: " + object.getString("unregisteredSponsor").equals("null"));
             int remoteID = object.getInt("id");
             int eventID = object.getInt("eventId");
             String status = object.getString("status");
@@ -97,15 +127,15 @@ public class Challenge extends SugarRecord {
             String uploadToken = contractObject.getString("uploadToken");
             JSONArray sizesArray = contractObject.getJSONArray("sizes");
 
-            return new Challenge(remoteID,eventID,teamID,sponsorID,teamName,description,STATE.fromString(status),sponsorIsHidden,amount,contractObject,unregisteredSponsorObject);
+            return new Challenge(remoteID, eventID, teamID, sponsorID, teamName, description, STATE.fromString(status), sponsorIsHidden, amount, contractObject, unregisteredSponsorObject);
         } catch(JSONException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public enum STATE{
-        WITHDRAWN,PROPOSED,ACCEPTED,WITH_PROOF;
+    public enum STATE {
+        WITHDRAWN, PROPOSED, ACCEPTED, WITH_PROOF;
 
         public static STATE fromString(String input) {
             for(STATE s : STATE.values()) {

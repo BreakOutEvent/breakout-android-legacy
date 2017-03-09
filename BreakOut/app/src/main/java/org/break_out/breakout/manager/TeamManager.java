@@ -13,8 +13,11 @@ import java.util.ArrayList;
 public class TeamManager {
     private static final String TAG = "TeamManager";
     private static TeamManager _instance;
+    private static ArrayList<Team> _teams;
 
-    private TeamManager() {}
+    private TeamManager() {
+        _teams = new ArrayList<>();
+    }
 
     public static TeamManager getInstance() {
         if(_instance == null) {
@@ -31,7 +34,10 @@ public class TeamManager {
         } else {
             t = new Team(remoteId,teamName);
             Log.d(TAG,"new team! "+remoteId);
-            t.save();
+            if(!_teams.contains(t)){
+                _teams.add(t);
+            }
+            //t.save();
         }
         return t;
     }
@@ -39,18 +45,16 @@ public class TeamManager {
     @Nullable
     public Team getTeamById(int id) {
         Log.d(TAG,"getTeamById "+id);
-        ArrayList<Team> resultList = new ArrayList<>();
-        resultList.addAll(Team.findWithQuery(Team.class,"SELECT * FROM Team WHERE _REMOTE_ID = "+id+" LIMIT 1"));
-        if(resultList.size() > 0) {
-            Log.d(TAG,"teamId already there : "+id);
-            return resultList.get(0);
+        for(Team t : _teams){
+            if(t.getRemoteId() == id){
+                return t;
+            }
         }
         return null;
     }
 
+    @Nullable
     public ArrayList<Team> getAllTeams() {
-        ArrayList<Team> resultList = new ArrayList<>();
-        resultList.addAll(Team.findWithQuery(Team.class,"SELECT * FROM TEAM ORDER BY _REMOTE_ID DESC"));
-        return resultList;
+        return _teams;
     }
 }

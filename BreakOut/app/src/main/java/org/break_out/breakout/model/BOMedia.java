@@ -4,9 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import com.orm.SugarRecord;
-import com.orm.dsl.Ignore;
-
 import org.break_out.breakout.manager.MediaManager;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Created by Maximilian Dühr on 04.05.2016.
  */
-public class BOMedia extends SugarRecord {
+public class BOMedia {
     private static final String TAG = "BOMedia";
     private TYPE _mediaType;
     private String _url;
@@ -29,29 +26,20 @@ public class BOMedia extends SugarRecord {
     private SIZE _size;
     private int _sizeFromServer;
 
-    @Ignore
     private MediaChangedListener _listener = null;
 
-    @Ignore
     private File _mediaFile;
 
     private SAVESTATE _mediaSaveState;
     private Posting _linkedPosting;
     private boolean _isDownloaded = false;
 
-    @Ignore
     private static final String JSON_ID = "id";
-    @Ignore
     private static final String JSON_TYPE = "type";
-    @Ignore
     private static final String JSONARR_SIZES = "sizes";
-    @Ignore
     private static final String JSON_URL = "url";
-    @Ignore
     private static final String JSON_WIDTH = "width";
-    @Ignore
     private static final String JSON_HEIGHT = "height";
-    @Ignore
     private static final String JSON_SIZE = "size";
 
     public BOMedia() {
@@ -79,21 +67,12 @@ public class BOMedia extends SugarRecord {
         return _size;
     }
 
-    @Override
-    public boolean delete() {
-        if(_mediaFile != null) {
-            _mediaFile.delete();
-        }
-        return super.delete();
-    }
-
     public int getRemoteID() {
         return _remoteID;
     }
 
     public void registerMediaChangedListener(MediaChangedListener listener) {
         _listener = listener;
-        save();
     }
 
     public MediaChangedListener getListener() {
@@ -129,14 +108,12 @@ public class BOMedia extends SugarRecord {
     public void setSaveState(SAVESTATE state) {
         _mediaSaveState = state;
         callListener();
-        this.save();
     }
 
     public boolean setURL(String url) {
         try {
             URL objectURL = new URL(url);
             _url = url;
-            this.save();
             callListener();
             return true;
         } catch(MalformedURLException e) {
@@ -148,14 +125,12 @@ public class BOMedia extends SugarRecord {
     public void setIsDownloaded(boolean state) {
         _isDownloaded = state;
         callListener();
-        this.save();
     }
 
     public void setFile(File file) {
         _mediaFile = file;
         _fileURI = Uri.fromFile(_mediaFile).toString();
         callListener();
-        this.save();
     }
 
     public void setSize(SIZE size, int remoteSize) {
@@ -170,13 +145,11 @@ public class BOMedia extends SugarRecord {
     public void setPosting(Posting posting) {
         _linkedPosting = posting;
         callListener();
-        this.save();
     }
 
     public void setRemoteID(int id) {
         _remoteID = id;
         callListener();
-        this.save();
     }
 
     public enum SAVESTATE {
@@ -238,13 +211,13 @@ public class BOMedia extends SugarRecord {
             JSONArray sizesArray = mediaObject.getJSONArray(JSONARR_SIZES);
             switch(maxSize) {
                 case SMALL:
-                    Log.d(TAG,"small sized");
-                    for (int j = 0; j < sizesArray.length(); j++) {
+                    Log.d(TAG, "small sized");
+                    for(int j = 0; j < sizesArray.length(); j++) {
                         JSONObject currentSize = sizesArray.getJSONObject(j);
                         int id = currentSize.getInt(JSON_ID);
-                        if (sizesArray.getJSONObject(j).getInt(JSON_WIDTH) < 150) {
+                        if(sizesArray.getJSONObject(j).getInt(JSON_WIDTH) < 150) {
                             String url = currentSize.getString(JSON_URL);
-                            if (MediaManager.getMediaByID(id) == null) {
+                            if(MediaManager.getMediaByID(id) == null) {
                                 media = manager.createExternalMedia(c, TYPE.IMAGE);
                                 media.setRemoteID(id);
                                 media.setURL(url);
@@ -256,13 +229,13 @@ public class BOMedia extends SugarRecord {
                     }
                     break;
                 case MEDIUM:
-                    Log.d(TAG,"medium sized");
-                    for (int j = 0; j < sizesArray.length(); j++) {
+                    Log.d(TAG, "medium sized");
+                    for(int j = 0; j < sizesArray.length(); j++) {
                         JSONObject currentSize = sizesArray.getJSONObject(j);
                         int id = currentSize.getInt(JSON_ID);
-                        if (sizesArray.getJSONObject(j).getInt(JSON_WIDTH) >= 150 || sizesArray.getJSONObject(j).getInt(JSON_WIDTH) <= 400) {
+                        if(sizesArray.getJSONObject(j).getInt(JSON_WIDTH) >= 150 || sizesArray.getJSONObject(j).getInt(JSON_WIDTH) <= 400) {
                             String url = currentSize.getString(JSON_URL);
-                            if (MediaManager.getMediaByID(id) == null) {
+                            if(MediaManager.getMediaByID(id) == null) {
                                 media = manager.createExternalMedia(c, TYPE.IMAGE);
                                 media.setRemoteID(id);
                                 media.setURL(url);
@@ -275,12 +248,12 @@ public class BOMedia extends SugarRecord {
                     return sizedMediaFromJSON(c, mediaObject, SIZE.SMALL);
 
                 case LARGE:
-                    for (int j = 0; j < sizesArray.length(); j++) {
+                    for(int j = 0; j < sizesArray.length(); j++) {
                         JSONObject currentSize = sizesArray.getJSONObject(j);
                         int id = currentSize.getInt(JSON_ID);
-                        if (sizesArray.getJSONObject(j).getInt(JSON_WIDTH) >= 400 || sizesArray.getJSONObject(j).getInt(JSON_WIDTH) <= 1300) {
+                        if(sizesArray.getJSONObject(j).getInt(JSON_WIDTH) >= 400 || sizesArray.getJSONObject(j).getInt(JSON_WIDTH) <= 1300) {
                             String url = currentSize.getString(JSON_URL);
-                            if (MediaManager.getMediaByID(id) == null) {
+                            if(MediaManager.getMediaByID(id) == null) {
                                 media = manager.createExternalMedia(c, TYPE.IMAGE);
                                 media.setRemoteID(id);
                                 media.setURL(url);

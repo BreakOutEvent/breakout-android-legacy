@@ -162,11 +162,13 @@ public class PostScreenActivity extends BOActivity {
         super.onDestroy();
         setResult(RESULT_CANCELED);
         if(_postMedia.getSavestate() == BOMedia.SAVESTATE.TEMP) {
-            _postMedia.delete();
+            //TODO: handle failed media
+            // _postMedia.delete();
         }
         _locationManager.removeServiceListener(_listener);
         if(_receivedLocation != null) {
-            _receivedLocation.delete();
+            //TODO
+            //_receivedLocation.delete();
         }
         finish();
     }

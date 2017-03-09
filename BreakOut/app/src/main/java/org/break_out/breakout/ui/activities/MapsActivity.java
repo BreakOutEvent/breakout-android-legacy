@@ -76,7 +76,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onLocationObtained(BOLocation currentLocation) {
                         final BOLocation obtainedLocation = currentLocation;
-                        obtainedLocation.save();
+                        //TODO
+                        // obtainedLocation.save();
                         obtainedLocation.setIsPosted(false);
                         setMarker(currentLocation);
                         manager.postUnUploadedLocationsToServer();
@@ -119,7 +120,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             BOLocationManager.getAllLocationsFromServer(this, new BOLocationManager.BOLocationListObtainedListener() {
                 @Override
                 public void onListObtained() {
-                    Log.d(TAG, "Map updated! " + BOLocation.listAll(BOLocation.class).size());
+                    //TODO
+                    // Log.d(TAG, "Map updated! " + BOLocation.listAll(BOLocation.class).size());
+
                     for (Team t : TeamManager.getInstance().getAllTeams()) {
                         Log.d(TAG, "team " + t.getRemoteId());
                         ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
