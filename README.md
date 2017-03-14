@@ -1,6 +1,8 @@
 # BreakOut - Android
 This is the official Android app for the BreakOut project.
 
+[<img alt='Get it on Google Play' height="100" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/>](https://play.google.com/store/apps/details?id=org.break_out.breakout)
+
 ## What is BreakOut?
 With BreakOut we challenge you, to travel as far away as possible in 36 hours without spending any money. During this time each team collects money for the DAFI-program to give refugees the opportunity of higher education.
 More information at <http://www.break-out.org>
