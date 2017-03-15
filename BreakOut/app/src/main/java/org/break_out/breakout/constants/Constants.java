@@ -8,6 +8,7 @@ public class Constants {
     public class Api {
 
         public static final String BASE_URL = "https://backend.break-out.org";
+        public static final String BASE_URL_TEST = "";
         public static final String HOST_URL = "backend.break-out.org";
         public static final String MEDIA_URL = "https://media.break-out.org";
         public static final String CLIENT_ID = "breakout_app";

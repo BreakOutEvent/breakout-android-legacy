@@ -7,6 +7,7 @@
     <string name="intentaction_updatelist" translatable="false">breakout.intent.action.updateLocation</string>
     <string name="PREFERENCES_GLOBAL" translatable="false">BreakOutPreferences</string>
     <string name="PREFERENCE_CURRENTLY_LOCATING" translatable="false">IsCurrentlyLocating</string>
+    <string name="PREFERENCE_IS_TEST" translatable="false">isTestPhase</string>
     <string name="account_not_created">The account could not be created.</string>
     <string name="button_continue">next</string>
     <string name="error">Error</string>
@@ -118,7 +119,21 @@
 
     <string name="no_older_postings">There are no older posts</string>
     <string name="no_new_postings">No new posts</string>
-    
+
     <string name="earlyBird_running_title" translatable="false">BreakOut 2017</string>
     <string name="earlyBird_running_text">Your adventure has started. We wish you unforgettable 36 hours!</string>
+
+    <!-- Menu -->
+    <string name="menu_post">Post a status</string>
+    <string name="menu_options">Options</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_summary_test">Activate test mode</string>
+    <string name="pref_title_test">Test mode</string>
+
 </resources>

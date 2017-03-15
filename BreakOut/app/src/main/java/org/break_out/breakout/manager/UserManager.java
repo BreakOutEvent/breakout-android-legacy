@@ -258,7 +258,7 @@ public class UserManager {
                 }
 
                 result.putSerializable(KEY_NEW_USER, newUser);
-                result.putBoolean(KEY_UPDATE_SUCCESS, newUser.updateOnServerSync());
+                result.putBoolean(KEY_UPDATE_SUCCESS, newUser.updateOnServerSync(_context));
 
                 return result;
             }

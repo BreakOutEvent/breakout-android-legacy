@@ -7,6 +7,7 @@ import android.util.Log;
 
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.model.Challenge;
+import org.break_out.breakout.util.URLUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -76,7 +77,7 @@ public class ChallengeManager  {
             int teamId = UserManager.getInstance(_context).getCurrentUser().getTeamId();
 
             OkHttpClient client = new OkHttpClient();
-            Request callRequest = new Request.Builder().url(Constants.Api.BASE_URL + "/" + "event" + "/" + eventId + "/" + "team" + "/" + teamId + "/" + "challenge" + "/").build();
+            Request callRequest = new Request.Builder().url(URLUtils.getBaseUrl(_context) + "/" + "event" + "/" + eventId + "/" + "team" + "/" + teamId + "/" + "challenge" + "/").build();
 
             try{
                 Response response = client.newCall(callRequest).execute();

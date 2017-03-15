@@ -71,6 +71,10 @@ public class MainActivity extends BOActivity implements UserManager.UserDataChan
                                     startActivity(new Intent(getApplicationContext(), PostScreenActivity.class));
                                 }
                                 break;
+                            case R.id.options:
+                                Intent i = new Intent(getApplicationContext(),SettingsActivity.class);
+                                startActivity(i);
+                                break;
                             case R.id.all_posts:
                                 setCurrentFragment(new AllPostsFragment());
                                 break;

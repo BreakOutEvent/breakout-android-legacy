@@ -9,6 +9,7 @@ import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.secrets.BOSecrets;
+import org.break_out.breakout.util.URLUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -362,7 +363,7 @@ public class User implements Serializable {
      *
      * @return True if the registration has been successful, false otherwise
      */
-    public boolean registerOnServerSync() {
+    public boolean registerOnServerSync(Context c) {
         OkHttpClient client = new OkHttpClient();
 
         // Construct JSON for POST request
@@ -373,7 +374,7 @@ public class User implements Serializable {
 
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
-                .url(Constants.Api.BASE_URL + "/user/")
+                .url(URLUtils.getBaseUrl(c) + "/user/")
                 .post(body)
                 .build();
 
@@ -414,7 +415,7 @@ public class User implements Serializable {
         // Build URL
         HttpUrl loginUrl = new HttpUrl.Builder()
                 .scheme("https")
-                .host(Constants.Api.HOST_URL)
+                .host(URLUtils.getBaseUrl(c))
                 .addPathSegment("oauth")
                 .addPathSegment("token")
                 .build();
@@ -498,7 +499,7 @@ public class User implements Serializable {
 
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl updateUrl = HttpUrl.parse(Constants.Api.BASE_URL + "/me/");
+        HttpUrl updateUrl = HttpUrl.parse(URLUtils.getBaseUrl(c) + "/me/");
 
         // Get remote ID from server
         Request updateRequest = new Request.Builder()
@@ -592,7 +593,7 @@ public class User implements Serializable {
      *
      * @return If the update was successful or not
      */
-    public boolean updateOnServerSync() {
+    public boolean updateOnServerSync(Context c) {
         if (_role == Role.VISITOR) {
             Log.e(TAG, "Could not update user because it is a " + Role.VISITOR.toString());
             return false;
@@ -601,7 +602,7 @@ public class User implements Serializable {
         OkHttpClient client = new OkHttpClient();
 
         // Build URL
-        HttpUrl updateUrl = HttpUrl.parse(Constants.Api.BASE_URL + "/user/" + _remoteId + "/");
+        HttpUrl updateUrl = HttpUrl.parse(URLUtils.getBaseUrl(c) + "/user/" + _remoteId + "/");
 
         // Build body
         JSONObject userJSON = toJSON();

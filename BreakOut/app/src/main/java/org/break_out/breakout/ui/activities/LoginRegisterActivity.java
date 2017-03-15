@@ -242,7 +242,7 @@ public class LoginRegisterActivity extends BackgroundImageActivity {
             User user = new User(email, password);
 
             // Register user to the server and return result
-            result.putBoolean(KEY_SUCCESS, user.registerOnServerSync());
+            result.putBoolean(KEY_SUCCESS, user.registerOnServerSync(getApplication().getApplicationContext()));
             return result;
         }
     }

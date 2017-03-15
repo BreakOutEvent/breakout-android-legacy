@@ -15,6 +15,7 @@ import org.break_out.breakout.model.Posting;
 import org.break_out.breakout.ui.activities.PostScreenActivity;
 import org.break_out.breakout.ui.fragments.LoadingListener;
 import org.break_out.breakout.ui.fragments.SelectedPostingFragment;
+import org.break_out.breakout.util.URLUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,7 +114,7 @@ public class PostingManager {
                 Request request = new Request.Builder()
                         .addHeader("Authorization", "Bearer " + UserManager.getInstance(context).getCurrentUser().getAccessToken())
                         .addHeader("Content-Type", "application/json")
-                        .url(Constants.Api.BASE_URL + "/posting/")
+                        .url(URLUtils.getBaseUrl(context) + "/posting/")
                         .post(requestBody)
                         .build();
 
@@ -208,7 +209,7 @@ public class PostingManager {
                         .addHeader("challengeId", chosenChallenge.getRemoteID() + "")
                         .addHeader("Content-Type", "application/json")
                         .addHeader("Authorization", "Bearer " + UserManager.getInstance(context).getCurrentUser().getAccessToken())
-                        .url(Constants.Api.BASE_URL + "/event/" + chosenChallenge.getEventID() + "/team/" + UserManager.getInstance(context).getCurrentUser().getTeamId() + "/challenge/" + chosenChallenge.getRemoteID() + "/status/")
+                        .url(URLUtils.getBaseUrl(context) + "/event/" + chosenChallenge.getEventID() + "/team/" + UserManager.getInstance(context).getCurrentUser().getTeamId() + "/challenge/" + chosenChallenge.getRemoteID() + "/status/")
                         .put(RequestBody.create(JSON, challengeObject.toString()))
                         .build();
 
@@ -330,7 +331,7 @@ public class PostingManager {
             OkHttpClient client = new OkHttpClient.Builder()
                     .build();
             try {
-                Request likeRequest = new Request.Builder().url(Constants.Api.BASE_URL + "/posting/" + p.getRemoteID() + "/like/")
+                Request likeRequest = new Request.Builder().url(URLUtils.getBaseUrl(c) + "/posting/" + p.getRemoteID() + "/like/")
                         .addHeader("Authorization", "Bearer " + UserManager.getInstance(c).getCurrentUser().getAccessToken())
                         .post(RequestBody.create(JSON, new JSONObject().put("date", System.currentTimeMillis() / 1000).toString()))
                         .build();

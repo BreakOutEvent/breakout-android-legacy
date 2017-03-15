@@ -8,7 +8,7 @@
             android:id="@+id/post"
             android:icon="@drawable/ic_send_black_24dp"
             android:enabled="false"
-            android:title="Status posten"/>
+            android:title="@string/menu_post"/>
 
         <item
             android:id="@+id/your_team"
@@ -16,6 +16,9 @@
             android:enabled="false"
             android:visible="false"
             android:title="Dein Team"/>
+
+        <item android:id="@+id/options"
+              android:title="@string/menu_options"/>
 
         <item
             android:id="@+id/chat"

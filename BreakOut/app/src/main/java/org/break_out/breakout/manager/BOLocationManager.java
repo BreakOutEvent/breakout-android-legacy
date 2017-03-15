@@ -20,6 +20,7 @@ import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.model.Team;
 import org.break_out.breakout.model.User;
+import org.break_out.breakout.util.URLUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -431,7 +432,7 @@ public class BOLocationManager {
             OkHttpClient client = new OkHttpClient.Builder()
                     .build();
             Request request = new Request.Builder()
-                    .url(Constants.Api.BASE_URL + "/event/" + UserManager.getInstance(context).getCurrentUser().getEventId() + "/location/")
+                    .url(URLUtils.getBaseUrl(context) + "/event/" + UserManager.getInstance(context).getCurrentUser().getEventId() + "/location/")
                     .build();
             try {
                 Response response = client.newCall(request).execute();
@@ -500,7 +501,7 @@ public class BOLocationManager {
             int teamId = userManager.getCurrentUser().getTeamId();
             int eventId = userManager.getCurrentUser().getEventId();
 
-            String url = Constants.Api.BASE_URL + "/event/" + eventId + "/team/" + teamId + "/location/";
+            String url = URLUtils.getBaseUrl(c) + "/event/" + eventId + "/team/" + teamId + "/location/";
             double lat = location.getLatitude();
             double lng = location.getLongitude();
             long timestamp = location.getTimestamp();
@@ -546,7 +547,7 @@ public class BOLocationManager {
 
             Request.Builder requestBuilder = new Request.Builder()
                     .addHeader("Authorization", "Bearer " + UserManager.getInstance(c).getCurrentUser().getAccessToken())
-                    .url(Constants.Api.BASE_URL + "/event/" + curUser.getEventId() + "/team/" + curUser.getTeamId() + "/location/multiple/");
+                    .url(URLUtils.getBaseUrl(c) + "/event/" + curUser.getEventId() + "/team/" + curUser.getTeamId() + "/location/multiple/");
             JSONArray requestArray = new JSONArray();
             try {
                 for(BOLocation l : locations) {
