@@ -37,3 +37,7 @@ BOSecrets.java
 BreakOut/app/src/release/res/values/google_maps_api.xml
 BreakOut/app/src/main/java/org/break_out/breakout/secrets.zip
 BreakOut/app/src/main/res/values/strings_secret.xml
+BreakOut/app/build.gradle
+*.gradle
+BreakOut/gradle/wrapper/gradle-wrapper.properties
+BreakOut/build.gradle
