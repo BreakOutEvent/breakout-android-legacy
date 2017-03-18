@@ -61,16 +61,8 @@ public class Posting {
     }
 
     public Posting(String teamName, String message, @Nullable BOLocation location, @Nullable BOMedia media) {
-        this();
-        _hasMedia = media != null;
-        if(_hasMedia) {
-            _linkedMedia = media;
-        }
-        if(location != null) {
-            _location = location;
-        }
-        _text = message;
-        _teamName = teamName;
+        this(message,location,media);
+        this._teamName = teamName;
     }
 
     //getters

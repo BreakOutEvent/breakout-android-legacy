@@ -133,9 +133,6 @@ public class PostScreenActivity extends BOActivity {
             }
         });
 
-        //initialize temporary media object
-        _postMedia = MediaManager.getInstance().createExternalMedia(this, BOMedia.TYPE.IMAGE);
-
         // Send posting button
         View btSend = findViewById(R.id.post_iv_save);
         btSend.setOnClickListener(new View.OnClickListener() {
@@ -161,9 +158,11 @@ public class PostScreenActivity extends BOActivity {
     protected void onDestroy() {
         super.onDestroy();
         setResult(RESULT_CANCELED);
-        if(_postMedia.getSavestate() == BOMedia.SAVESTATE.TEMP) {
-            //TODO: handle failed media
-            // _postMedia.delete();
+        if(_postMedia != null){
+            if(_postMedia.getSavestate() == BOMedia.SAVESTATE.TEMP) {
+                //TODO: handle failed media
+                // _postMedia.delete();
+            }
         }
         _locationManager.removeServiceListener(_listener);
         if(_receivedLocation != null) {
@@ -207,6 +206,9 @@ public class PostScreenActivity extends BOActivity {
             }
         } else {
             Toast.makeText(this, "Result False", Toast.LENGTH_SHORT).show();
+            if(requestCode == REQUESTCODE_IMAGE){
+                _postMedia = null;
+            }
             Log.d(TAG, "result code: " + resultCode);
         }
     }
@@ -330,6 +332,7 @@ public class PostScreenActivity extends BOActivity {
         final Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         final PackageManager packageManager = getPackageManager();
         final List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
+        _postMedia = MediaManager.getInstance().createExternalMedia(this, BOMedia.TYPE.IMAGE);
         _postMedia.setSaveState(BOMedia.SAVESTATE.TEMP);
         for(ResolveInfo res : listCam) {
             final String packageName = res.activityInfo.packageName;
@@ -407,7 +410,7 @@ public class PostScreenActivity extends BOActivity {
         if(comment.isEmpty() && location == null && (media == null)) {
             return;
         } else {
-            Log.d(TAG, "will be send, media=" + media);
+            Log.d(TAG, "will be send, media=" + (media==null));
             PostingManager m = PostingManager.getInstance();
             m.sendPostingToServer(this, PostingManager.buildPosting(comment, sendLocation, media), _chosenChallenge, new PostingSentListener());
         }

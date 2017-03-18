@@ -53,6 +53,7 @@ public class PostingManager {
     }
 
     public static Posting buildPosting(String message, BOLocation location, BOMedia media) {
+        Log.d(TAG,"media null? "+(media==null));
         return new Posting(message, location, media);
     }
 

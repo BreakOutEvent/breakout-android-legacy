@@ -56,7 +56,9 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
 
     @Override
     public void onBindViewHolder(PostingViewHolder holder, int position) {
+        Log.d(TAG,"onBind");
         populateView(holder, position);
+        callListenerIfNeeded(position);
     }
 
 
@@ -153,9 +155,12 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                 if(s.getType().equals("IMAGE")) {
                     Uri uri = Uri.parse(s.getUrl());
 
-                    Log.d(TAG, "file exists");
+                    Log.d(TAG, "image should reload");
+                    Log.d(TAG,"size: "+s.getType());
                     Picasso.with(_context)
                             .load(uri)
+                            .placeholder(R.drawable.bg_login_600dp)
+                            .error(R.drawable.bg_login_600dp)
                             .into(holder.ivPosting);
                 }
             }

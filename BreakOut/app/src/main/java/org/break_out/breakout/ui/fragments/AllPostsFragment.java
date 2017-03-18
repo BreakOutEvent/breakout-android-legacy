@@ -54,7 +54,7 @@ public class AllPostsFragment extends BOFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        service = this.createBreakoutClient(); // TODO: Dependency InjectioN!
+        service = this.createBreakoutClient(); // TODO: Dependency Injection!
         if (_dataList == null) {
             _dataList = new ArrayList<>();
         }
@@ -64,6 +64,7 @@ public class AllPostsFragment extends BOFragment {
             @Override
             public void onOffsetReached() {
                 getNextPostings();
+                Log.d(TAG,"offset reached");
             }
         });
     }
