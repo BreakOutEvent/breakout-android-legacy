@@ -14,9 +14,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.break_out.breakout.LocationService;
+import org.break_out.breakout.service.LocationService;
 import org.break_out.breakout.R;
-import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.model.Team;
 import org.break_out.breakout.model.User;
@@ -213,7 +212,10 @@ public class BOLocationManager {
     @Nullable
     public BOLocation getLocation(Context c, BOLocationRequestListener listener) {
         requestObtainingLocation(c, listener);
-        return _locations.get(_locations.size()-1);
+        if(_locations.size() > 0){
+            return _locations.get(_locations.size()-1);
+        }
+        return null;
     }
 
     /**
@@ -432,7 +434,7 @@ public class BOLocationManager {
             OkHttpClient client = new OkHttpClient.Builder()
                     .build();
             Request request = new Request.Builder()
-                    .url(URLUtils.getBaseUrl(context) + "/event/" + UserManager.getInstance(context).getCurrentUser().getEventId() + "/location/")
+                    .url(URLUtils.getBaseUrl(context) + "/event/" + UserManager.getInstance(context)+ id  + "/location/")
                     .build();
             try {
                 Response response = client.newCall(request).execute();
@@ -447,9 +449,7 @@ public class BOLocationManager {
                     Log.d(TAG, "location added");
                 }
                 return resultList;
-            } catch(IOException e) {
-                e.printStackTrace();
-            } catch(JSONException e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
             return null;

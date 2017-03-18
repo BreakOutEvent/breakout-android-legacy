@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.ResponseBody
 import org.break_out.breakout.manager.UserManager
+import org.break_out.breakout.util.URLUtils
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -33,7 +34,7 @@ class BreakoutApiService {
 
     private fun createBreakoutClient(accessToken: String? = null): BreakoutClient {
         return Retrofit.Builder()
-                .baseUrl("https://backend.break-out.org") // TODO: Fetch this from config!
+                .baseUrl(URLUtils.getBaseUrl(context))
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(createOkHttpClient(accessToken))

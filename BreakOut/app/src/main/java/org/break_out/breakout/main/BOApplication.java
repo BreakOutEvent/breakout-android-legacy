@@ -1,4 +1,4 @@
-package org.break_out.breakout;
+package org.break_out.breakout.main;
 
 import android.app.Application;
 

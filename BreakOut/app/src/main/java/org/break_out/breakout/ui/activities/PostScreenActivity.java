@@ -25,7 +25,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.manager.BOLocationManager;
@@ -33,6 +32,7 @@ import org.break_out.breakout.manager.ChallengeManager;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.Challenge;
 import org.break_out.breakout.model.User;
@@ -58,7 +58,7 @@ public class PostScreenActivity extends BOActivity {
 
     private static final String BUNDLETAG_URI = "seturi";
     private static final String RUNNERTAG_MOVE_IMAGE = "moveImage";
-    private final static int REQUESTCODE_IMAGE = 0;
+    private final static int REQUESTCODE_IMAGE = 2;
     public final static int REQUESTCODE_CHALLENGE = 3;
 
     private static File _mainFolder;
@@ -117,8 +117,8 @@ public class PostScreenActivity extends BOActivity {
         _rlChallenge.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent startChallengeChooseIntent = new Intent(instance,ChooseChallengeActivity.class);
-                instance.startActivityForResult(startChallengeChooseIntent,REQUESTCODE_CHALLENGE);
+                Intent startChallengeChooseIntent = new Intent(instance, ChooseChallengeActivity.class);
+                instance.startActivityForResult(startChallengeChooseIntent, REQUESTCODE_CHALLENGE);
             }
         });
 
@@ -178,31 +178,29 @@ public class PostScreenActivity extends BOActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == Activity.RESULT_OK) {
             if(requestCode == REQUESTCODE_IMAGE) {
-                if(data!=null) {
+                if(data != null) {
                     boolean fromCamera = data.getData() == null;
-                    if(requestCode == REQUESTCODE_IMAGE) {
-                        Uri imageUri = null;
-                        if(!fromCamera) {
-                            imageUri = data.getData();
-                            _ivChosenImage.setImageURI(imageUri);
-                            moveFileToProfilePath(imageUri);
-                        } else {
-                            MediaManager.moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
-                                @Override
-                                public void onFileMoved(File result) {
-                                    _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
-                                }
-                            });
-                        }
+                    Uri imageUri = null;
+                    if(!fromCamera) {
+                        imageUri = data.getData();
+                        _ivChosenImage.setImageURI(imageUri);
+                        moveFileToProfilePath(imageUri);
+                    } else {
+                        MediaManager.moveToInternal(this, _postMedia, new MediaManager.OnFileMovedListener() {
+                            @Override
+                            public void onFileMoved(File result) {
+                                _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia, 400, 400));
+                            }
+                        });
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(),"Foto nicht korrekt gespeichert.",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Foto nicht korrekt gespeichert.", Toast.LENGTH_LONG).show();
                 }
 
             } else if(requestCode == REQUESTCODE_CHALLENGE) {
-                int challengeId = data.getIntExtra(ChooseChallengeActivity.RESULT_ID,-1);
-                if(challengeId!=-1) {
-                    Log.d(TAG,"challenge chosen: "+challengeId);
+                int challengeId = data.getIntExtra(ChooseChallengeActivity.RESULT_ID, -1);
+                if(challengeId != -1) {
+                    Log.d(TAG, "challenge chosen: " + challengeId);
                     Challenge chosenChallenge = ChallengeManager.getInstance().getChallengeByRemoteID(challengeId);
                     setChosenChallenge(chosenChallenge);
                 }
@@ -378,7 +376,7 @@ public class PostScreenActivity extends BOActivity {
                     MediaManager.moveToInternal(getApplicationContext(), _postMedia, new MediaManager.OnFileMovedListener() {
                         @Override
                         public void onFileMoved(File result) {
-                            _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia,400,400));
+                            _ivChosenImage.setImageBitmap(MediaManager.decodeSampledBitmapFromFile(_postMedia, 400, 400));
                         }
                     });
                 } else {
@@ -409,9 +407,9 @@ public class PostScreenActivity extends BOActivity {
         if(comment.isEmpty() && location == null && (media == null)) {
             return;
         } else {
-            Log.d(TAG,"will be send, media=" +media);
+            Log.d(TAG, "will be send, media=" + media);
             PostingManager m = PostingManager.getInstance();
-            m.sendPostingToServer(this, PostingManager.buildPosting(comment, sendLocation, media),_chosenChallenge, new PostingSentListener());
+            m.sendPostingToServer(this, PostingManager.buildPosting(comment, sendLocation, media), _chosenChallenge, new PostingSentListener());
         }
     }
 
@@ -468,9 +466,11 @@ public class PostScreenActivity extends BOActivity {
     }
 
     public final class PostingSentListener {
-        public PostingSentListener() {}
+        public PostingSentListener() {
+        }
+
         public void onPostSend() {
-            Log.d(TAG,"onPostSend called");
+            Log.d(TAG, "onPostSend called");
             setResult(RESULT_OK);
             finish();
         }

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final String TAG = "MapsActivity";
+    private final int OFFSET = 3;
     private long currentUserId = -1;
     private GoogleMap mMap;
     private boolean mapReady = false;
@@ -144,7 +145,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void addToMap(ArrayList<BOLocation> locationList) {
         Log.d(TAG,"add to map");
-        for(int i = 0; i<locationList.size() && (i+1)<=locationList.size()-1; i++) {
+        int i;
+        for(i = 0; i<locationList.size() && (i+OFFSET)<=locationList.size()-1; i+=OFFSET) {
 
             BOLocation curLoc = locationList.get(i);
             BOLocation nextLoc = locationList.get(i+1);
@@ -166,6 +168,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .width(16)
                         .color(color));
             }
+        }
+
+        if(i < locationList.size()){
         }
     }
 }

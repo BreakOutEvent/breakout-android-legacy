@@ -100,8 +100,10 @@ public class PostingManager {
 
                 JSONObject requestObject = new JSONObject();
                 requestObject.accumulate("text", posting.getText())
-                        .accumulate("date", posting.getCreatedTimestamp())
-                        .accumulate("uploadMediaTypes", new JSONArray().put("image"));
+                        .accumulate("date", posting.getCreatedTimestamp());
+                if(posting.hasMedia()){
+                    requestObject.accumulate("uploadMediaTypes", new JSONArray().put("image"));
+                }
                 if (posting.getLocation() != null) {
                     requestObject.accumulate("postingLocation", new JSONObject()
                             .accumulate("latitude", posting.getLocation().getLatitude())
@@ -199,23 +201,25 @@ public class PostingManager {
 
         @Override
         protected Void doInBackground(Void... params) {
-            try {
-                OkHttpClient client = new OkHttpClient.Builder()
-                        .build();
-                JSONObject challengeObject = new JSONObject();
-                challengeObject.accumulate("postingId", posting.getRemoteID())
-                        .accumulate("status", Challenge.STATE.WITH_PROOF.toString());
-                Request challengeRequest = new Request.Builder()
-                        .addHeader("challengeId", chosenChallenge.getRemoteID() + "")
-                        .addHeader("Content-Type", "application/json")
-                        .addHeader("Authorization", "Bearer " + UserManager.getInstance(context).getCurrentUser().getAccessToken())
-                        .url(URLUtils.getBaseUrl(context) + "/event/" + chosenChallenge.getEventID() + "/team/" + UserManager.getInstance(context).getCurrentUser().getTeamId() + "/challenge/" + chosenChallenge.getRemoteID() + "/status/")
-                        .put(RequestBody.create(JSON, challengeObject.toString()))
-                        .build();
+            if(chosenChallenge != null){
+                try {
+                    OkHttpClient client = new OkHttpClient.Builder()
+                            .build();
+                    JSONObject challengeObject = new JSONObject();
+                    challengeObject.accumulate("postingId", posting.getRemoteID())
+                            .accumulate("status", Challenge.STATE.WITH_PROOF.toString());
+                    Request challengeRequest = new Request.Builder()
+                            .addHeader("challengeId", chosenChallenge.getRemoteID() + "")
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("Authorization", "Bearer " + UserManager.getInstance(context).getCurrentUser().getAccessToken())
+                            .url(URLUtils.getBaseUrl(context) + "/event/" + chosenChallenge.getEventID() + "/team/" + UserManager.getInstance(context).getCurrentUser().getTeamId() + "/challenge/" + chosenChallenge.getRemoteID() + "/status/")
+                            .put(RequestBody.create(JSON, challengeObject.toString()))
+                            .build();
 
-                client.newCall(challengeRequest).execute();
-            } catch (Exception e) {
-                e.printStackTrace();
+                    client.newCall(challengeRequest).execute();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             return null;
         }

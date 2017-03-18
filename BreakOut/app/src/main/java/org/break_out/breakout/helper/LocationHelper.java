@@ -1,4 +1,4 @@
-package org.break_out.breakout;
+package org.break_out.breakout.helper;
 
 import android.content.Context;
 import android.location.Location;

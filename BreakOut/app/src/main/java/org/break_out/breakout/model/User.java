@@ -415,7 +415,7 @@ public class User implements Serializable {
         // Build URL
         HttpUrl loginUrl = new HttpUrl.Builder()
                 .scheme("https")
-                .host(URLUtils.getBaseUrl(c))
+                .host("backend.break-out.org")
                 .addPathSegment("oauth")
                 .addPathSegment("token")
                 .build();

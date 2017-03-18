@@ -1,9 +1,6 @@
 package org.break_out.breakout.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.location.Address;
-import android.location.Geocoder;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,26 +14,21 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import org.break_out.breakout.R;
 import org.break_out.breakout.api.BreakoutApiService;
-import org.break_out.breakout.api.BreakoutClient;
-import org.break_out.breakout.api.Like;
 import org.break_out.breakout.api.Medium;
 import org.break_out.breakout.api.NewPosting;
 import org.break_out.breakout.api.PostingLocation;
 import org.break_out.breakout.api.Size;
-import org.break_out.breakout.R;
 import org.break_out.breakout.manager.UserManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.ResponseBody;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Maximilian Duehr on 21.04.2016.
@@ -81,15 +73,13 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         holder.tvTeamName.setText(teamName);
 
         holder.currentPosition = pos;
-
-        holder.tvComments.setText(posting.getComments() + " Kommentare");
         holder.tvLikes.setText(posting.getLikes() + " Likes");
-        holder.tvComments.setText(posting.getComments() + " Kommentare");
+        holder.tvComments.setText(posting.getComments().size() + " Kommentare");
 
         // Add location to view
         PostingLocation postingLocation = posting.getPostingLocation();
-        if (postingLocation != null) {
-            if (postingLocation.getLocationData() != null) {
+        if(postingLocation != null) {
+            if(postingLocation.getLocationData() != null) {
                 String locationText = postingLocation.getLocationData().getLocality() + " - " +
                         postingLocation.getLocationData().getCountry();
                 holder.tvTeamLocation.setText(locationText);
@@ -106,7 +96,7 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         }
 
         // Add likes + listener for likes to view!
-        if (posting.getHasLiked()) { // TODO: This does not work
+        if(posting.getHasLiked()) { // TODO: This does not work
             holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
             holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
         } else {
@@ -146,22 +136,24 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         }
 
         // Add date to view
-        if (posting.getDate() != null) {
+        if(posting.getDate() != null) {
             holder.tvTime.setText(timeBuilder(posting.getDate())); // TODO: Use Android Resources!
         }
 
         // Add text to view
-        if (posting.getText() != null && !posting.getText().isEmpty()) {
+        if(posting.getText() != null && !posting.getText().isEmpty()) {
             holder.tvComment.setText(posting.getText());
         }
 
         holder.ivPosting.setVisibility(View.GONE);
 
-        for (Medium m : posting.getMedia()) {
+        for(Medium m : posting.getMedia()) {
             holder.ivPosting.setVisibility(View.VISIBLE);
-            for (Size s : m.getSizes()) { // TODO: Fix possible NPE in kotlin class
-                if (s.getType().equals("IMAGE")) {
+            for(Size s : m.getSizes()) { // TODO: Fix possible NPE in kotlin class
+                if(s.getType().equals("IMAGE")) {
                     Uri uri = Uri.parse(s.getUrl());
+
+                    Log.d(TAG, "file exists");
                     Picasso.with(_context)
                             .load(uri)
                             .into(holder.ivPosting);
@@ -169,9 +161,9 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             }
         }
 
-        if (posting.getUser().getProfilePic() != null) {
-            for (Size s : posting.getUser().getProfilePic().getSizes()) {
-                if (s.getType().equals("IMAGE")) {
+        if(posting.getUser().getProfilePic() != null) {
+            for(Size s : posting.getUser().getProfilePic().getSizes()) {
+                if(s.getType().equals("IMAGE")) {
                     Uri uri = Uri.parse(s.getUrl());
                     Picasso.with(_context)
                             .load(uri)
@@ -183,7 +175,7 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
 
         holder.rlChallenge.setVisibility(View.GONE);
 
-        if (posting.getProof() != null) {
+        if(posting.getProof() != null) {
             holder.rlChallenge.setVisibility(View.VISIBLE);
             holder.tvChallenge.setText(posting.getProof().getDescription());
         }
@@ -198,12 +190,12 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(timestamp * 1000);
 
-        for (long i = minutes; (i - 60) > 0; i -= 60) {
+        for(long i = minutes; (i - 60) > 0; i -= 60) {
             hours++;
         }
 
-        if (hours == 0) {
-            if (Locale.getDefault().getISO3Language().contains("de")) {
+        if(hours == 0) {
+            if(Locale.getDefault().getISO3Language().contains("de")) {
                 responseBuilder.append("vor ")
                         .append(minutes)
                         .append(" Minuten");
@@ -212,8 +204,8 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                         .append(" minutes")
                         .append(" ago");
             }
-        } else if (hours < 24) {
-            if (Locale.getDefault().getISO3Language().contains("de")) {
+        } else if(hours < 24) {
+            if(Locale.getDefault().getISO3Language().contains("de")) {
                 responseBuilder.append("vor ")
                         .append(hours)
                         .append(" Stunden");
@@ -237,9 +229,9 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     }
 
     private void callListenerIfNeeded(int position) {
-        if (_listener != null) {
+        if(_listener != null) {
 
-            if ((getItemCount() - (position + 1)) <= _listener.getDesiredOffset()) {
+            if((getItemCount() - (position + 1)) <= _listener.getDesiredOffset()) {
                 _listener.onOffsetReached();
             }
         }
@@ -266,18 +258,6 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
 
         public PostingViewHolder(View itemView) {
             super(itemView);
-            itemView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    Log.d(TAG, "onAttach position: " + currentPosition);
-                    callListenerIfNeeded(currentPosition);
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                    Log.d(TAG, "onDetach position: " + currentPosition);
-                }
-            });
             llWrapper = (LinearLayout) itemView.findViewById(R.id.posting_ll_wrapper);
             ivPosting = (ImageView) itemView.findViewById(R.id.posting_iv_image);
             civTeamPic = (CircleImageView) itemView.findViewById(R.id.posting_civ_teamPic);

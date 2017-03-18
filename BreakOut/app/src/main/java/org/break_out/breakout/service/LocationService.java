@@ -1,4 +1,4 @@
-package org.break_out.breakout;
+package org.break_out.breakout.service;
 
 import android.app.Service;
 import android.content.Intent;
