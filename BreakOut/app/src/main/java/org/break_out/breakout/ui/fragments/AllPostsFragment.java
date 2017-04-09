@@ -40,8 +40,7 @@ public class AllPostsFragment extends BOFragment {
     private ProgressBar _progressBar;
     private RelativeLayout _progressWrapper;
 
-    private int currentOffset = 0;
-    private final int FETCH_LIMIT = 10;
+    private int currentPage = 0;
 
     private BreakoutApiService service;
 
@@ -64,13 +63,13 @@ public class AllPostsFragment extends BOFragment {
             @Override
             public void onOffsetReached() {
                 getNextPostings();
-                Log.d(TAG,"offset reached");
+                Log.d(TAG, "offset reached");
             }
         });
     }
 
     private void getNextPostings() {
-        service.getPostings(currentOffset, FETCH_LIMIT)
+        service.getPostings(currentPage)
                 .subscribe(new Action1<List<RemotePosting>>() {
                     @Override
                     public void call(List<RemotePosting> remotePostings) {
@@ -81,7 +80,7 @@ public class AllPostsFragment extends BOFragment {
                         for (RemotePosting np : remotePostings) {
                             _dataList.add(np);
                         }
-                        currentOffset +=1;
+                        currentPage++;
                         _adapter.notifyDataSetChanged();
                         _swipeLayout.setRefreshing(false);
                     }
@@ -133,7 +132,7 @@ public class AllPostsFragment extends BOFragment {
     }
 
     private void refresh(){
-        currentOffset = 0;
+        currentPage = 0;
         _dataList.clear();
         _adapter.notifyDataSetChanged();
         getNextPostings();

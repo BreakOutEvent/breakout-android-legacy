@@ -18,9 +18,8 @@ import rx.Observable;
 public interface BreakoutClient {
 
     @GET("posting/")
-    Observable<List<RemotePosting>> getAllPostings(@Query("offset") int offset,
-                                                   @Query("limit") int limit,
-                                                   @Query("userid") int userIdHasLiked);
+    Observable<List<RemotePosting>> getAllPostings(@Query("page") int offset,
+                                                @Query("userid") int userIdHasLiked);
 
     @GET("posting/{id}/")
     Observable<RemotePosting>  getPostingById(@Path("id") int id);

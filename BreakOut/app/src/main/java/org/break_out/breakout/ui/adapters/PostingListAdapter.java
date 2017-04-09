@@ -26,6 +26,7 @@ import org.break_out.breakout.ui.activities.PostDetailActivity;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.ResponseBody;
@@ -38,10 +39,9 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     private static final String TAG = "PostingListAdapter";
 
     private static ArrayList<RemotePosting> _postingList;
-    private Context _context;
     private static OnPositionFromEndReachedListener _listener;
-
     BreakoutApiService apiService;
+    private Context _context;
 
     public PostingListAdapter(Context context, ArrayList<RemotePosting> postingList) {
         _postingList = postingList;
@@ -186,12 +186,12 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         }
 
         // Add date to view
-        if(posting.getDate() != null) {
+        if (posting.getDate() != null) {
             holder.tvTime.setText(timeBuilder(posting.getDate())); // TODO: Use Android Resources!
         }
 
         // Add text to view
-        if(posting.getText() != null && !posting.getText().isEmpty()) {
+        if (posting.getText() != null && !posting.getText().isEmpty()) {
             holder.tvComment.setText(posting.getText());
         }
         if(posting.getProof() != null) {
@@ -212,15 +212,15 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         StringBuilder responseBuilder = new StringBuilder();
         int minutes = (int) (dif / 1000) / 60;
         int hours = 0;
-        Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         c.setTimeInMillis(timestamp * 1000);
 
-        for(long i = minutes; (i - 60) > 0; i -= 60) {
+        for (long i = minutes; (i - 60) > 0; i -= 60) {
             hours++;
         }
 
-        if(hours == 0) {
-            if(Locale.getDefault().getISO3Language().contains("de")) {
+        if (hours == 0) {
+            if (Locale.getDefault().getISO3Language().contains("de")) {
                 responseBuilder.append("vor ")
                         .append(minutes)
                         .append(" Minuten");
@@ -229,8 +229,8 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                         .append(" minutes")
                         .append(" ago");
             }
-        } else if(hours < 24) {
-            if(Locale.getDefault().getISO3Language().contains("de")) {
+        } else if (hours < 24) {
+            if (Locale.getDefault().getISO3Language().contains("de")) {
                 responseBuilder.append("vor ")
                         .append(hours)
                         .append(" Stunden");
@@ -245,6 +245,14 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                     .append(c.get(Calendar.MONTH) + 1)
                     .append(".")
                     .append(c.get(Calendar.YEAR));
+            if (Locale.getDefault().getISO3Language().contains("de")) {
+                responseBuilder.append(" um ");
+            } else {
+                responseBuilder.append(" at ");
+            }
+            responseBuilder.append(String.format("%02d", c.get(Calendar.HOUR_OF_DAY)))
+                    .append(":")
+                    .append(String.format("%02d", c.get(Calendar.MINUTE)));
         }
         return responseBuilder.toString();
     }
@@ -254,9 +262,9 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     }
 
     private void callListenerIfNeeded(int position) {
-        if(_listener != null) {
+        if (_listener != null) {
 
-            if((getItemCount() - (position + 1)) <= _listener.getDesiredOffset()) {
+            if ((getItemCount() - (position + 1)) <= _listener.getDesiredOffset()) {
                 _listener.onOffsetReached();
             }
         }
@@ -270,6 +278,19 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         _context.startActivity(showDetailIntent);
     }
 
+    public static abstract class OnPositionFromEndReachedListener {
+        private int offset;
+
+        public OnPositionFromEndReachedListener(int offset) {
+            this.offset = offset;
+        }
+
+        public final int getDesiredOffset() {
+            return offset;
+        }
+
+        public abstract void onOffsetReached();
+    }
 
     public class PostingViewHolder extends RecyclerView.ViewHolder {
         LinearLayout llWrapper;
@@ -306,20 +327,6 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             tvComments = (TextView) itemView.findViewById(R.id.post_tv_comments);
             rlLikeWrapper = (RelativeLayout) itemView.findViewById(R.id.post_rl_likeWrapper);
         }
-    }
-
-    public static abstract class OnPositionFromEndReachedListener {
-        private int offset;
-
-        public OnPositionFromEndReachedListener(int offset) {
-            this.offset = offset;
-        }
-
-        public final int getDesiredOffset() {
-            return offset;
-        }
-
-        public abstract void onOffsetReached();
     }
 
 

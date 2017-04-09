@@ -2,11 +2,8 @@ package org.break_out.breakout.api
 
 import android.content.Context
 import com.facebook.stetho.okhttp3.StethoInterceptor
-import java.io.IOException
-
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.ResponseBody
 import org.break_out.breakout.manager.UserManager
 import org.break_out.breakout.util.URLUtils
@@ -86,11 +83,11 @@ class BreakoutApiService {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getPostings(offset: Int, limit: Int): Observable<List<RemotePosting>> {
+    fun getPostings(page: Int): Observable<List<RemotePosting>> {
         val accessToken = UserManager.getInstance(context).currentUser.accessToken
         val userId = UserManager.getInstance(context).currentUser.remoteId
         return createBreakoutClient(accessToken)
-                .getAllPostings(offset, limit, userId.toInt())
+                .getAllPostings(page, userId.toInt())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
     }
