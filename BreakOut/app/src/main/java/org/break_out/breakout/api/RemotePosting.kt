@@ -6,7 +6,7 @@ package org.break_out.breakout.api
 import org.break_out.breakout.model.BOLocation
 import org.break_out.breakout.model.Posting
 
-class NewPosting(
+class RemotePosting(
         val id: Int,
         val text: String?,
         val date: Int?,
@@ -16,8 +16,8 @@ class NewPosting(
         val media: List<Medium> = listOf(),
         val hashtags: List<Any> = listOf(),
         val proof: Proof?,
-        val likes: Int = 0,
-        val hasLiked: Boolean = false)
+        var likes: Int = 0,
+        var hasLiked: Boolean = false)
 
 class Proof(
         val status: String,
@@ -25,7 +25,7 @@ class Proof(
         val description: String = ""
 )
 
-fun NewPosting.transfromToPosting(): Posting {
+fun RemotePosting.transfromToPosting(): Posting {
 
     val teamName = this.user.participant?.teamName
     val message = this.text

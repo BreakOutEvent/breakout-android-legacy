@@ -18,7 +18,6 @@ public class Challenge {
     private int _remoteID;
     private int _eventID;
     private int _teamID;
-    private int _sponsorID;
     private String _teamName;
     private String _description;
     private STATE _status;
@@ -28,11 +27,10 @@ public class Challenge {
     private JSONObject _unregisteredSponsor;
     private int _postingID;
 
-    public Challenge(int remoteID, int eventID, int teamID, int sponsorID, String teamName, String description, STATE status, boolean isSponsorHidden, int amount, JSONObject contract, JSONObject unregisteredSponsor) {
+    public Challenge(int remoteID, int eventID, int teamID, String teamName, String description, STATE status, boolean isSponsorHidden, int amount, JSONObject contract, JSONObject unregisteredSponsor) {
         _remoteID = remoteID;
         _eventID = eventID;
         _teamID = teamID;
-        _sponsorID = sponsorID;
         _teamName = teamName;
         _description = description;
         _status = status;
@@ -40,9 +38,6 @@ public class Challenge {
         _amount = amount;
         _contract = contract;
         _unregisteredSponsor = unregisteredSponsor;
-    }
-
-    public Challenge() {
     }
 
     public int getRemoteID() {
@@ -108,26 +103,19 @@ public class Challenge {
     @Nullable
     public static Challenge fromJSON(JSONObject object) {
         try {
-            Log.d(TAG, object.getString("unregisteredSponsor"));
-            Log.d(TAG, "equals: " + object.getString("unregisteredSponsor").equals("null"));
             int remoteID = object.getInt("id");
             int eventID = object.getInt("eventId");
             String status = object.getString("status");
             int teamID = object.getInt("teamId");
             String teamName = object.getString("team");
-            int sponsorID = object.getInt("sponsorId");
-            int userID = object.getInt("userId");
             boolean sponsorIsHidden = object.getBoolean("sponsorIsHidden");
             JSONObject unregisteredSponsorObject = !object.getString("unregisteredSponsor").equals("null") ? object.getJSONObject("unregisteredSponsor") : null;
             int amount = object.getInt("amount");
             String description = object.getString("description");
+            Log.d(TAG,"description: "+description);
             JSONObject contractObject = object.getJSONObject("contract");
-            int contractID = contractObject.getInt("id");
-            String documentType = contractObject.getString("type");
-            String uploadToken = contractObject.getString("uploadToken");
-            JSONArray sizesArray = contractObject.getJSONArray("sizes");
 
-            return new Challenge(remoteID, eventID, teamID, sponsorID, teamName, description, STATE.fromString(status), sponsorIsHidden, amount, contractObject, unregisteredSponsorObject);
+            return new Challenge(remoteID, eventID, teamID, teamName, description, STATE.fromString(status), sponsorIsHidden, amount, contractObject, unregisteredSponsorObject);
         } catch(JSONException e) {
             e.printStackTrace();
         }

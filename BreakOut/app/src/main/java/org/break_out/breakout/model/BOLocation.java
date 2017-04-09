@@ -125,9 +125,9 @@ public class BOLocation {
         int eventId = object.getInt("eventId");
         boolean duringEvent = object.getBoolean("duringEvent");
         String teamName = object.getString("team");
-        Log.d(TAG, "teamId: " + teamId);
-
-        TeamManager.getInstance().createTeam(teamId, teamName);
+        //if(TeamManager.getInstance().getTeamById(teamId)==null) {
+            TeamManager.getInstance().createTeam(teamId, teamName);
+        //}
 
         location = BOLocationManager.createLocation(remoteId, teamId, eventId, teamName, timestamp, latitude, longitude);
         location.setIsPosted(true);

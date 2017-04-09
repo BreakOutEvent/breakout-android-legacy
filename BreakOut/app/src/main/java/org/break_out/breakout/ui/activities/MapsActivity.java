@@ -15,26 +15,24 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.R;
 import org.break_out.breakout.manager.BOLocationManager;
 import org.break_out.breakout.manager.TeamManager;
 import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.model.Team;
 
 import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final String TAG = "MapsActivity";
-    private final int OFFSET = 3;
     private long currentUserId = -1;
     private GoogleMap mMap;
     private boolean mapReady = false;
     private FloatingActionButton _floatingActionButton;
-    private ArrayList<BOLocation> savedLocations;
+    private ArrayList<BOLocation> _savedLocations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void locate() {
         final BOLocationManager manager = BOLocationManager.getInstance(getApplicationContext());
         if(manager.locationServicesAvailable()) {
-            if(UserManager.getInstance(getApplicationContext()).getCurrentUser().getRemoteId()!=-1) {
+            if(UserManager.getInstance(getApplicationContext()).getCurrentUser().getRemoteId() != -1) {
                 manager.getLocation(getApplicationContext(), new BOLocationManager.BOLocationRequestListener() {
                     @Override
                     public void onLocationObtained(BOLocation currentLocation) {
@@ -85,22 +83,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 });
             } else {
-                Toast.makeText(getApplicationContext(),"Du musst eingeloggt sein",Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Du musst eingeloggt sein", Toast.LENGTH_LONG).show();
             }
         } else {
-            Toast.makeText(getApplicationContext(),"Bitte aktiviere Ortungsdienste",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Bitte aktiviere Ortungsdienste", Toast.LENGTH_LONG).show();
         }
     }
 
     private void setMarker(BOLocation location) {
         if(mapReady) {
-            LatLng newLoc = new LatLng(location.getLatitude(),location.getLongitude());
+            LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
             mMap.addMarker(new MarkerOptions().position(newLoc));
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(newLoc,7);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(newLoc, 7);
             mMap.moveCamera(cameraUpdate);
         }
     }
-
 
 
     /**
@@ -117,26 +114,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapReady = true;
         mMap = googleMap;
         _floatingActionButton.setVisibility(View.VISIBLE);
-        if((savedLocations = BOLocationManager.getAllSavedLocations()).isEmpty()) {
+        final ArrayList<Team> teams = TeamManager.getInstance().getAllTeams();
+        if((_savedLocations = BOLocationManager.getAllSavedLocations()).isEmpty()) {
             BOLocationManager.getAllLocationsFromServer(this, new BOLocationManager.BOLocationListObtainedListener() {
                 @Override
                 public void onListObtained() {
                     //TODO
                     // Log.d(TAG, "Map updated! " + BOLocation.listAll(BOLocation.class).size());
 
-                    for (Team t : TeamManager.getInstance().getAllTeams()) {
-                        Log.d(TAG, "team " + t.getRemoteId());
-                        ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
-                        if (currentUserLocationList.size() != 0) {
-                            addToMap(currentUserLocationList);
+                    if(teams != null) {
+                        if(teams.size() > 0) {
+                            for(Team t : teams) {
+                                Log.d(TAG, "team " + t.getRemoteId());
+                                ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
+                                Log.d(TAG, "current user list size: " + currentUserLocationList.size());
+                                if(currentUserLocationList.size() != 0) {
+                                    addToMap(currentUserLocationList);
+                                }
+                            }
                         }
                     }
                 }
             });
         } else {
-            for (Team t : TeamManager.getInstance().getAllTeams()) {
+            for(Team t : teams) {
                 ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
-                if (currentUserLocationList.size() != 0) {
+                if(currentUserLocationList.size() != 0) {
                     addToMap(currentUserLocationList);
                 }
             }
@@ -144,33 +147,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void addToMap(ArrayList<BOLocation> locationList) {
-        Log.d(TAG,"add to map");
+        int offset = getPostDifference(locationList.size());
+        Log.d(TAG, "add to map");
         int i;
-        for(i = 0; i<locationList.size() && (i+OFFSET)<=locationList.size()-1; i+=OFFSET) {
+        LatLng l2 = null;
+        for(i = 0; i < locationList.size() && (i + offset) <= locationList.size() - 1; i += offset) {
 
             BOLocation curLoc = locationList.get(i);
-            BOLocation nextLoc = locationList.get(i+1);
+            BOLocation nextLoc = locationList.get(i + offset);
             LatLng l1 = new LatLng(curLoc.getLatitude(), curLoc.getLongitude());
-            LatLng l2 = new LatLng(nextLoc.getLatitude(), nextLoc.getLongitude());
+            l2 = new LatLng(nextLoc.getLatitude(), nextLoc.getLongitude());
             if(i == 0) {
                 mMap.addMarker(new MarkerOptions().position(l1).title(curLoc.getTeamName()));
             }
-            if((i+1) == locationList.size()-1){
+            if((i + offset) == locationList.size() - 1) {
                 mMap.addMarker((new MarkerOptions().position(l2).title(nextLoc.getTeamName())));
             }
             int color = getResources().getColor(R.color.line_otherTeam);
             if(nextLoc.getTeamId() == currentUserId) {
                 color = getResources().getColor(R.color.line_ownTeam);
             }
-            if(curLoc.getTeamId() == nextLoc.getTeamId()) {
-                Polyline line = mMap.addPolyline(new PolylineOptions()
-                        .add(l1,l2)
-                        .width(16)
-                        .color(color));
-            }
+            mMap.addPolyline(new PolylineOptions()
+                    .add(l1, l2)
+                    .width(16)
+                    .color(color));
         }
+        if(i < locationList.size() - 1) {
+            //TODO: make prettier code
+            Log.d(TAG, "add last point");
+            int color = getResources().getColor(R.color.line_otherTeam);
+            LatLng l1 = new LatLng(locationList.get(locationList.size() - 1).getLatitude(), locationList.get(locationList.size() - 1).getLongitude());
+            mMap.addMarker(new MarkerOptions().position(l1).title(locationList.get(locationList.size() - 1).getTeamName()));
+            mMap.addPolyline(new PolylineOptions()
+                    .add(l1, l2)
+                    .width(16)
+                    .color(color));
+        }
+    }
 
-        if(i < locationList.size()){
-        }
+    private int getPostDifference(int listLength) {
+        if(listLength < 10)
+            return 1;
+        else
+            return listLength / 10;
     }
 }

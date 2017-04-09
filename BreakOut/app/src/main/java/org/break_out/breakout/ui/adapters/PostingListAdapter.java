@@ -1,6 +1,7 @@
 package org.break_out.breakout.ui.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,15 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.api.BreakoutApiService;
 import org.break_out.breakout.api.Medium;
-import org.break_out.breakout.api.NewPosting;
 import org.break_out.breakout.api.PostingLocation;
+import org.break_out.breakout.api.RemotePosting;
 import org.break_out.breakout.api.Size;
-import org.break_out.breakout.manager.UserManager;
+import org.break_out.breakout.ui.activities.PostDetailActivity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,13 +37,13 @@ import rx.functions.Action1;
 public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.PostingViewHolder> {
     private static final String TAG = "PostingListAdapter";
 
-    private static ArrayList<NewPosting> _postingList;
+    private static ArrayList<RemotePosting> _postingList;
     private Context _context;
     private static OnPositionFromEndReachedListener _listener;
 
     BreakoutApiService apiService;
 
-    public PostingListAdapter(Context context, ArrayList<NewPosting> postingList) {
+    public PostingListAdapter(Context context, ArrayList<RemotePosting> postingList) {
         _postingList = postingList;
         _context = context;
         apiService = new BreakoutApiService(_context);
@@ -55,28 +56,23 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
     }
 
     @Override
-    public void onBindViewHolder(PostingViewHolder holder, int position) {
-        Log.d(TAG,"onBind");
-        populateView(holder, position);
-        callListenerIfNeeded(position);
-    }
-
-
-    @Override
-    public int getItemCount() {
-        return _postingList.size();
-    }
-
-    private void populateView(final PostingViewHolder holder, final int pos) {
-
-        final NewPosting posting = _postingList.get(pos);
-
-        String teamName = posting.getUser().getParticipant().getTeamName();
-        holder.tvTeamName.setText(teamName);
-
-        holder.currentPosition = pos;
+    public void onBindViewHolder(final PostingViewHolder holder, int position) {
+        Log.d(TAG, "onBind");
+        final RemotePosting posting = _postingList.get(holder.getAdapterPosition());
+        holder.llWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDetail(holder.getAdapterPosition());
+            }
+        });
         holder.tvLikes.setText(posting.getLikes() + " Likes");
         holder.tvComments.setText(posting.getComments().size() + " Kommentare");
+        holder.ivPosting.setVisibility(View.GONE);
+        holder.rlChallenge.setVisibility(View.GONE);
+        String teamName = posting.getUser().getParticipant().getTeamName();
+        if(teamName != null) {
+            holder.tvTeamName.setText(teamName);
+        }
 
         // Add location to view
         PostingLocation postingLocation = posting.getPostingLocation();
@@ -97,29 +93,54 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             holder.tvTeamLocation.setVisibility(View.GONE);
         }
 
-        // Add likes + listener for likes to view!
-        if(posting.getHasLiked()) { // TODO: This does not work
-            holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
-            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
-        } else {
-            //TODO: Fix this color, it is to bright compared to the default font color!
-            holder.tvLikes.setTextColor(_context.getResources().getColor(android.R.color.darker_gray));
-            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_black_18dp));
+        //Image logic
+        Glide.clear(holder.ivPosting);
+        for(Medium m : posting.getMedia()) {
+            holder.ivPosting.setVisibility(View.VISIBLE);
+            for(Size s : m.getSizes()) { // TODO: Fix possible NPE in kotlin class
+                if(s.getType().equals("IMAGE")) {
+                    Log.d(TAG, "glide should load");
+                    Uri uri = Uri.parse(s.getUrl());
+                    Glide.with(_context)
+                            .load(uri)
+                            .placeholder(R.drawable.bg_welcome_600dp)
+                            .dontAnimate()
+                            .dontTransform()
+                            .into(holder.ivPosting);
+                }
+            }
+            callListenerIfNeeded(holder.getAdapterPosition());
+        }
 
-            holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+        Glide.clear(holder.civTeamPic);
+        if(posting.getUser().getProfilePic() != null) {
+            for(Size s : posting.getUser().getProfilePic().getSizes()) {
+                if(s.getType().equals("IMAGE")) {
+                    Log.d(TAG, "glide should load profile");
+                    Uri uri = Uri.parse(s.getUrl());
+                    Glide.with(_context)
+                            .load(uri)
+                            .placeholder(R.drawable.placeholder_profile_pic)
+                            .dontAnimate()
+                            .dontTransform()
+                            .into(holder.civTeamPic);
 
-                    String accessToken = UserManager.getInstance(_context).getCurrentUser().getAccessToken();
+                }
+            }
+        }
 
-
-                    // TODO: Make this beautiful again!
-
+        //like logic
+        holder.rlLikeWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!posting.getHasLiked()) {
                     apiService.likePosting(posting.getId())
                             .subscribe(new Action1<ResponseBody>() {
                                 @Override
                                 public void call(ResponseBody responseBody) {
-                                    holder.tvLikes.setText(posting.getLikes() + 1 + " Likes");
+                                    posting.setLikes(posting.getLikes() + 1);
+                                    posting.setHasLiked(true);
+                                    holder.tvLikes.setText(posting.getLikes() + " Likes");
                                     holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
                                     holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
                                 }
@@ -128,13 +149,40 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                                 public void call(Throwable throwable) {
                                     Log.e(TAG, "Could not like post");
                                     Log.e(TAG, throwable.getLocalizedMessage());
-                                    // TODO: Handle error! (E.g. Auth Errors)
                                 }
                             });
-
-
+                } else {
+                    Log.d(TAG, "unlike");
+                    apiService.unlikePosting(posting.getId())
+                            .subscribe(new Action1<ResponseBody>() {
+                                @Override
+                                public void call(ResponseBody responseBody) {
+                                    posting.setLikes(posting.getLikes() - 1);
+                                    posting.setHasLiked(false);
+                                    holder.tvLikes.setText(posting.getLikes() + " Likes");
+                                    holder.tvLikes.setTextColor(_context.getResources().getColor(android.R.color.darker_gray));
+                                    holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_black_18dp));
+                                }
+                            }, new Action1<Throwable>() {
+                                @Override
+                                public void call(Throwable throwable) {
+                                    Log.e(TAG, "Could not unlike post");
+                                    Log.e(TAG, throwable.getLocalizedMessage());
+                                }
+                            });
                 }
-            });
+
+            }
+        });
+
+        // Add likes + listener for likes to view!
+        if(posting.getHasLiked()) { // TODO: This does not work
+            holder.tvLikes.setTextColor(_context.getResources().getColor(R.color.red_like));
+            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_red_18dp));
+        } else {
+            //TODO: Fix this color, it is to bright compared to the default font color!
+            holder.tvLikes.setTextColor(_context.getResources().getColor(android.R.color.darker_gray));
+            holder.ivLikes.setImageDrawable(_context.getResources().getDrawable(R.drawable.ic_favorite_black_18dp));
         }
 
         // Add date to view
@@ -146,44 +194,16 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         if(posting.getText() != null && !posting.getText().isEmpty()) {
             holder.tvComment.setText(posting.getText());
         }
-
-        holder.ivPosting.setVisibility(View.GONE);
-
-        for(Medium m : posting.getMedia()) {
-            holder.ivPosting.setVisibility(View.VISIBLE);
-            for(Size s : m.getSizes()) { // TODO: Fix possible NPE in kotlin class
-                if(s.getType().equals("IMAGE")) {
-                    Uri uri = Uri.parse(s.getUrl());
-
-                    Log.d(TAG, "image should reload");
-                    Log.d(TAG,"size: "+s.getType());
-                    Picasso.with(_context)
-                            .load(uri)
-                            .placeholder(R.drawable.bg_login_600dp)
-                            .error(R.drawable.bg_login_600dp)
-                            .into(holder.ivPosting);
-                }
-            }
-        }
-
-        if(posting.getUser().getProfilePic() != null) {
-            for(Size s : posting.getUser().getProfilePic().getSizes()) {
-                if(s.getType().equals("IMAGE")) {
-                    Uri uri = Uri.parse(s.getUrl());
-                    Picasso.with(_context)
-                            .load(uri)
-                            .placeholder(R.drawable.placeholder_profile_pic)
-                            .into(holder.civTeamPic);
-                }
-            }
-        }
-
-        holder.rlChallenge.setVisibility(View.GONE);
-
         if(posting.getProof() != null) {
             holder.rlChallenge.setVisibility(View.VISIBLE);
             holder.tvChallenge.setText(posting.getProof().getDescription());
         }
+    }
+
+
+    @Override
+    public int getItemCount() {
+        return _postingList.size();
     }
 
     private String timeBuilder(long timestamp) {
@@ -242,6 +262,14 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         }
     }
 
+    private void showDetail(int pos){
+        RemotePosting posting = _postingList.get(pos);
+        int id = posting.getId();
+        Intent showDetailIntent = new Intent(_context,PostDetailActivity.class);
+        showDetailIntent.putExtra(PostDetailActivity.TAG_ID,id);
+        _context.startActivity(showDetailIntent);
+    }
+
 
     public class PostingViewHolder extends RecyclerView.ViewHolder {
         LinearLayout llWrapper;
@@ -259,7 +287,6 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         ImageView ivComments;
         TextView tvLikes;
         TextView tvComments;
-        int currentPosition;
 
         public PostingViewHolder(View itemView) {
             super(itemView);

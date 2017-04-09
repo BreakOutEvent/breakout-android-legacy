@@ -23,7 +23,7 @@ import okhttp3.Response;
 public class ChallengeManager  {
     private static final String TAG = "ChallengeManager";
     private static ChallengeManager _instance;
-    private static ArrayList<Challenge> _challenges;
+    private static ArrayList<Challenge> _challenges = new ArrayList<>();
 
     private ChallengeManager() {
         _challenges = new ArrayList<>();
@@ -83,12 +83,14 @@ public class ChallengeManager  {
                 Response response = client.newCall(callRequest).execute();
                 String responseString = response.body().string();
                 ArrayList<Challenge> responseList = Challenge.fromJSON(new JSONArray(responseString));
+                Log.d(TAG,"JSON: "+responseString);
+                ArrayList<Challenge> resultList = new ArrayList<>();
                 for(Challenge c : responseList) {
                     if(!isSaved(c)){
-                        getAllChallenges().add(c);
+                        resultList.add(c);
                     }
                 }
-                return getAllChallenges();
+                return resultList;
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -99,7 +101,10 @@ public class ChallengeManager  {
         protected void onPostExecute(ArrayList<Challenge> list) {
             super.onPostExecute(list);
             if(_listener != null) {
+                _challenges.clear();
+                _challenges.addAll(list);
                 _listener.onChallengesFetched();
+
             }
         }
 

@@ -79,11 +79,26 @@ class BreakoutApiService {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getPostings(offset: Int, limit: Int): Observable<List<NewPosting>> {
+    fun unlikePosting(postingId: Integer): Observable<ResponseBody> {
+        return createBreakoutClient(UserManager.getInstance(context).currentUser.accessToken)
+                .unlikePosting(postingId.toInt())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getPostings(offset: Int, limit: Int): Observable<List<RemotePosting>> {
         val accessToken = UserManager.getInstance(context).currentUser.accessToken
         val userId = UserManager.getInstance(context).currentUser.remoteId
         return createBreakoutClient(accessToken)
                 .getAllPostings(offset, limit, userId.toInt())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getPostingById(id: Int):Observable<RemotePosting>{
+        val accessToken = UserManager.getInstance(context).currentUser.accessToken
+        return createBreakoutClient(accessToken)
+                .getPostingById(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
     }

@@ -198,6 +198,8 @@ public class Posting {
         _profilePicturePath = path;
     }
 
+    public void toggleLike(){ _hasliked = !_hasliked;    }
+
     public void setLikes(int likes) {
         _likes = likes;
     }

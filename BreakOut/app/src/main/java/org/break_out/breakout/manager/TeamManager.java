@@ -28,12 +28,10 @@ public class TeamManager {
 
     public Team createTeam(int remoteId,String teamName) {
         Team t;
-        Log.d(TAG,"team created");
         if((t = getTeamById(remoteId))!=null) {
             return t;
         } else {
             t = new Team(remoteId,teamName);
-            Log.d(TAG,"new team! "+remoteId);
             if(!_teams.contains(t)){
                 _teams.add(t);
             }
@@ -44,7 +42,6 @@ public class TeamManager {
 
     @Nullable
     public Team getTeamById(int id) {
-        Log.d(TAG,"getTeamById "+id);
         for(Team t : _teams){
             if(t.getRemoteId() == id){
                 return t;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.break_out.breakout">
+<manifest package="org.break_out.breakout"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -72,7 +72,8 @@
                 <action android:name="android.location.PROVIDERS_CHANGED"/>
             </intent-filter>
         </receiver>
-        <!--<receiver android:name=".sync.BOSyncReceiver">
+        <!--
+        <receiver android:name=".sync.BOSyncReceiver">
             <intent-filter>
                 <action android:name="org.break_out.posting.SYNC_RECEIVER"/>
             </intent-filter>
@@ -82,7 +83,9 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
             </intent-filter>
-        </receiver> -->
+        </receiver>
+        -->
+
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -111,6 +114,8 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.break_out.breakout.ui.activities.MainActivity"/>
+        </activity>
+        <activity android:name=".ui.activities.PostDetailActivity">
         </activity>
     </application>
 

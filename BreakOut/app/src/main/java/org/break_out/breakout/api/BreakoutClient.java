@@ -4,9 +4,8 @@ import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
-import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -19,12 +18,18 @@ import rx.Observable;
 public interface BreakoutClient {
 
     @GET("posting/")
-    Observable<List<NewPosting>> getAllPostings(@Query("offset") int offset,
-                                                @Query("limit") int limit,
-                                                @Query("userid") int userIdHasLiked);
+    Observable<List<RemotePosting>> getAllPostings(@Query("offset") int offset,
+                                                   @Query("limit") int limit,
+                                                   @Query("userid") int userIdHasLiked);
+
+    @GET("posting/{id}/")
+    Observable<RemotePosting>  getPostingById(@Path("id") int id);
 
     @POST("posting/{postingId}/like/")
     Observable<ResponseBody> likePosting(@Path("postingId") int postingId,
                                          @Body Like like);
+
+    @DELETE("posting/{postingId}/like/")
+    Observable<ResponseBody> unlikePosting(@Path("postingId") int postingId);
 
 }

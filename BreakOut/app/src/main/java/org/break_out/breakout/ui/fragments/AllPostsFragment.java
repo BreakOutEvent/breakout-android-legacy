@@ -16,7 +16,7 @@ import android.widget.RelativeLayout;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.api.BreakoutApiService;
-import org.break_out.breakout.api.NewPosting;
+import org.break_out.breakout.api.RemotePosting;
 import org.break_out.breakout.ui.activities.MainActivity;
 import org.break_out.breakout.ui.adapters.PostingListAdapter;
 
@@ -33,7 +33,7 @@ public class AllPostsFragment extends BOFragment {
     private static final String TAG = "AllPostsFragment";
 
     private PostingListAdapter _adapter;
-    private ArrayList<NewPosting> _dataList;
+    private ArrayList<RemotePosting> _dataList;
 
     private RecyclerView _recyclerView;
     private SwipeRefreshLayout _swipeLayout;
@@ -71,17 +71,17 @@ public class AllPostsFragment extends BOFragment {
 
     private void getNextPostings() {
         service.getPostings(currentOffset, FETCH_LIMIT)
-                .subscribe(new Action1<List<NewPosting>>() {
+                .subscribe(new Action1<List<RemotePosting>>() {
                     @Override
-                    public void call(List<NewPosting> newPostings) {
+                    public void call(List<RemotePosting> remotePostings) {
                         Log.d(TAG, "Received a new list of postings");
-                        if (newPostings.size() == 0) {
+                        if (remotePostings.size() == 0) {
                             Log.i(TAG, "List of size was zero");
                         }
-                        for (NewPosting np : newPostings) {
+                        for (RemotePosting np : remotePostings) {
                             _dataList.add(np);
                         }
-                        currentOffset += FETCH_LIMIT;
+                        currentOffset +=1;
                         _adapter.notifyDataSetChanged();
                         _swipeLayout.setRefreshing(false);
                     }
@@ -111,11 +111,7 @@ public class AllPostsFragment extends BOFragment {
         _swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                currentOffset = 0;
-                _dataList.clear();
-                _adapter.notifyDataSetChanged();
-                getNextPostings();
-                Log.d(TAG, "onRefresh: Resetting offset and loading postings from server");
+               refresh();
             }
         });
 
@@ -134,5 +130,13 @@ public class AllPostsFragment extends BOFragment {
             }
         });
         return v;
+    }
+
+    private void refresh(){
+        currentOffset = 0;
+        _dataList.clear();
+        _adapter.notifyDataSetChanged();
+        getNextPostings();
+        Log.d(TAG, "onRefresh: Resetting offset and loading postings from server");
     }
 }

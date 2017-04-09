@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -48,7 +49,7 @@ public class BOLocationManager {
     private static LocationManager _locationManager;
     private static ArrayList<BOLocationListener> _listenerList = new ArrayList<>();
     private static ArrayList<BOLocationServiceListener> _statusListenerList = new ArrayList<>();
-    private static ArrayList<BOLocation> _locations;
+    private static ArrayList<BOLocation> _locations = new ArrayList<>();
     private static BOLocationManager _instance;
 
     private static SharedPreferences _preferences;
@@ -432,21 +433,21 @@ public class BOLocationManager {
             int id = UserManager.getInstance(context).getCurrentUser().getEventId() == -1 ? 1 : UserManager.getInstance(context).getCurrentUser().getEventId();
             ArrayList<BOLocation> resultList = new ArrayList<>();
             OkHttpClient client = new OkHttpClient.Builder()
+                    .readTimeout(5, TimeUnit.SECONDS)
                     .build();
             Request request = new Request.Builder()
-                    .url(URLUtils.getBaseUrl(context) + "/event/" + UserManager.getInstance(context)+ id  + "/location/")
+                    .url(URLUtils.getBaseUrl(context) + "/event/" + id  + "/location/")
                     .build();
             try {
                 Response response = client.newCall(request).execute();
                 String responseBody = response.body().string();
-                Log.d(TAG, "responseBody: " + responseBody);
 
+                //Add location
                 JSONArray responseArray = new JSONArray(responseBody);
                 for(int i = 0; i < responseArray.length(); i++) {
                     JSONObject curLocationObj = responseArray.getJSONObject(i);
                     BOLocation newLocation = BOLocation.fromJSON(curLocationObj);
                     resultList.add(newLocation);
-                    Log.d(TAG, "location added");
                 }
                 return resultList;
             } catch(Exception e) {
@@ -460,6 +461,8 @@ public class BOLocationManager {
             super.onPostExecute(boLocations);
             if(boLocations != null) {
                 Log.d(TAG, "it worked! " + boLocations.size());
+                _locations.clear();
+                _locations.addAll(boLocations);
                 if(listener != null) {
                     listener.onListObtained();
                 }

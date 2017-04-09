@@ -25,8 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:maxHeight="200dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/bg_welcome_600dp"/>
+                android:scaleType="centerCrop"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -46,8 +45,7 @@
                         android:layout_height="45dp"
                         android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/placeholder_profile_pic"/>
+                        android:scaleType="centerCrop"/>
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -136,7 +134,8 @@
                     <RelativeLayout
                         android:id="@+id/post_rl_likeWrapper"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:clickable="true">
                         <ImageView
                             android:id="@+id/post_iv_likes"
                             android:layout_width="wrap_content"
