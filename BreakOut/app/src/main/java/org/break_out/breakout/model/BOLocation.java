@@ -38,28 +38,76 @@ public class BOLocation {
         _posting = posting;
     }
 
+    public static BOLocation fromJSON(JSONObject teamObject, JSONObject locationObject) throws JSONException {
+        int remoteId = locationObject.getInt("id");
+        BOLocation location = BOLocationManager.getLocationById(remoteId);
+        if (location != null) {
+            return location;
+        }
+        double latitude = locationObject.getDouble("latitude");
+        double longitude = locationObject.getDouble("longitude");
+        long timestamp = locationObject.getLong("date");
+        int eventId = teamObject.getInt("event");
+        boolean duringEvent = locationObject.getBoolean("duringEvent");
+        int teamId = teamObject.getInt("id");
+        String teamName = teamObject.getString("name");
+        Log.d(TAG, "teamId: " + teamId);
+
+        TeamManager.getInstance().createTeam(teamId, teamName);
+
+        location = BOLocationManager.createLocation(remoteId, teamId, eventId, teamName, timestamp, latitude, longitude);
+        location.setIsPosted(true);
+        location.setDuringEvent(duringEvent);
+
+        return location;
+    }
+
     public double getLatitude() {
         return _latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        _latitude = latitude;
     }
 
     public double getLongitude() {
         return _longitude;
     }
 
+    public void setLongitude(double longitude) {
+        _longitude = longitude;
+    }
+
     public int getRemoteId() {
         return _remoteId;
+    }
+
+    public void setRemoteId(int remoteId) {
+        _remoteId = remoteId;
     }
 
     public int getTeamId() {
         return _teamId;
     }
 
+    public void setTeamId(int teamId) {
+        _teamId = teamId;
+    }
+
     public int getEventId() {
         return _eventId;
     }
 
+    public void setEventId(int eventId) {
+        _eventId = eventId;
+    }
+
     public String getTeamName() {
         return _teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        _teamName = teamName;
     }
 
     public Posting getPosting() {
@@ -74,65 +122,15 @@ public class BOLocation {
         return _duringEvent;
     }
 
-
-    public void setRemoteId(int remoteId) {
-        _remoteId = remoteId;
-    }
-
-    public void setTeamId(int teamId) {
-        _teamId = teamId;
-    }
-
-    public void setEventId(int eventId) {
-        _eventId = eventId;
-    }
-
-    public void setTeamName(String teamName) {
-        _teamName = teamName;
-    }
-
-    public void setLatitude(double latitude) {
-        _latitude = latitude;
-    }
-
-    public void setLongitude(double longitude) {
-        _longitude = longitude;
+    public void setDuringEvent(boolean isDuringEvent) {
+        _duringEvent = isDuringEvent;
     }
 
     public void setIsPosted(boolean isPosted) {
         _isPosted = isPosted;
     }
 
-    public void setDuringEvent(boolean isDuringEvent) {
-        _duringEvent = isDuringEvent;
-    }
-
-
-    public long getTimestamp() {
+    public Long getTimestamp() {
         return _timestamp;
-    }
-
-    public static BOLocation fromJSON(JSONObject object) throws JSONException {
-        int remoteId = object.getInt("id");
-        BOLocation location = BOLocationManager.getLocationById(remoteId);
-        if(location != null) {
-            return location;
-        }
-        double latitude = object.getDouble("latitude");
-        double longitude = object.getDouble("longitude");
-        long timestamp = object.getLong("date");
-        int teamId = object.getInt("teamId");
-        int eventId = object.getInt("eventId");
-        boolean duringEvent = object.getBoolean("duringEvent");
-        String teamName = object.getString("team");
-        //if(TeamManager.getInstance().getTeamById(teamId)==null) {
-            TeamManager.getInstance().createTeam(teamId, teamName);
-        //}
-
-        location = BOLocationManager.createLocation(remoteId, teamId, eventId, teamName, timestamp, latitude, longitude);
-        location.setIsPosted(true);
-        location.setDuringEvent(duringEvent);
-
-        return location;
     }
 }

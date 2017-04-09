@@ -14,6 +14,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -25,6 +26,8 @@ import org.break_out.breakout.model.BOLocation;
 import org.break_out.breakout.model.Team;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final String TAG = "MapsActivity";
@@ -69,8 +72,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void locate() {
         final BOLocationManager manager = BOLocationManager.getInstance(getApplicationContext());
-        if(manager.locationServicesAvailable()) {
-            if(UserManager.getInstance(getApplicationContext()).getCurrentUser().getRemoteId() != -1) {
+        if (manager.locationServicesAvailable()) {
+            if (UserManager.getInstance(getApplicationContext()).getCurrentUser().getRemoteId() != -1) {
                 manager.getLocation(getApplicationContext(), new BOLocationManager.BOLocationRequestListener() {
                     @Override
                     public void onLocationObtained(BOLocation currentLocation) {
@@ -91,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setMarker(BOLocation location) {
-        if(mapReady) {
+        if (mapReady) {
             LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
             mMap.addMarker(new MarkerOptions().position(newLoc));
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(newLoc, 7);
@@ -115,80 +118,76 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         _floatingActionButton.setVisibility(View.VISIBLE);
         final ArrayList<Team> teams = TeamManager.getInstance().getAllTeams();
-        if((_savedLocations = BOLocationManager.getAllSavedLocations()).isEmpty()) {
+
+        if ((_savedLocations = BOLocationManager.getAllSavedLocations()).isEmpty()) {
             BOLocationManager.getAllLocationsFromServer(this, new BOLocationManager.BOLocationListObtainedListener() {
                 @Override
                 public void onListObtained() {
                     //TODO
                     // Log.d(TAG, "Map updated! " + BOLocation.listAll(BOLocation.class).size());
 
-                    if(teams != null) {
-                        if(teams.size() > 0) {
-                            for(Team t : teams) {
-                                Log.d(TAG, "team " + t.getRemoteId());
-                                ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
-                                Log.d(TAG, "current user list size: " + currentUserLocationList.size());
-                                if(currentUserLocationList.size() != 0) {
-                                    addToMap(currentUserLocationList);
-                                }
+                    if (teams != null) {
+                        for (Team t : teams) {
+                            Log.d(TAG, "team " + t.getRemoteId());
+                            ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
+                            if (currentUserLocationList.size() != 0) {
+                                addToMap(currentUserLocationList);
+
                             }
                         }
                     }
                 }
             });
         } else {
-            for(Team t : teams) {
-                ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
-                if(currentUserLocationList.size() != 0) {
-                    addToMap(currentUserLocationList);
+            if (teams != null) {
+                for (Team t : teams) {
+                    ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
+                    if (currentUserLocationList.size() != 0) {
+                        addToMap(currentUserLocationList);
+                    }
                 }
             }
         }
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds(new LatLng(41.3873996, 2.1606497), new LatLng(52.5076291, 13.1459824)), 200));
     }
 
     private void addToMap(ArrayList<BOLocation> locationList) {
-        int offset = getPostDifference(locationList.size());
         Log.d(TAG, "add to map");
-        int i;
-        LatLng l2 = null;
-        for(i = 0; i < locationList.size() && (i + offset) <= locationList.size() - 1; i += offset) {
 
-            BOLocation curLoc = locationList.get(i);
-            BOLocation nextLoc = locationList.get(i + offset);
-            LatLng l1 = new LatLng(curLoc.getLatitude(), curLoc.getLongitude());
-            l2 = new LatLng(nextLoc.getLatitude(), nextLoc.getLongitude());
-            if(i == 0) {
-                mMap.addMarker(new MarkerOptions().position(l1).title(curLoc.getTeamName()));
+        Collections.sort(locationList, new Comparator<BOLocation>() {
+            @Override
+            public int compare(BOLocation o1, BOLocation o2) {
+                return o1.getTimestamp().compareTo(o2.getTimestamp());
             }
-            if((i + offset) == locationList.size() - 1) {
-                mMap.addMarker((new MarkerOptions().position(l2).title(nextLoc.getTeamName())));
-            }
+        });
+
+        ArrayList<LatLng> latLngs = new ArrayList<>();
+
+        for (BOLocation location : locationList) {
+            latLngs.add(new LatLng(location.getLatitude(), location.getLongitude()));
+        }
+
+        if (locationList.size() > 0 && latLngs.size() > 0) {
+
+            BOLocation firstLocation = locationList.get(0);
+            LatLng lastLatLng = latLngs.get(latLngs.size() - 1);
+
+
+            mMap.addMarker((new MarkerOptions().position(lastLatLng).title(firstLocation.getTeamName())));
+
             int color = getResources().getColor(R.color.line_otherTeam);
-            if(nextLoc.getTeamId() == currentUserId) {
+            if (firstLocation.getTeamId() == currentUserId) {
                 color = getResources().getColor(R.color.line_ownTeam);
             }
+
             mMap.addPolyline(new PolylineOptions()
-                    .add(l1, l2)
-                    .width(16)
+                    .addAll(latLngs)
+                    .width(4)
                     .color(color));
-        }
-        if(i < locationList.size() - 1) {
-            //TODO: make prettier code
-            Log.d(TAG, "add last point");
-            int color = getResources().getColor(R.color.line_otherTeam);
-            LatLng l1 = new LatLng(locationList.get(locationList.size() - 1).getLatitude(), locationList.get(locationList.size() - 1).getLongitude());
-            mMap.addMarker(new MarkerOptions().position(l1).title(locationList.get(locationList.size() - 1).getTeamName()));
-            mMap.addPolyline(new PolylineOptions()
-                    .add(l1, l2)
-                    .width(16)
-                    .color(color));
+
+
         }
     }
 
-    private int getPostDifference(int listLength) {
-        if(listLength < 10)
-            return 1;
-        else
-            return listLength / 10;
-    }
 }
