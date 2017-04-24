@@ -10,16 +10,18 @@
         android:key="@string/PREFERENCE_URL"
         android:summary="@string/pref_summary_url"
         android:title="@string/pref_title_url"
-        android:defaultValue=""/>
+        android:defaultValue="@string/secret_url"/>
 
     <EditTextPreference
         android:key="@string/PREFERENCE_CLIENTID"
         android:summary="@string/pref_summary_clientId"
-        android:title="@string/pref_title_id"/>
+        android:title="@string/pref_title_id"
+        android:defaultValue="@string/secret_id"/>
 
     <EditTextPreference
         android:key="@string/PREFERENCE_CLIENTSECRET"
         android:summary="@string/pref_summary_clientSecret"
-        android:title="@string/pref_title_clientSecret"/>
+        android:title="@string/pref_title_clientSecret"
+        android:defaultValue="@string/secret_secret"/>
 
 </PreferenceScreen>

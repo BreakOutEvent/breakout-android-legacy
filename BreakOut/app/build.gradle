@@ -9,8 +9,8 @@ android {
         applicationId "org.break_out.breakout"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 16
-        versionName "1.1.5"
+        versionCode 17
+        versionName "1.1.6"
         multiDexEnabled false
     }
     buildTypes {

@@ -138,9 +138,9 @@
 
     <string name="pref_summary_test" translatable="false">Activate test mode</string>
     <string name="pref_title_test">Test mode</string>
-    <string name="pref_title_url">URL</string>
-    <string name="pref_summary_url">Server url</string>
-    <string name="pref_title_id">ID</string>
+    <string name="pref_title_url" translatable="false">URL</string>
+    <string name="pref_summary_url" translatable="false">Server url</string>
+    <string name="pref_title_id" translatable="false">ID</string>
     <string name="pref_summary_clientId" translatable="false">Client ID</string>
     <string name="pref_title_clientSecret" translatable="false">Secret</string>
     <string name="pref_summary_clientSecret" translatable="false">Client secret</string>
