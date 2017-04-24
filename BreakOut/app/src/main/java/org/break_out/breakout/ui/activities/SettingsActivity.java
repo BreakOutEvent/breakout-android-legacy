@@ -2,6 +2,7 @@ package org.break_out.breakout.ui.activities;
 
 
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
 import android.support.v4.app.NavUtils;
@@ -14,6 +15,9 @@ import org.break_out.breakout.R;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
     private static final String TAG = "SettingsActivity";
+    EditTextPreference urlPref;
+    EditTextPreference idPref;
+    EditTextPreference secretPref;
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -33,12 +37,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         setupActionBar();
         addPreferencesFromResource(R.xml.pref_general);
         SwitchPreference testPref = (SwitchPreference) findPreference(getString(R.string.PREFERENCE_IS_TEST));
+        urlPref = (EditTextPreference) findPreference(getString(R.string.PREFERENCE_URL));
+        idPref = (EditTextPreference) findPreference(getString(R.string.PREFERENCE_CLIENTID));
+        secretPref = (EditTextPreference) findPreference(getString(R.string.PREFERENCE_CLIENTSECRET));
+
+        boolean testCase = getSharedPreferences(getString(R.string.PREFERENCES_GLOBAL),MODE_PRIVATE).getBoolean(getString(R.string.PREFERENCE_IS_TEST),false);
+        setOptions(testCase);
+
         testPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Log.d(TAG,"onPrefChange called");
                 Boolean val = (Boolean) newValue;
                 getSharedPreferences(getString(R.string.PREFERENCES_GLOBAL),MODE_PRIVATE).edit().putBoolean(getString(R.string.PREFERENCE_IS_TEST),val).apply();
+                setOptions(val);
                 return true;
             }
         });
@@ -53,6 +65,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    private void setOptions(boolean active){
+        urlPref.setEnabled(active);
+        idPref.setEnabled(active);
+        secretPref.setEnabled(active);
     }
 
     @Override

@@ -1,9 +1,25 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="@string/PREFERENCE_IS_TEST"
         android:summary="@string/pref_summary_test"
         android:title="@string/pref_title_test"/>
+
+    <EditTextPreference
+        android:key="@string/PREFERENCE_URL"
+        android:summary="@string/pref_summary_url"
+        android:title="@string/pref_title_url"
+        android:defaultValue=""/>
+
+    <EditTextPreference
+        android:key="@string/PREFERENCE_CLIENTID"
+        android:summary="@string/pref_summary_clientId"
+        android:title="@string/pref_title_id"/>
+
+    <EditTextPreference
+        android:key="@string/PREFERENCE_CLIENTSECRET"
+        android:summary="@string/pref_summary_clientSecret"
+        android:title="@string/pref_title_clientSecret"/>
 
 </PreferenceScreen>

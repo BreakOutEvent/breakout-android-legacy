@@ -8,6 +8,9 @@
     <string name="PREFERENCES_GLOBAL" translatable="false">BreakOutPreferences</string>
     <string name="PREFERENCE_CURRENTLY_LOCATING" translatable="false">IsCurrentlyLocating</string>
     <string name="PREFERENCE_IS_TEST" translatable="false">isTestPhase</string>
+    <string name="PREFERENCE_URL" translatable="false">connectionUrl</string>
+    <string name="PREFERENCE_CLIENTID" translatable="false">clientId</string>
+    <string name="PREFERENCE_CLIENTSECRET" translatable="false">clientSecret</string>
     <string name="account_not_created">The account could not be created.</string>
     <string name="button_continue">next</string>
     <string name="error">Error</string>
@@ -135,6 +138,12 @@
 
     <string name="pref_summary_test" translatable="false">Activate test mode</string>
     <string name="pref_title_test">Test mode</string>
+    <string name="pref_title_url">URL</string>
+    <string name="pref_summary_url">Server url</string>
+    <string name="pref_title_id">ID</string>
+    <string name="pref_summary_clientId" translatable="false">Client ID</string>
+    <string name="pref_title_clientSecret" translatable="false">Secret</string>
+    <string name="pref_summary_clientSecret" translatable="false">Client secret</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
