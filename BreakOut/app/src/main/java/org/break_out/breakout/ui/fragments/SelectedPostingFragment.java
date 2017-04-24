@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.api.RemotePosting;
+import org.break_out.breakout.manager.PostingManager;
 import org.break_out.breakout.model.BOMedia;
 import org.json.JSONObject;
 

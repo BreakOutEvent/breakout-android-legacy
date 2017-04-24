@@ -318,14 +318,14 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
             tvTeamLocation = (TextView) itemView.findViewById(R.id.posting_tv_teamLocation);
             tvTime = (TextView) itemView.findViewById(R.id.posting_tv_time);
             tvComment = (TextView) itemView.findViewById(R.id.posting_tv_comment);
-            rlChallenge = (RelativeLayout) itemView.findViewById(R.id.post_rl_challengeWrap);
-            tvChallenge = (TextView) itemView.findViewById(R.id.post_tv_challenge);
-            ivChallenge = (ImageView) itemView.findViewById(R.id.post_iv_trophy);
-            ivLikes = (ImageView) itemView.findViewById(R.id.post_iv_likes);
-            tvLikes = (TextView) itemView.findViewById(R.id.post_tv_likes);
-            ivComments = (ImageView) itemView.findViewById(R.id.post_iv_comments);
-            tvComments = (TextView) itemView.findViewById(R.id.post_tv_comments);
-            rlLikeWrapper = (RelativeLayout) itemView.findViewById(R.id.post_rl_likeWrapper);
+            rlChallenge = (RelativeLayout) itemView.findViewById(R.id.posting_rl_challengeWrap);
+            tvChallenge = (TextView) itemView.findViewById(R.id.posting_tv_challenge);
+            ivChallenge = (ImageView) itemView.findViewById(R.id.posting_iv_trophy);
+            ivLikes = (ImageView) itemView.findViewById(R.id.posting_iv_likes);
+            tvLikes = (TextView) itemView.findViewById(R.id.posting_tv_likes);
+            ivComments = (ImageView) itemView.findViewById(R.id.posting_iv_comments);
+            tvComments = (TextView) itemView.findViewById(R.id.posting_tv_comments);
+            rlLikeWrapper = (RelativeLayout) itemView.findViewById(R.id.posting_rl_likeWrapper);
         }
     }
 

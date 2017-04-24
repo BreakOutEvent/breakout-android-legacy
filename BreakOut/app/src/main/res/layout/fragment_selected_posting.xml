@@ -101,7 +101,7 @@
                         android:textSize="14sp"/>
 
                     <RelativeLayout
-                        android:id="@+id/post_rl_challengeWrap"
+                        android:id="@+id/posting_rl_challengeWrap"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/box_challenge"
@@ -110,18 +110,18 @@
                         android:visibility="visible"
                         android:layout_marginBottom="12dp">
                         <ImageView
-                            android:id="@+id/post_iv_trophy"
+                            android:id="@+id/posting_iv_trophy"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:alpha=".4"
                             android:src="@drawable/ic_trophy_black_24dp"/>
                         <TextView
-                            android:id="@+id/post_tv_challenge"
+                            android:id="@+id/posting_tv_challenge"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_toEndOf="@+id/post_iv_trophy"
-                            android:layout_toRightOf="@id/post_iv_trophy"
+                            android:layout_toEndOf="@+id/posting_iv_trophy"
+                            android:layout_toRightOf="@id/posting_iv_trophy"
                             android:layout_centerInParent="true"
                             android:gravity="left"
                             android:layout_marginLeft="20dp"
@@ -138,33 +138,33 @@
                         android:orientation="horizontal">
 
                         <RelativeLayout
-                            android:id="@+id/post_rl_likeWrapper"
+                            android:id="@+id/posting_rl_likeWrapper"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content">
                             <ImageView
-                                android:id="@+id/post_iv_likes"
+                                android:id="@+id/posting_iv_likes"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:tint="@color/white_transparent_50"
                                 android:src="@drawable/ic_favorite_black_18dp"/>
 
                             <TextView
-                                android:id="@+id/post_tv_likes"
+                                android:id="@+id/posting_tv_likes"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_toRightOf="@id/post_iv_likes"
+                                android:layout_toRightOf="@id/posting_iv_likes"
                                 android:paddingLeft="5dp"
                                 android:text="68 likes"
                                 />
                         </RelativeLayout>
 
                         <RelativeLayout
-                            android:id="@+id/post_rl_commentWrapper"
+                            android:id="@+id/posting_rl_commentWrapper"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content">
 
                             <ImageView
-                                android:id="@+id/post_iv_comments"
+                                android:id="@+id/posting_iv_comments"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:paddingLeft="20dp"
@@ -172,11 +172,11 @@
                                 android:tint="@color/white_transparent_50"
                                 />
                             <TextView
-                                android:id="@+id/post_tv_comments"
+                                android:id="@+id/posting_tv_comments"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:paddingLeft="5dp"
-                                android:layout_toRightOf="@id/post_iv_comments"
+                                android:layout_toRightOf="@id/posting_iv_comments"
                                 android:text="8 Kommentare"/>
 
                         </RelativeLayout>
