@@ -433,37 +433,63 @@ public class BOLocationManager {
 
         @Override
         protected ArrayList<BOLocation> doInBackground(Void... params) {
-            int id = UserManager.getInstance(context).getCurrentUser().getEventId() == -1 ? 1 : UserManager.getInstance(context).getCurrentUser().getEventId();
-            ArrayList<BOLocation> resultList = new ArrayList<>();
             OkHttpClient client = new OkHttpClient.Builder()
                     .readTimeout(5, TimeUnit.SECONDS)
                     .build();
-            Request request = new Request.Builder()
-                    .url(URLUtils.getBaseUrl(context) + "/event/" + id + "/location/")
+
+            Request requestEvents = new Request.Builder()
+                    .url(URLUtils.getBaseUrl(context) + "/event/")
                     .build();
+
+            ArrayList<Long> currentEventIds = new ArrayList<>();
+
             try {
-                Response response = client.newCall(request).execute();
-                String responseBody = response.body().string();
+                Response responseEvents = client.newCall(requestEvents).execute();
+                String responseBody = responseEvents.body().string();
 
                 //Add location
                 JSONArray responseArray = new JSONArray(responseBody);
                 for (int i = 0; i < responseArray.length(); i++) {
-                    JSONObject curTeamObj = responseArray.getJSONObject(i);
-                    JSONArray currTeamLocations = curTeamObj.getJSONArray("locations");
-
-                    for (int j = 0; j < currTeamLocations.length(); j++) {
-                        JSONObject curLocationObj = currTeamLocations.getJSONObject(j);
-                        BOLocation newLocation = BOLocation.fromJSON(curTeamObj, curLocationObj);
-                        resultList.add(newLocation);
-                        Log.d(TAG, "location added");
-
-                    }
+                    JSONObject currEventObj = responseArray.getJSONObject(i);
+                    Boolean isCurrent = currEventObj.getBoolean("isCurrent");
+                    if (isCurrent) currentEventIds.add(currEventObj.getLong("id"));
                 }
-                return resultList;
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+
+
+            ArrayList<BOLocation> resultList = new ArrayList<>();
+
+            for (Long id : currentEventIds) {
+                Request request = new Request.Builder()
+                        .url(URLUtils.getBaseUrl(context) + "/event/" + id + "/location/")
+                        .build();
+                try {
+                    Response response = client.newCall(request).execute();
+                    String responseBody = response.body().string();
+
+                    //Add location
+                    JSONArray responseArray = new JSONArray(responseBody);
+                    for (int i = 0; i < responseArray.length(); i++) {
+                        JSONObject curTeamObj = responseArray.getJSONObject(i);
+                        JSONArray currTeamLocations = curTeamObj.getJSONArray("locations");
+
+                        for (int j = 0; j < currTeamLocations.length(); j++) {
+                            JSONObject curLocationObj = currTeamLocations.getJSONObject(j);
+                            BOLocation newLocation = BOLocation.fromJSON(curTeamObj, curLocationObj);
+                            resultList.add(newLocation);
+                            Log.d(TAG, "location added");
+
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return resultList;
         }
 
         @Override
@@ -473,7 +499,7 @@ public class BOLocationManager {
                 Log.d(TAG, "it worked! " + boLocations.size());
                 _locations.clear();
                 _locations.addAll(boLocations);
-                if(listener != null) {
+                if (listener != null) {
                     listener.onListObtained();
                 }
             } else {

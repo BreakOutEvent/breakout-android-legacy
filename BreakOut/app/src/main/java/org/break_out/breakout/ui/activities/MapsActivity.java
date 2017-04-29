@@ -149,7 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds(new LatLng(41.3873996, 2.1606497), new LatLng(52.5076291, 13.1459824)), 200));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds(new LatLng(41.3873996, 2.1606497), new LatLng(52.5076291, 13.1459824)), 400));
     }
 
     private void addToMap(ArrayList<BOLocation> locationList) {
