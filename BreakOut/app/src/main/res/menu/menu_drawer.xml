@@ -17,10 +17,6 @@
             android:visible="false"
             android:title="Dein Team"/>
 
-        <item android:id="@+id/options"
-              android:icon="@drawable/ic_settings_black_24dp"
-              android:title="@string/menu_options"/>
-
         <item
             android:id="@+id/chat"
             android:icon="@drawable/ic_chat_black_24dp"
@@ -67,6 +63,10 @@
             android:enabled="false"
             android:visible="false"
             android:title="Einstellungen"/>
+
+        <item android:id="@+id/options"
+              android:icon="@drawable/ic_settings_black_24dp"
+              android:title="@string/menu_options"/>
 
         <item
             android:id="@+id/help"

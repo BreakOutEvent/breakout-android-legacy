@@ -1,6 +1,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/PREFERENCE_TRACKING_ENABLED"
+        android:summary="@string/pref_summary_tracking"
+        android:title="@string/pref_title_tracking"/>
+
+    <SwitchPreference
         android:defaultValue="true"
         android:key="@string/PREFERENCE_IS_TEST"
         android:summary="@string/pref_summary_test"

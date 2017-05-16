@@ -16,12 +16,13 @@ public final class URLUtils {
     private static final String TAG = "URLUtils";
 
     public static String getBaseUrl(Context c){
-        SharedPreferences preferences = c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL),Context.MODE_PRIVATE);
-        boolean isTest = preferences.getBoolean(c.getString(R.string.PREFERENCE_IS_TEST),false);
+        boolean isTest = isTest(c);
         Log.d(TAG,"getBseUrl called, test: "+isTest);
         if(isTest){
+            Log.d(TAG,"is test");
             return Constants.Api.BASE_URL_TEST;
         }
+        Log.d(TAG,"is no test");
         return Constants.Api.BASE_URL;
     }
 

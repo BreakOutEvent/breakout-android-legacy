@@ -88,7 +88,7 @@ public class EarlyBirdWelcomeFragment extends Fragment {
         long currentTime = System.currentTimeMillis();
         Calendar calendar = Calendar.getInstance();
         //set calendar wit time of event
-        calendar.set(2016,5,3,9,0);
+        calendar.set(2017,5,28,9,0);
         Log.d(TAG,"current: "+currentTime+" event: "+calendar.getTimeInMillis());
         if(currentTime>=calendar.getTimeInMillis()) {
             _tvHeadline.setText(getString(R.string.earlyBird_running_title));

@@ -11,6 +11,7 @@
     <string name="PREFERENCE_URL" translatable="false">connectionUrl</string>
     <string name="PREFERENCE_CLIENTID" translatable="false">clientId</string>
     <string name="PREFERENCE_CLIENTSECRET" translatable="false">clientSecret</string>
+    <string name="PREFERENCE_TRACKING_ENABLED" translatable="false">backgroundTracking</string>
     <string name="account_not_created">The account could not be created.</string>
     <string name="button_continue">next</string>
     <string name="error">Error</string>
@@ -125,6 +126,7 @@
 
     <string name="earlyBird_running_title" translatable="false">BreakOut 2017</string>
     <string name="earlyBird_running_text">Your adventure has started. We wish you unforgettable 36 hours!</string>
+    <string name="commentsUpdate">Comments will be added in the next update</string>
 
     <!-- Menu -->
     <string name="menu_post">Post a status</string>
@@ -136,6 +138,8 @@
     <!-- Example General settings -->
     <string name="pref_header_general" translatable="false">General</string>
 
+    <string name="pref_summary_tracking" translatable="false">Activate background tracking</string>
+    <string name="pref_title_tracking" translatable="false">Background tracking</string>
     <string name="pref_summary_test" translatable="false">Activate test mode</string>
     <string name="pref_title_test">Test mode</string>
     <string name="pref_title_url" translatable="false">URL</string>
@@ -144,6 +148,7 @@
     <string name="pref_summary_clientId" translatable="false">Client ID</string>
     <string name="pref_title_clientSecret" translatable="false">Secret</string>
     <string name="pref_summary_clientSecret" translatable="false">Client secret</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>

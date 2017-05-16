@@ -69,10 +69,15 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         holder.tvComments.setText(posting.getComments().size() + " Kommentare");
         holder.ivPosting.setVisibility(View.GONE);
         holder.rlChallenge.setVisibility(View.GONE);
-        String teamName = posting.getUser().getParticipant().getTeamName();
-        if(teamName != null) {
-            holder.tvTeamName.setText(teamName);
+        if(posting.getUser().getParticipant() != null){
+            String teamName = posting.getUser().getParticipant().getTeamName();
+            if(teamName != null) {
+                holder.tvTeamName.setText(teamName);
+            }
+        } else {
+            holder.tvTeamName.setText("");
         }
+
 
         // Add location to view
         PostingLocation postingLocation = posting.getPostingLocation();

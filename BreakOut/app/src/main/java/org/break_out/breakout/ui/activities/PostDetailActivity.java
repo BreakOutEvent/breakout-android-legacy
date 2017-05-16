@@ -35,6 +35,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private TextView _tv_location;
     private TextView _tv_likes;
     private TextView _tv_comments;
+    private TextView _tv_comment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class PostDetailActivity extends AppCompatActivity {
         _tv_location = (TextView) findViewById(R.id.posting_tv_teamLocation);
         _tv_likes = (TextView) findViewById(R.id.posting_tv_likes);
         _tv_comments = (TextView) findViewById(R.id.posting_tv_comments);
+        _tv_comment = (TextView) findViewById(R.id.posting_tv_comment);
 
 
         _iv_posting.setVisibility(View.GONE);
@@ -113,7 +115,9 @@ public class PostDetailActivity extends AppCompatActivity {
             }
         }
         _tv_comments.setText((posting.getComments().size()+""));
-        _tv_likes.setText(posting.getLikes()+"");
+        _tv_comment.setText(posting.getText());
+        _tv_likes.setText((posting.getLikes()+""));
+
         if(posting.getProof() == null){
             _rl_challenge.setVisibility(View.GONE);
         }

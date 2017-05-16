@@ -109,5 +109,6 @@
     <string name="menu_post">Status posten</string>
     <string name="pref_title_test">Testmodus</string>
     <string name="title_activity_settings">Einstellungen</string>
+    <string name="commentsUpdate">Die Kommentarfunktion kommt im nächsten Update</string>
 
 </resources>

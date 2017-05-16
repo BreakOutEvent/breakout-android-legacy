@@ -8,8 +8,6 @@ import com.google.gson.annotations.SerializedName
  */
 class Participant {
     var eventId: Int? = null
-    var eventCity: String? = null
     var teamId: Int? = null
     var teamName: String? = null
-    var tshirtSize: String? = null
 }

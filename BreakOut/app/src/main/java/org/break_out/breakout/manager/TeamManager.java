@@ -52,6 +52,9 @@ public class TeamManager {
 
     @Nullable
     public ArrayList<Team> getAllTeams() {
+        if(_teams.isEmpty()){
+            return new ArrayList<>();
+        }
         return _teams;
     }
 }

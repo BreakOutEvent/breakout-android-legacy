@@ -525,6 +525,7 @@ public class User implements Serializable {
 
             // Get values
             long remoteId = ((responseObj.has("id") && !responseObj.isNull("id")) ? responseObj.getLong("id") : -1);
+
             String firstName = ((responseObj.has("firstname") && !responseObj.isNull("firstname")) ? responseObj.getString("firstname") : null);
             String lastName = ((responseObj.has("lastname") && !responseObj.isNull("lastname")) ? responseObj.getString("lastname") : null);
             String email = ((responseObj.has("email") && !responseObj.isNull("email")) ? responseObj.getString("email") : null);

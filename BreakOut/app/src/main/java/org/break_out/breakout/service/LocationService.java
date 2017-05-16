@@ -25,12 +25,13 @@ public class LocationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
+        Log.d(TAG,"onStart");
         _locationManager = BOLocationManager.getInstance(this);
         BOLocation lastLocation = _locationManager.getLocation(this, new BOLocationManager.BOLocationRequestListener() {
             @Override
             public void onLocationObtained(BOLocation currentLocation) {
                 _locationManager.stopListeningForChanges(this);
+                Log.d(TAG,"location got");
             }
         });
         return super.onStartCommand(intent, flags, startId);

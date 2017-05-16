@@ -37,7 +37,7 @@ import okhttp3.Response;
 public class BOLocationManager {
     private static final String TAG = "BOLocationManager";
     private static final int MIN_DISTANCE = 5;
-    private static final int TEN_MINUTES = 1 * 1000 * 60 * 10;
+    private static final int TEN_MINUTES = 1000 * 60 * 10;
     private static final int ALARM_INTERVAL = TEN_MINUTES;
     private static final int REQUESTCODE_ALARMINTENT = 0;
     private static boolean _isLocating;
@@ -180,7 +180,7 @@ public class BOLocationManager {
         broadcastIntent.putExtra(BOLocationBroadcastReceiver.KEY_EXTRA, BOLocationBroadcastReceiver.KEY_START);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(c, REQUESTCODE_ALARMINTENT, broadcastIntent, 0);
         c.sendBroadcast(broadcastIntent);
-        _alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, _preferences.getInt("interval", TEN_MINUTES) * 1000, pendingIntent);
+        _alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, TEN_MINUTES * 1000, pendingIntent);
     }
 
     public void addServiceListener(BOLocationServiceListener listener) {
@@ -391,7 +391,7 @@ public class BOLocationManager {
             boLocationServiceIntent = new Intent(context, LocationService.class);
             if (intent.getExtras() != null) {
                 String intentExtra = intent.getExtras().getString(KEY_EXTRA) == null ? "" : intent.getExtras().getString(KEY_EXTRA);
-
+                Log.d(TAG,"receiver called");
                 if (!intentExtra.isEmpty()) {
                     if (intentExtra.equals(KEY_START)) {
                         context.startService(boLocationServiceIntent);
