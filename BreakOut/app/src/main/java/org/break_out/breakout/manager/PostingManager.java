@@ -5,24 +5,16 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
+import org.break_out.breakout.R;
 import org.break_out.breakout.model.BOLocation;
-import org.break_out.breakout.constants.Constants;
 import org.break_out.breakout.model.BOMedia;
 import org.break_out.breakout.model.Challenge;
 import org.break_out.breakout.model.Posting;
 import org.break_out.breakout.ui.activities.PostScreenActivity;
-import org.break_out.breakout.ui.fragments.LoadingListener;
-import org.break_out.breakout.ui.fragments.SelectedPostingFragment;
 import org.break_out.breakout.util.URLUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -36,10 +28,9 @@ import okhttp3.Response;
  * Created by Maximilian Dühr on 24.04.2016.
  */
 public class PostingManager {
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private final static String TAG = "PostingManager";
     private static PostingManager instance;
-
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private PostingManager() {
 
@@ -53,7 +44,7 @@ public class PostingManager {
     }
 
     public static Posting buildPosting(String message, BOLocation location, BOMedia media) {
-        Log.d(TAG,"media null? "+(media==null));
+        Log.d(TAG, "media null? " + (media == null));
         return new Posting(message, location, media);
     }
 
@@ -64,6 +55,14 @@ public class PostingManager {
     // TODO: Use Retrofit
     public void likePosting(Context c, Posting posting) {
         new LikePostTask(c, posting).execute();
+    }
+
+    public interface PostingListener {
+        void onPostingListChanged();
+    }
+
+    public interface NewPostingFetchedListener extends PostingListener {
+        void noNewPostings();
     }
 
     // TODO: Use Retrofit
@@ -87,7 +86,7 @@ public class PostingManager {
             progressDialog = new ProgressDialog(context);
             progressDialog.setCancelable(false);
             progressDialog.setMessage("creating Posting...");
-            if(!progressDialog.isShowing()) {
+            if (!progressDialog.isShowing()) {
                 progressDialog.show();
             }
         }
@@ -102,7 +101,7 @@ public class PostingManager {
                 JSONObject requestObject = new JSONObject();
                 requestObject.accumulate("text", posting.getText())
                         .accumulate("date", posting.getCreatedTimestamp());
-                if(posting.hasMedia()){
+                if (posting.hasMedia()) {
                     requestObject.accumulate("uploadMediaTypes", new JSONArray().put("image"));
                 }
                 if (posting.getLocation() != null) {
@@ -129,7 +128,7 @@ public class PostingManager {
                 if (posting.hasMedia()) {
                     JSONObject mediaDataJSON = new JSONObject(new JSONArray(responseJSON.getString("media")).getJSONObject(0).toString());
                     posting.setUploadCredentials(mediaDataJSON.getString("id"), mediaDataJSON.getString("uploadToken"));
-                    Log.d(TAG,"credentials: "+posting.getUploadToken()+" "+posting.getMediaId());
+                    Log.d(TAG, "credentials: " + posting.getUploadToken() + " " + posting.getMediaId());
                 }
                 response.body().close();
 
@@ -141,15 +140,41 @@ public class PostingManager {
         }
 
         @Override
-        protected void onPostExecute(Posting posting) {
+        protected void onPostExecute(final Posting posting) {
             super.onPostExecute(posting);
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+
             if (posting != null) {
+                if (chosenChallenge != null && !posting.hasMedia()) {
+                    Log.d(TAG,"challenge not null, no media");
+                    new PostChallengeTask(context, chosenChallenge, posting, curListener, null).execute();
+                } else if (chosenChallenge == null && posting.hasMedia()) {
+                    Log.d(TAG,"challenge is null, media there");
+                    if (posting.hasUploadCredentials()) {
+                        new UploadMediaToServerTask(context, posting, curListener).execute();
+                    }
+                } else if (chosenChallenge != null && posting.hasMedia()) {
+                    Log.d(TAG,"both fullfilled");
+                    new PostChallengeTask(context, chosenChallenge, posting, curListener, new OnChallengePostedListener() {
+                        @Override
+                        public void onChallengePosted() {
+                            Log.d(TAG,"should post media now");
+                            new UploadMediaToServerTask(context, posting, curListener).execute();
+                        }
+                    }).execute();
+                }
+
+                BOLocationManager.getInstance(context).postUnUploadedLocationsToServer();
+
+/*
                 if (posting.hasMedia()) {
                     if (posting.hasUploadCredentials()) {
                         if (chosenChallenge != null) {
                             new PostChallengeTask(context, chosenChallenge, posting, null).execute();
                         }
-                        new UploadMediaToServerTask(posting, curListener, progressDialog).execute();
+                        new UploadMediaToServerTask(context,posting, curListener).execute();
                     } else {
                         if (chosenChallenge != null) {
                             if (progressDialog.isShowing()) {
@@ -180,8 +205,9 @@ public class PostingManager {
                 }
                 curListener.onPostSend();
             }
-            if(progressDialog.isShowing()) {
+            if (progressDialog.isShowing()) {
                 progressDialog.dismiss();
+            }*/
             }
         }
     }
@@ -191,18 +217,32 @@ public class PostingManager {
         private Context context;
         private Challenge chosenChallenge;
         private Posting posting;
+        private ProgressDialog dialog;
         private PostScreenActivity.PostingSentListener listener;
+        private OnChallengePostedListener chalListener;
 
-        public PostChallengeTask(Context context, Challenge challenge, Posting posting, @Nullable PostScreenActivity.PostingSentListener listener) {
+        public PostChallengeTask(Context context, Challenge challenge, Posting posting, @Nullable PostScreenActivity.PostingSentListener listener, @Nullable OnChallengePostedListener challengeListener) {
             this.context = context;
             this.chosenChallenge = challenge;
             this.posting = posting;
             this.listener = listener;
+            chalListener = challengeListener;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(context);
+            dialog.setCancelable(false);
+            dialog.setMessage(context.getString(R.string.dialog_upload_challenge));
+            if (!dialog.isShowing()) {
+                dialog.show();
+            }
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            if(chosenChallenge != null){
+            if (chosenChallenge != null) {
                 try {
                     OkHttpClient client = new OkHttpClient.Builder()
                             .build();
@@ -231,35 +271,42 @@ public class PostingManager {
             if (listener != null) {
                 listener.onPostSend();
             }
-            BOLocationManager.getInstance(context).postUnUploadedLocationsToServer();
+            if (chalListener != null) {
+                chalListener.onChallengePosted();
+            }
+            if(dialog.isShowing()){
+                dialog.dismiss();
+            }
         }
     }
 
     // TODO: Maybe use Retrofit?
     private class UploadMediaToServerTask extends AsyncTask<Void, Integer, Boolean> {
+        Context c;
         Posting toBeUploadedPosting;
         String attachmentFileName = "";
         PostScreenActivity.PostingSentListener curListener;
         ProgressDialog dialog;
 
-        public UploadMediaToServerTask(Posting posting, PostScreenActivity.PostingSentListener listener, @Nullable ProgressDialog dialog) {
+        public UploadMediaToServerTask(Context c, Posting posting, PostScreenActivity.PostingSentListener listener) {
+            this.c = c;
             toBeUploadedPosting = posting;
             attachmentFileName = toBeUploadedPosting.getMedia().getFile().getName();
             curListener = listener;
             if (toBeUploadedPosting.getMediaFile() == null) {
                 //TODO:Handle missing file
             }
-            this.dialog = dialog;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if (dialog != null) {
-                dialog.setMessage("uploading Media...");
-                if(!dialog.isShowing()) {
-                    dialog.show();
-                }
+            if (dialog == null) {
+                dialog = new ProgressDialog(c);
+            }
+            dialog.setMessage(c.getString(R.string.dialog_upload_media));
+            if (!dialog.isShowing()) {
+                dialog.show();
             }
         }
 
@@ -271,7 +318,7 @@ public class PostingManager {
         @Override
         protected Boolean doInBackground(Void... params) {
             if (toBeUploadedPosting.getMediaFile() != null && toBeUploadedPosting.getMediaFile().length() > 0) {
-                Log.d(TAG,"post media task called");
+                Log.d(TAG, "post media task called");
                 try {
                     OkHttpClient client = new OkHttpClient.Builder()
                             .build();
@@ -285,7 +332,7 @@ public class PostingManager {
 
                     Request request = new Request.Builder()
                             .header("X-UPLOAD-TOKEN", toBeUploadedPosting.getUploadToken())
-                            .url(Constants.Api.MEDIA_URL)
+                            .url(URLUtils.getMediaUrl(c))
                             .post(requestBody)
                             .build();
 
@@ -320,7 +367,6 @@ public class PostingManager {
             }
         }
     }
-
     // TODO: Use Retrofit
     public class LikePostTask extends AsyncTask<Void, Void, Boolean> {
         private Context c;
@@ -350,11 +396,7 @@ public class PostingManager {
         }
     }
 
-    public interface PostingListener {
-        void onPostingListChanged();
-    }
-
-    public interface NewPostingFetchedListener extends PostingListener {
-        void noNewPostings();
+    private interface OnChallengePostedListener {
+        void onChallengePosted();
     }
 }

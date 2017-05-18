@@ -45,6 +45,7 @@
                         android:layout_height="45dp"
                         android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
+                        android:src="@drawable/placeholder_profile_pic"
                         android:scaleType="centerCrop"/>
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -58,8 +59,7 @@
                             android:id="@+id/posting_tv_teamName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="15sp"
-                            android:text="teamname"/>
+                            android:textSize="15sp"/>
 
                         <TextView
                             android:id="@+id/posting_tv_teamLocation"
@@ -69,7 +69,6 @@
                             android:layout_alignStart="@id/posting_tv_teamName"
                             android:layout_below="@id/posting_tv_teamName"
                             android:textSize="12sp"
-                            android:text="location"
                             android:textColor="@color/black_transparent_25"/>
 
                     </RelativeLayout>

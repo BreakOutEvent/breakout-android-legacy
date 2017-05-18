@@ -93,6 +93,10 @@ public class EarlyBirdWelcomeFragment extends Fragment {
         if(currentTime>=calendar.getTimeInMillis()) {
             _tvHeadline.setText(getString(R.string.earlyBird_running_title));
             _tvContent.setText(getString(R.string.earlyBird_running_text));
+        } else {
+            if(UserManager.getInstance(getContext()).getCurrentUser().getRole()!= User.Role.VISITOR){
+                _tvContent.setText(getString(R.string.early_bird_welcome_text));
+            }
         }
     }
 }

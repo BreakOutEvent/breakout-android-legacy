@@ -89,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Toast.makeText(getApplicationContext(), "Du musst eingeloggt sein", Toast.LENGTH_LONG).show();
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Bitte aktiviere Ortungsdienste", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.toast_enable_location), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -129,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (teams != null) {
                         for (Team t : teams) {
                             Log.d(TAG, "team " + t.getRemoteId());
-                            ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
+                            ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getAllLocationsFromTeam(t.getRemoteId());
                             if (currentUserLocationList.size() != 0) {
                                 addToMap(currentUserLocationList);
 
@@ -141,7 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             if (teams != null) {
                 for (Team t : teams) {
-                    ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getInstance(getApplicationContext()).getAllLocationsFromTeam(t.getRemoteId());
+                    ArrayList<BOLocation> currentUserLocationList = BOLocationManager.getAllLocationsFromTeam(t.getRemoteId());
                     if (currentUserLocationList.size() != 0) {
                         addToMap(currentUserLocationList);
                     }

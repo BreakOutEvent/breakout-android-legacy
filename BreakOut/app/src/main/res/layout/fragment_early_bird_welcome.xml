@@ -62,7 +62,7 @@
             android:layout_marginTop="15dp"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:text="@string/early_bird_welcome_text"
+            android:text="@string/early_bird_welcome_text_visitor"
             android:textColor="@color/text_dark"
             android:textSize="15sp"/>
 

@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.break_out.breakout.constants.Constants;
+import org.break_out.breakout.R;
 import org.break_out.breakout.manager.MediaManager;
 import org.break_out.breakout.manager.UserManager;
 import org.break_out.breakout.secrets.BOSecrets;
@@ -71,7 +71,7 @@ public class User implements Serializable {
         VISITOR,
         USER,
         PARTICIPANT_WITHOUT_TEAM,
-        PARTICIPANT,SPONSOR;
+        PARTICIPANT, SPONSOR;
 
         public static Role fromString(String enumString) {
             try {
@@ -413,12 +413,20 @@ public class User implements Serializable {
         Log.d(TAG, "set password: " + _password);
 
         // Build URL
-        HttpUrl loginUrl = new HttpUrl.Builder()
-                .scheme("https")
-                .host("backend.break-out.org")
+        String scheme = "https";
+        int port = Integer.parseInt(URLUtils.getPort());
+        if (c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL), Context.MODE_PRIVATE).getBoolean(c.getString(R.string.PREFERENCE_IS_TEST), true)) {
+            scheme = "http";
+        }
+        HttpUrl.Builder loginUrlBuilder = new HttpUrl.Builder()
+                .scheme(scheme)
+                .host(URLUtils.getBaseUrlWithoutProtocol(c))
                 .addPathSegment("oauth")
-                .addPathSegment("token")
-                .build();
+                .addPathSegment("token");
+        if (c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL), Context.MODE_PRIVATE).getBoolean(c.getString(R.string.PREFERENCE_IS_TEST), true)) {
+            loginUrlBuilder.port(port);
+        }
+        HttpUrl loginUrl = loginUrlBuilder.build();
 
 
         // Build x-www-form-urlencoded body
@@ -432,13 +440,14 @@ public class User implements Serializable {
         Request loginRequest = new Request.Builder()
                 .url(loginUrl)
                 .post(body)
-                .addHeader("Authorization", Credentials.basic("breakout_app", new BOSecrets().getClientSecret()))
+                .addHeader("Authorization", Credentials.basic("breakout_app", new BOSecrets().getClientSecret(c)))
                 .addHeader("Content-Type", FORM_URL_ENCODED)
                 .build();
         try {
             Response loginResponse = client.newCall(loginRequest).execute();
 
             String response = loginResponse.body().string();
+            Log.d(TAG, "login response: " + response);
             if (!loginResponse.isSuccessful()) {
                 Log.e(TAG, loginResponse.body().string());
                 return false;
@@ -449,9 +458,9 @@ public class User implements Serializable {
             loginResponse.body().close();
             Log.d(TAG, "login :\n" + response);
             BOMedia profilePic = null;
-            if(!loginResponseJson.isNull("profilePic")) {
+            if (!loginResponseJson.isNull("profilePic")) {
                 profilePic = BOMedia.sizedMediaFromJSON(c, loginResponseJson.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
-                Log.d(TAG,"profile pic : "+profilePic.getUrl());
+                Log.d(TAG, "profile pic : " + profilePic.getUrl());
                 setProfileImage(profilePic);
             }
 
@@ -559,7 +568,7 @@ public class User implements Serializable {
             }
 
             if (!responseObj.isNull("profilePic")) {
-                profileImage = BOMedia.sizedMediaFromJSON(c,responseObj.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
+                profileImage = BOMedia.sizedMediaFromJSON(c, responseObj.getJSONObject("profilePic"), BOMedia.SIZE.MEDIUM);
             }
 
             // Set user values

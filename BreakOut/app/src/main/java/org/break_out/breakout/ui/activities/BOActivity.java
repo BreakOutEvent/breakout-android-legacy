@@ -182,7 +182,7 @@ public abstract class BOActivity extends AppCompatActivity {
                 if(permissionGranted) {
                     startTrackingService(getApplicationContext());
                 } else {
-                    Toast.makeText(getApplicationContext(), "please enable location services", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),getString(R.string.toast_enable_location), Toast.LENGTH_SHORT).show();
                 }
             }
         }, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);

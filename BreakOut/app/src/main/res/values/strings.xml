@@ -99,7 +99,8 @@
     <string name="from">from</string>
 
     <string name="progress_please_wait">please wait...</string>
-    <string name="early_bird_welcome_text">We are currently working on making the app perfect for your trip around the world. Login to continue</string>
+    <string name="early_bird_welcome_text_visitor">We are currently working on making the app perfect for your trip around the world. Login to continue</string>
+    <string name="early_bird_welcome_text">We are currently working on making the app perfect for your trip around the world.</string>
 
     <string name="choose_challenge">Choose challenge (optional)</string>
 
@@ -118,8 +119,8 @@
     <string name="emergency_etc_1">You can reach us while the 36 hours of the event around the clock under this number:</string>
 
     <string name="number_emergency" translatable="false">112</string>
-    <string name="number_breakout" translatable="false">+4981424659110</string>
-    <string name="number_diplomatic" translatable="false">03050002000</string>
+    <string name="number_breakout" translatable="false">+49 211-97531979</string>
+    <string name="number_diplomatic" translatable="false">+49 301817 0</string>
 
     <string name="no_older_postings">There are no older posts</string>
     <string name="no_new_postings">No new posts</string>
@@ -153,4 +154,9 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
 
+    <string name="dialog_create_posting">Creating posting...</string>
+    <string name="dialog_upload_challenge">Adding proof for challenge...</string>
+    <string name="dialog_upload_media">Uploading media...</string>
+
+    <string name="toast_enable_location">Please enable location services</string>
 </resources>

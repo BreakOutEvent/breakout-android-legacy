@@ -30,7 +30,7 @@
     <string name="textview_about">Was ist Breakout?</string>
     <string name="tooltip_username_password">Bitte gib deine E-Mail und ein Passwort ein.</string>
 
-    <string name="early_bird_welcome_text">Wir arbeiten gerade daran die App perfekt zu machen für deinen Trip um die Welt. Logge dich ein, um fortzufahren</string>
+    <string name="early_bird_welcome_text_visitor">Wir arbeiten gerade daran die App perfekt zu machen für deinen Trip um die Welt. Logge dich ein, um fortzufahren</string>
     <string name="early_bird_welcome_title">Bald geht es los!</string>
 
     <string-array name="gender_array">
@@ -110,5 +110,10 @@
     <string name="pref_title_test">Testmodus</string>
     <string name="title_activity_settings">Einstellungen</string>
     <string name="commentsUpdate">Die Kommentarfunktion kommt im nächsten Update</string>
+    <string name="dialog_create_posting">Erstelle Posting...</string>
+    <string name="dialog_upload_challenge">Verlinke Beweis für Challenge...</string>
+    <string name="dialog_upload_media">Lade Medien hoch....</string>
+    <string name="early_bird_welcome_text">Wir arbeiten gerade daran die App perfekt zu machen für deinen Trip um die Welt.</string>
+    <string name="toast_enable_location">Bitte aktiviere Ortungsdienste!</string>
 
 </resources>

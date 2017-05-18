@@ -95,15 +95,17 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                 holder.tvTeamLocation.setText(lat + ", " + lon);
             }
         } else {
-            holder.tvTeamLocation.setVisibility(View.GONE);
+            holder.tvTeamLocation.setText("");
         }
 
         //Image logic
         Glide.clear(holder.ivPosting);
+        Glide.clear(holder.civTeamPic);
         for(Medium m : posting.getMedia()) {
-            holder.ivPosting.setVisibility(View.VISIBLE);
             for(Size s : m.getSizes()) { // TODO: Fix possible NPE in kotlin class
+                Log.d(TAG,"posting type: "+s.getType());
                 if(s.getType().equals("IMAGE")) {
+                    holder.ivPosting.setVisibility(View.VISIBLE);
                     Log.d(TAG, "glide should load");
                     Uri uri = Uri.parse(s.getUrl());
                     Glide.with(_context)
@@ -112,12 +114,13 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                             .dontAnimate()
                             .dontTransform()
                             .into(holder.ivPosting);
+                } else {
+                    Log.d(TAG,"not an image");
+                    holder.ivPosting.setVisibility(View.GONE);
                 }
             }
             callListenerIfNeeded(holder.getAdapterPosition());
         }
-
-        Glide.clear(holder.civTeamPic);
         if(posting.getUser().getProfilePic() != null) {
             for(Size s : posting.getUser().getProfilePic().getSizes()) {
                 if(s.getType().equals("IMAGE")) {
@@ -129,9 +132,12 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
                             .dontAnimate()
                             .dontTransform()
                             .into(holder.civTeamPic);
+                    Log.d(TAG,"url: "+s.getUrl());
 
                 }
             }
+        } else {
+            holder.civTeamPic.setImageDrawable(_context.getResources().getDrawable(R.drawable.placeholder_profile_pic));
         }
 
         //like logic
@@ -199,9 +205,9 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         if (posting.getText() != null && !posting.getText().isEmpty()) {
             holder.tvComment.setText(posting.getText());
         }
-        if(posting.getProof() != null) {
+        if(posting.getProves() != null) {
             holder.rlChallenge.setVisibility(View.VISIBLE);
-            holder.tvChallenge.setText(posting.getProof().getDescription());
+            holder.tvChallenge.setText(posting.getProves().getDescription());
         }
     }
 
@@ -211,7 +217,7 @@ public class PostingListAdapter extends RecyclerView.Adapter<PostingListAdapter.
         return _postingList.size();
     }
 
-    private String timeBuilder(long timestamp) {
+    public static String timeBuilder(long timestamp) {
         long curTime = System.currentTimeMillis();
         long dif = curTime - (timestamp * 1000);
         StringBuilder responseBuilder = new StringBuilder();

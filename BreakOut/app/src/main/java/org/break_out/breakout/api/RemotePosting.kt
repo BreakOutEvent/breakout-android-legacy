@@ -15,7 +15,7 @@ class RemotePosting(
         val comments: List<Comment> = listOf(),
         val media: List<Medium> = listOf(),
         val hashtags: List<Any> = listOf(),
-        val proof: Proof?,
+        val proves: Proof?,
         var likes: Int = 0,
         var hasLiked: Boolean = false)
 

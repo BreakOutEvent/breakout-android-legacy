@@ -23,7 +23,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.break_out.breakout.R;
 import org.break_out.breakout.constants.Constants;
@@ -158,14 +157,14 @@ public class PostScreenActivity extends BOActivity {
     protected void onDestroy() {
         super.onDestroy();
         setResult(RESULT_CANCELED);
-        if(_postMedia != null){
-            if(_postMedia.getSavestate() == BOMedia.SAVESTATE.TEMP) {
+        if (_postMedia != null) {
+            if (_postMedia.getSavestate() == BOMedia.SAVESTATE.TEMP) {
                 //TODO: handle failed media
                 // _postMedia.delete();
             }
         }
         _locationManager.removeServiceListener(_listener);
-        if(_receivedLocation != null) {
+        if (_receivedLocation != null) {
             //TODO
             //_receivedLocation.delete();
         }
@@ -175,12 +174,12 @@ public class PostScreenActivity extends BOActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == Activity.RESULT_OK) {
-            if(requestCode == REQUESTCODE_IMAGE) {
-                if(data != null) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUESTCODE_IMAGE) {
+                if (data != null) {
                     boolean fromCamera = data.getData() == null;
                     Uri imageUri = null;
-                    if(!fromCamera) {
+                    if (!fromCamera) {
                         imageUri = data.getData();
                         _ivChosenImage.setImageURI(imageUri);
                         moveFileToProfilePath(imageUri);
@@ -193,20 +192,18 @@ public class PostScreenActivity extends BOActivity {
                         });
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Foto nicht korrekt gespeichert.", Toast.LENGTH_LONG).show();
                 }
 
-            } else if(requestCode == REQUESTCODE_CHALLENGE) {
+            } else if (requestCode == REQUESTCODE_CHALLENGE) {
                 int challengeId = data.getIntExtra(ChooseChallengeActivity.RESULT_ID, -1);
-                if(challengeId != -1) {
+                if (challengeId != -1) {
                     Log.d(TAG, "challenge chosen: " + challengeId);
                     Challenge chosenChallenge = ChallengeManager.getInstance().getChallengeByRemoteID(challengeId);
                     setChosenChallenge(chosenChallenge);
                 }
             }
         } else {
-            Toast.makeText(this, "Result False", Toast.LENGTH_SHORT).show();
-            if(requestCode == REQUESTCODE_IMAGE){
+            if (requestCode == REQUESTCODE_IMAGE) {
                 _postMedia = null;
             }
             Log.d(TAG, "result code: " + resultCode);
@@ -243,12 +240,12 @@ public class PostScreenActivity extends BOActivity {
                 BOLocationManager.BOLocationServiceListener listener = new BOLocationManager.BOLocationServiceListener() {
                     @Override
                     public void onServiceStatusChanged() {
-                        if(_locationManager.locationServicesAvailable()) {
+                        if (_locationManager.locationServicesAvailable()) {
                             requestPermissionsAndLocate(c);
                         }
                     }
                 };
-                if(permissionGranted) {
+                if (permissionGranted) {
                     Log.d(TAG, "permissions granted");
 /*                    if (_locationManager.locationServicesAvailable()) {
                         _tvLocation.setText(getString(R.string.info_obtaining_location));
@@ -277,14 +274,13 @@ public class PostScreenActivity extends BOActivity {
                     }*/
                     locate();
                 } else {
-                    Toast.makeText(getApplicationContext(), "please enable location services", Toast.LENGTH_SHORT).show();
                 }
             }
         }, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     private void locate() {
-        if(_locationManager.locationServicesAvailable()) {
+        if (_locationManager.locationServicesAvailable()) {
             _tvLocation.setText(getString(R.string.info_obtaining_location));
             _locationManager.getLocation(this, new BOLocationManager.BOLocationRequestListener() {
                 @Override
@@ -295,11 +291,11 @@ public class PostScreenActivity extends BOActivity {
                     Geocoder coder = new Geocoder(getApplicationContext());
                     try {
                         adressList = coder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
-                    } catch(IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    if(adressList != null) {
-                        if(adressList.size() > 0) {
+                    if (adressList != null) {
+                        if (adressList.size() > 0) {
                             setLocation(adressList.get(0));
                         }
                     }
@@ -334,7 +330,7 @@ public class PostScreenActivity extends BOActivity {
         final List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
         _postMedia = MediaManager.getInstance().createExternalMedia(this, BOMedia.TYPE.IMAGE);
         _postMedia.setSaveState(BOMedia.SAVESTATE.TEMP);
-        for(ResolveInfo res : listCam) {
+        for (ResolveInfo res : listCam) {
             final String packageName = res.activityInfo.packageName;
             final Intent intent = new Intent(captureIntent);
             intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
@@ -368,13 +364,12 @@ public class PostScreenActivity extends BOActivity {
             @Override
             public void onResult(@Nullable Bundle result) {
                 boolean successful = false;
-                if(result != null) {
+                if (result != null) {
                     successful = result.getBoolean(booltag, false);
                 }
                 //example code, will be replaced by specified operations
                 //reacting to the result later
-                if(successful) {
-                    Toast.makeText(getApplicationContext(), "Copying successful!", Toast.LENGTH_SHORT).show();
+                if (successful) {
                     _ivChosenImage.setImageURI(Uri.fromFile(_postMedia.getFile()));
                     MediaManager.moveToInternal(getApplicationContext(), _postMedia, new MediaManager.OnFileMovedListener() {
                         @Override
@@ -383,7 +378,6 @@ public class PostScreenActivity extends BOActivity {
                         }
                     });
                 } else {
-                    Toast.makeText(getApplicationContext(), "Copying failed!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -402,15 +396,15 @@ public class PostScreenActivity extends BOActivity {
     private void sendPostAndFinish(String comment, @Nullable BOLocation location, @Nullable BOMedia media) {
         BOLocation sendLocation = null;
 
-        if(location != null) {
+        if (location != null) {
             sendLocation = location;
         }
 
         //invalid post
-        if(comment.isEmpty() && location == null && (media == null)) {
-            return;
+        if (comment.isEmpty() && location == null && media == null) {
+
         } else {
-            Log.d(TAG, "will be send, media=" + (media==null));
+            Log.d(TAG, "will be send, media=" + (media != null));
             PostingManager m = PostingManager.getInstance();
             m.sendPostingToServer(this, PostingManager.buildPosting(comment, sendLocation, media), _chosenChallenge, new PostingSentListener());
         }
@@ -436,12 +430,12 @@ public class PostScreenActivity extends BOActivity {
             Bundle resultBundle = new Bundle();
             resultBundle.putBoolean(boolTag, false);
             setUri = null;
-            if(params != null) {
-                if(params.containsKey(BUNDLETAG_URI)) {
+            if (params != null) {
+                if (params.containsKey(BUNDLETAG_URI)) {
                     setUri = (Uri) params.get(BUNDLETAG_URI);
                 }
             }
-            if(setUri != null) {
+            if (setUri != null) {
                 try {
                     //Android gives a relative URI which cannot directly be referenced to find a File, so copy the
                     //given image into a temp Bitmap and compress that into a new File at a fixed destination
@@ -452,13 +446,13 @@ public class PostScreenActivity extends BOActivity {
                     tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dataOutputStream);
                     //if everything worked out, set the result to true
                     resultBundle.putBoolean(boolTag, true);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    if(dataOutputStream != null) {
+                    if (dataOutputStream != null) {
                         try {
                             dataOutputStream.close();
-                        } catch(IOException e) {
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }

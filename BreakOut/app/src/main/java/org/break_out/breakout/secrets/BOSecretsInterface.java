@@ -1,5 +1,7 @@
 package org.break_out.breakout.secrets;
 
+import android.content.Context;
+
 /**
  * This interface defines the methods to be implemented to return
  * secret values. These values should not be stored in the version
@@ -18,7 +20,7 @@ public interface BOSecretsInterface {
 
     public String getFlurryToken();
 
-    public String getClientSecret();
+    public String getClientSecret(Context context);
 
     public String getMapsKey();
 
