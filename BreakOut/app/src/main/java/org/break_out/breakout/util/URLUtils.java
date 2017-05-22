@@ -61,6 +61,6 @@ public final class URLUtils {
 
     private static boolean isTest(Context c){
         SharedPreferences preferences = c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL),Context.MODE_PRIVATE);
-        return preferences.getBoolean(c.getString(R.string.PREFERENCE_IS_TEST),true);
+        return preferences.getBoolean(c.getString(R.string.PREFERENCE_IS_TEST),false);
     }
 }

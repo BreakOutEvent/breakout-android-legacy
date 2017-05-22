@@ -48,8 +48,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         idPref = (EditTextPreference) findPreference(getString(R.string.PREFERENCE_CLIENTID));
         secretPref = (EditTextPreference) findPreference(getString(R.string.PREFERENCE_CLIENTSECRET));
 
-        testPref.setDefaultValue(true);
-        testPref.setEnabled(false);
+        boolean isTest = getSharedPreferences(getString(R.string.PREFERENCES_GLOBAL),Context.MODE_PRIVATE).getBoolean(getString(R.string.PREFERENCE_IS_TEST),false);
+
+        testPref.setDefaultValue(isTest);
+        testPref.setEnabled(true);
         trackingPref.setDefaultValue(false);
         if(UserManager.getInstance(this).getCurrentUser().getRole() != User.Role.VISITOR){
             trackingPref.setEnabled(true);
@@ -58,7 +60,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
 
 
-        boolean testCase = getSharedPreferences(getString(R.string.PREFERENCES_GLOBAL),MODE_PRIVATE).getBoolean(getString(R.string.PREFERENCE_IS_TEST),true);
+        boolean testCase = getSharedPreferences(getString(R.string.PREFERENCES_GLOBAL),MODE_PRIVATE).getBoolean(getString(R.string.PREFERENCE_IS_TEST),false);
         setOptions(testCase);
 
         testPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {

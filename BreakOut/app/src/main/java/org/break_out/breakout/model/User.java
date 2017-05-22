@@ -410,12 +410,13 @@ public class User implements Serializable {
     public boolean loginOnServerSync(Context c) {
         OkHttpClient client = new OkHttpClient();
         Log.d(TAG, "loginOnServerSync");
+        Log.d(TAG,"user: "+ _email);
         Log.d(TAG, "set password: " + _password);
 
         // Build URL
         String scheme = "https";
         int port = Integer.parseInt(URLUtils.getPort());
-        if (c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL), Context.MODE_PRIVATE).getBoolean(c.getString(R.string.PREFERENCE_IS_TEST), true)) {
+        if (c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL), Context.MODE_PRIVATE).getBoolean(c.getString(R.string.PREFERENCE_IS_TEST), false)) {
             scheme = "http";
         }
         HttpUrl.Builder loginUrlBuilder = new HttpUrl.Builder()
@@ -423,7 +424,7 @@ public class User implements Serializable {
                 .host(URLUtils.getBaseUrlWithoutProtocol(c))
                 .addPathSegment("oauth")
                 .addPathSegment("token");
-        if (c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL), Context.MODE_PRIVATE).getBoolean(c.getString(R.string.PREFERENCE_IS_TEST), true)) {
+        if (c.getSharedPreferences(c.getString(R.string.PREFERENCES_GLOBAL), Context.MODE_PRIVATE).getBoolean(c.getString(R.string.PREFERENCE_IS_TEST), false)) {
             loginUrlBuilder.port(port);
         }
         HttpUrl loginUrl = loginUrlBuilder.build();
@@ -440,7 +441,7 @@ public class User implements Serializable {
         Request loginRequest = new Request.Builder()
                 .url(loginUrl)
                 .post(body)
-                .addHeader("Authorization", Credentials.basic("breakout_app", new BOSecrets().getClientSecret(c)))
+                .addHeader("Authorization", Credentials.basic(URLUtils.getClientId(c), URLUtils.getClientSecret(c)))
                 .addHeader("Content-Type", FORM_URL_ENCODED)
                 .build();
         try {
@@ -449,7 +450,7 @@ public class User implements Serializable {
             String response = loginResponse.body().string();
             Log.d(TAG, "login response: " + response);
             if (!loginResponse.isSuccessful()) {
-                Log.e(TAG, loginResponse.body().string());
+                Log.e(TAG, response);
                 return false;
             }
 

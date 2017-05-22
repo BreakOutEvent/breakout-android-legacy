@@ -136,9 +136,6 @@
 
     <!-- Strings related to Settings -->
 
-    <!-- Example General settings -->
-    <string name="pref_header_general" translatable="false">General</string>
-
     <string name="pref_summary_tracking" translatable="false">Activate background tracking</string>
     <string name="pref_title_tracking" translatable="false">Background tracking</string>
     <string name="pref_summary_test" translatable="false">Activate test mode</string>
